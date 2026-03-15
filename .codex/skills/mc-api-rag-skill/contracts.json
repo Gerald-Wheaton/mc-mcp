@@ -1,0 +1,25 @@
+{
+  "artifacts": {
+    "normalizedMap": "mc-normalized-api-map.json",
+    "semanticChunks": "mc-llm-api-chunks.json"
+  },
+  "preferredWorkflow": [
+    "semantic_discovery_if_fuzzy",
+    "deterministic_lookup_for_exactness",
+    "schema_followup_if_needed"
+  ],
+  "recommendedHelpers": [
+    "findOperations",
+    "getOperationById",
+    "getOperationByMethodAndPath",
+    "getSchema",
+    "getOperationsForSchema",
+    "getSiblingOperations"
+  ],
+  "responseRequirements": [
+    "include_exact_method_and_path_when_available",
+    "include_required_params_when_available",
+    "include_request_schema_when_available",
+    "mention_uncertainty_when_multiple_candidates_exist"
+  ]
+}

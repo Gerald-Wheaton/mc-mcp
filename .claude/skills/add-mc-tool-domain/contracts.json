@@ -1,0 +1,29 @@
+{
+  "prerequisites": [
+    "run_maintenance-connection-api-rag_skill_before_writing_code",
+    "verify_exact_path_casing_in_normalized_map",
+    "confirm_path_param_names_in_normalized_map"
+  ],
+  "filesToCreate": [
+    "src/tools/<domain>.ts"
+  ],
+  "filesToModify": [
+    "src/shared/types.ts",
+    "src/index.ts"
+  ],
+  "requiredImports": [
+    "odataShape from shared/odata.ts",
+    "toToolText and toToolError from shared/response.ts",
+    "McApiResponse and entity type from shared/types.ts"
+  ],
+  "verification": [
+    "bunx tsc --noEmit"
+  ],
+  "conventions": [
+    "tool names: mc_list_<domain> and mc_get_<domain_singular>",
+    "all list tools spread ...odataShape",
+    "all handlers use try/catch with toToolText/toToolError",
+    "entity summary types: only confirmed fields, never full swagger schema",
+    "tool descriptions written for LLM analyst, not developer"
+  ]
+}
