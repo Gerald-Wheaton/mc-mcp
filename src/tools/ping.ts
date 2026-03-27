@@ -1,12 +1,14 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { McClient } from '../mc-client.js'
-import { toToolText, toToolError } from '../shared/response.js'
+import type { McClient } from '@/mc-client.js'
+import { toToolText, toToolError } from '@/shared/response.js'
 
 export function register(server: McpServer, client: McClient): void {
-  server.tool(
+  server.registerTool(
     'mc_ping',
-    'Check connectivity and authentication to the Maintenance Connection API. Returns a success message if the API is reachable and credentials are valid.',
-    {},
+    {
+      description:
+        'Check connectivity and authentication to the Maintenance Connection API. Returns a success message if the API is reachable and credentials are valid.',
+    },
     async () => {
       try {
         // No dedicated health endpoint — a minimal workorders query confirms both

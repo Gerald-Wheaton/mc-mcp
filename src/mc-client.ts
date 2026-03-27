@@ -6,11 +6,11 @@ export interface McRequestOptions {
 
 export class McClient {
   private baseUrl: string
-  private apiKey: string
+  private basicAuth: string
 
   constructor(config: McConfig) {
     this.baseUrl = config.baseUrl
-    this.apiKey = config.apiKey
+    this.basicAuth = config.basicAuth
   }
 
   async get<T>(path: string, options: McRequestOptions = {}): Promise<T> {
@@ -36,10 +36,9 @@ export class McClient {
     return response.json() as Promise<T>
   }
 
-  // TODO: swap to confirmed auth scheme once customer provides details
   private buildHeaders(): Record<string, string> {
     return {
-      Authorization: `Bearer ${this.apiKey}`,
+      Authorization: `Basic ${this.basicAuth}`,
       Accept: 'application/json',
     }
   }

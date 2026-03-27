@@ -9,12 +9,9 @@ export const odataShape = {
     .string()
     .optional()
     .describe(
-      "OData filter expression. Examples: \"Status eq 'Open'\", \"AssetPK eq 12345\", \"TargetDate gt '2024-01-01'\"",
+      'OData filter expression. IMPORTANT: string values must use double quotes, not single quotes (MC API requirement). Examples: IsOpen eq true, Type eq "CM", ID eq "1499", TargetDate gt "2024-01-01"',
     ),
-  $orderby: z
-    .string()
-    .optional()
-    .describe("OData sort expression. Example: \"TargetDate desc\" or \"ID asc\""),
+  $orderby: z.string().optional().describe('OData sort expression. Example: "TargetDate desc" or "ID asc"'),
   $top: z
     .number()
     .int()
@@ -22,12 +19,7 @@ export const odataShape = {
     .max(500)
     .optional()
     .describe('Max records to return (1–500). Defaults to server page size.'),
-  $skip: z
-    .number()
-    .int()
-    .nonnegative()
-    .optional()
-    .describe('Number of records to skip for pagination. Use with $top.'),
+  $skip: z.number().int().nonnegative().optional().describe('Number of records to skip for pagination. Use with $top.'),
 } as const
 
 export type ODataParams = {

@@ -5,7 +5,7 @@ A read-only [Model Context Protocol](https://modelcontextprotocol.io) server tha
 ## Requirements
 
 - [Bun](https://bun.sh) v1.0+
-- A Maintenance Connection API key and base URL
+- A Maintenance Connection API key and connection key
 
 ## Setup
 
@@ -13,84 +13,124 @@ A read-only [Model Context Protocol](https://modelcontextprotocol.io) server tha
 bun install
 ```
 
-Copy `.env.example` to `.env` and fill in your credentials:
+Create a `.env` file in the project root:
 
-```bash
+```env
 MC_BASE_URL=https://api.maintenanceconnection.com/v8
-MC_API_KEY=your-api-key-here
+MC_BASIC_AUTH_ENCODED=<base64(CONNECTION_KEY:API_KEY)>
 ```
 
-> **Note:** Bun reads `.env` automatically — no dotenv package needed.
+**How to generate `MC_BASIC_AUTH_ENCODED`:**
+
+```bash
+echo -n "YOUR_CONNECTION_KEY:YOUR_API_KEY" | base64
+```
+
+> The connection key identifies the tenant (username); the API key authenticates the caller (password). Order matters — connection key must come first.
 
 ## Running
 
 ```bash
-# Development (runs TypeScript directly)
-bun dev
+# Development — runs TypeScript directly via Bun
+bun --env-file=.env run src/index.ts
 
-# Production build
-bun run build       # compiles to dist/
-bun start           # runs dist/index.js
+# Or using the package.json script (loads .env automatically)
+bun dev
 ```
 
-## Connecting to an MCP Client
+**Test connectivity before connecting a client:**
 
-### Claude Desktop
+```bash
+bun --env-file=.env -e "
+import { loadConfig } from './src/config.ts'
+import { McClient } from './src/mc-client.ts'
+const client = new McClient(loadConfig())
+const r = await client.get('/workorders', { params: { \$top: 1 } })
+console.log('Connected. Total WOs:', r.Total)
+"
+```
 
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+## Connecting to Claude Desktop
+
+This server uses **stdio transport** — Claude Desktop spawns the server process directly rather than connecting over HTTP. There is no URL.
+
+**Steps:**
+
+1. Open Claude Desktop
+2. Go to **Settings → Developer → Edit Config**
+3. Add the following entry inside the `"mcpServers"` object in `claude_desktop_config.json`:
 
 ```json
-{
-  "mcpServers": {
-    "mc-mcp": {
-      "command": "bun",
-      "args": ["run", "/absolute/path/to/mc-mcp/src/index.ts"],
-      "env": {
-        "MC_BASE_URL": "https://api.maintenanceconnection.com/v8",
-        "MC_API_KEY": "your-api-key-here"
-      }
-    }
+"mc-mcp": {
+  "command": "/Users/geraldwheaton/.bun/bin/bun",
+  "args": [
+    "run",
+    "/Users/geraldwheaton/Desktop/fm360-pjcts/mc-mcp/src/index.ts"
+  ],
+  "env": {
+    "MC_BASE_URL": "https://api.maintenanceconnection.com/v8",
+    "MC_BASIC_AUTH_ENCODED": "<your-encoded-credentials>"
   }
 }
 ```
 
-Restart Claude Desktop after editing. You should see the MC tools available in a new conversation.
+4. Save and **restart Claude Desktop**
+5. Verify the server appears under the MCP tools icon (hammer icon) in the chat interface
+
+> **Note:** The `command` path above is machine-specific. If running on a different machine, update it using `which bun`. The `args` path must also be the absolute path to `src/index.ts`.
+
+**Suggested first prompts:**
+
+- *"What data is available in Maintenance Connection?"* — calls `mc_list_datasets`
+- *"Show me open work orders"* — calls `mc_list_work_orders` with `IsOpen eq true`
+- *"How many assets does this facility have?"* — calls `mc_list_assets`
+- *"Are there any open purchase orders?"* — calls `mc_list_purchase_orders`
 
 ## Available Tools
 
-| Tool                      | Description                                      |
-| ------------------------- | ------------------------------------------------ |
-| `mc_ping`                 | Verify connectivity and auth                     |
-| `mc_list_work_orders`     | List WOs with OData filtering/sorting/pagination |
-| `mc_get_work_order`       | Get a single WO by PK                            |
-| `mc_list_assets`          | List assets with OData filtering                 |
-| `mc_get_asset`            | Get a single asset by PK                         |
-| `mc_list_parts`           | List parts/inventory with OData filtering        |
-| `mc_get_part`             | Get a single part by PK                          |
-| `mc_list_purchase_orders` | List POs with OData filtering                    |
-| `mc_get_purchase_order`   | Get a single PO by PK                            |
+| Tool | Description |
+|------|-------------|
+| `mc_ping` | Verify connectivity and auth |
+| `mc_list_datasets` | List all available resource families and their tools — call this first to orient |
+| `mc_list_work_orders` | List work orders (types: CM=Corrective, PM=Preventive, SR=Service Request) |
+| `mc_get_work_order` | Get a single work order by PK |
+| `mc_list_assets` | List assets and locations (33,639 records, hierarchical) |
+| `mc_get_asset` | Get a single asset by PK |
+| `mc_list_parts` | List inventory parts (3,305 records) |
+| `mc_get_part` | Get a single part by PK |
+| `mc_list_purchase_orders` | List purchase orders (74 records) |
+| `mc_get_purchase_order` | Get a single purchase order by PK |
+| `mc_list_po_line_items` | List PO line items — filter by `PurchaseOrderPK eq {pk}` to see what was ordered on a PO, or by `PartRef/PK` to trace procurement history for a part |
 
-All list tools support OData query parameters: `$filter`, `$orderby`, `$top` (max 500), `$skip`.
+All list tools support OData pagination: `$top` (max 500), `$skip`, `$orderby`.
 
-**Example filters:**
+**OData filter syntax** — string values must use double quotes (MC API quirk — single quotes are stripped by the parser):
 
-- `$filter=Status eq 'Open'`
-- `$filter=TargetDate gt '2024-01-01'`
-- `$filter=AssetPK eq 12345`
+```
+IsOpen eq true                        boolean
+IsAssigned eq false                   boolean
+IsLocation eq false                   assets — equipment only
+Type eq "CM"                          work orders — corrective maintenance
+Type eq "PM"                          work orders — preventive maintenance
+Type eq "SR"                          work orders — service requests
+ID eq "AC001/001"                     match by ID string
+StatusDetails/Value eq "ISSUED"       match by status
+```
 
 ## Project Structure
 
 ```
 src/
-├── index.ts                  # Server entry point
-├── config.ts                 # Env var loading
-├── mc-client.ts              # HTTP wrapper (auth lives here)
+├── index.ts              # Server entry point — registers all tools
+├── config.ts             # Env var loading (MC_BASE_URL, MC_BASIC_AUTH_ENCODED)
+├── mc-client.ts          # HTTP wrapper — all auth logic lives here
 ├── shared/
-│   ├── odata.ts              # Shared OData Zod params — used by all list tools
-│   ├── response.ts           # toToolText() / toToolError() helpers
-│   └── types.ts              # MC API response types
+│   ├── odata.ts          # Shared OData Zod params ($filter, $top, $skip, $orderby)
+│   ├── response.ts       # toToolText() / toToolError() helpers
+│   └── types.ts          # Zod schemas + inferred TypeScript types for all entities
 └── tools/
     ├── ping.ts
+    ├── datasets.ts        # Static tool — no API call
     ├── work-orders.ts
     ├── assets.ts
     ├── parts.ts
@@ -99,117 +139,10 @@ src/
 
 ## Adding a New Tool Domain
 
-Follow these steps to expose a new MC API resource (e.g., Invoices, Labors, Companies).
+1. Look up the endpoint in `api-docs/mc-normalized-api-map.json`
+2. Add a Zod schema to `src/shared/types.ts` with confirmed fields only
+3. Create `src/tools/<domain>.ts` exporting `register(server, client)`
+4. Import and call `register` in `src/index.ts`
+5. Run `bun run --bun tsc --noEmit` to type-check
 
-### 1. Look up the endpoints
-
-Before writing any code, find the exact paths in `api-docs/mc-normalized-api-map.json`. Search by the resource family name or tag. Note:
-
-- The exact path casing (the MC API is inconsistent — e.g., `/Assets` vs `/workorders`)
-- The path parameter name (e.g., `assetPK`, not just `pk`)
-- Whether the list response is wrapped in `McApiResponse<T>` or returned directly
-
-> If you're using Claude Code, the `add-mc-tool-domain` skill automates this process.
-
-### 2. Add a type to `src/shared/types.ts`
-
-Add a minimal `<Entity>Summary` interface with only the fields you've confirmed exist in the API response. Do not copy the full Swagger schema — add fields incrementally as you verify them against real responses.
-
-```typescript
-export interface InvoiceSummary {
-  PK: number;
-  ID: string;
-  // add fields as confirmed
-}
-```
-
-### 3. Create `src/tools/<domain>.ts`
-
-Create a new file that exports a single `register(server, client)` function:
-
-```typescript
-import { z } from "zod";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { McClient } from "../mc-client.js";
-import { odataShape } from "../shared/odata.js";
-import { toToolText, toToolError } from "../shared/response.js";
-import type { McApiResponse, InvoiceSummary } from "../shared/types.js";
-
-export function register(server: McpServer, client: McClient): void {
-  server.tool(
-    "mc_list_invoices",
-    "List invoices from Maintenance Connection. Use $filter to narrow by status, vendor, or date. Useful for AP reconciliation and spend analysis.",
-    { ...odataShape },
-    async (input) => {
-      try {
-        const data = await client.get<McApiResponse<InvoiceSummary>>(
-          "/Invoices",
-          { params: input },
-        );
-        return toToolText(data);
-      } catch (err) {
-        return toToolError(err);
-      }
-    },
-  );
-
-  server.tool(
-    "mc_get_invoice",
-    "Get full details for a single invoice by its primary key (PK).",
-    {
-      pk: z
-        .number()
-        .int()
-        .positive()
-        .describe("The invoice primary key (PK integer)"),
-    },
-    async ({ pk }) => {
-      try {
-        const data = await client.get<InvoiceSummary>(`/Invoices/${pk}`);
-        return toToolText(data);
-      } catch (err) {
-        return toToolError(err);
-      }
-    },
-  );
-}
-```
-
-**Tool description tips** — the description is read by the LLM to decide when and how to call the tool:
-
-- Say what the entity _is_, what filters are _typically useful_, and what _questions_ the tool helps answer
-- Add `.describe()` with examples to any non-obvious parameters
-- Write for an analyst, not a developer (i.e. this is prompt engineering NOT developer comments)
-
-### 4. Register in `src/index.ts`
-
-Two lines: one import and one register call.
-
-```typescript
-// With the other imports
-import { register as registerInvoices } from "./tools/invoices.js";
-
-// Before server.connect()
-registerInvoices(server, client);
-```
-
-### 5. Type-check
-
-```bash
-bunx tsc --noEmit
-```
-
-Fix any errors before testing.
-
-## Changing the Auth Scheme
-
-All auth logic lives in the private `buildHeaders()` method in `src/mc-client.ts`. When the real auth scheme is confirmed, only that method needs to change — nothing else in the codebase touches authentication.
-
-## Open Questions
-
-Before shipping Phase 2:
-
-1. What auth scheme does the MC API use? (API key header? OAuth2? Basic?)
-2. What is the sandbox/non-prod environment URL?
-3. Which 3–5 entities are highest priority for the first release?
-4. Which MCP client connects first — Claude Desktop, VS Code, or custom?
+> If using Claude Code, the `add-mc-tool-domain` skill automates this process.

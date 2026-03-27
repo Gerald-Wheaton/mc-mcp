@@ -1,20 +1,20 @@
-import { McApiError } from "../mc-client.js";
+import { McApiError } from '../mc-client.js'
 
 export interface ToolResult {
-  [key: string]: unknown;
-  content: [{ type: "text"; text: string }];
-  isError?: true;
+  [key: string]: unknown
+  content: [{ type: 'text'; text: string }]
+  isError?: true
 }
 
 export function toToolText(data: unknown): ToolResult {
   return {
     content: [
       {
-        type: "text",
-        text: typeof data === "string" ? data : JSON.stringify(data, null, 2),
+        type: 'text',
+        text: typeof data === 'string' ? data : JSON.stringify(data, null, 2),
       },
     ],
-  };
+  }
 }
 
 export function toToolError(err: unknown): ToolResult {
@@ -23,10 +23,10 @@ export function toToolError(err: unknown): ToolResult {
       ? `MC API error ${err.status}: ${err.body || err.message}`
       : err instanceof Error
         ? err.message
-        : String(err);
+        : String(err)
 
   return {
-    content: [{ type: "text", text: `Error: ${message}` }],
+    content: [{ type: 'text', text: `Error: ${message}` }],
     isError: true,
-  };
+  }
 }

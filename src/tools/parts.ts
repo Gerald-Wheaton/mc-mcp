@@ -1,20 +1,30 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { McClient } from '../mc-client.js'
-import { odataShape } from '../shared/odata.js'
-import { toToolText, toToolError } from '../shared/response.js'
-import type { McApiResponse, PartSummary } from '../shared/types.js'
+import type { McClient } from '@/mc-client.js'
+import { odataShape } from '@/shared/odata.js'
+import { toToolText, toToolError } from '@/shared/response.js'
+import { PartSummarySchema, McApiResponseSchema } from '@/shared/types.js'
+
+const PartListSchema = McApiResponseSchema(PartSummarySchema)
 
 export function register(server: McpServer, client: McClient): void {
-  server.tool(
+  server.registerTool(
     'mc_list_parts',
-    'List parts (inventory items) from Maintenance Connection. Supports OData filtering, sorting, and pagination. Use $filter to narrow by status, category, vendor, or any part field.',
-    { ...odataShape },
+    {
+      description:
+        'List parts (inventory items) from Maintenance Connection. 3,305 total records. ' +
+        'Useful boolean filters: Active eq true (3300/3305), DirectIssue eq true (3185), AvailableToRequester eq true (3180). ' +
+        'CostRuleDetails.Value codes: S=Standard Cost (156), AVG=Average Cost (2); most parts have null. ' +
+        'IssueUnitsDetails.Value: E=Each (1 record); nearly all null. ' +
+        'IMPORTANT: Quantity-on-hand, on-order, reserved, and reorder fields are NOT on this endpoint — use PartLocations for stock levels. ' +
+        'Key fields: Name, ID, InternalPartNumber, PartDescription, IssueUnitCost, LastOrderUnitPrice, LastOrdered, LastIssued, CategoryRef, ClassificationRef. ' +
+        'String filters use double quotes: ID eq "9429994", Name eq "Control Board".',
+      inputSchema: { ...odataShape },
+    },
     async (input) => {
       try {
-        const data = await client.get<McApiResponse<PartSummary>>('/Parts', {
-          params: input,
-        })
+        const raw = await client.get('/Parts', { params: input })
+        const data = PartListSchema.parse(raw)
         return toToolText(data)
       } catch (err) {
         return toToolError(err)
@@ -22,15 +32,18 @@ export function register(server: McpServer, client: McClient): void {
     },
   )
 
-  server.tool(
+  server.registerTool(
     'mc_get_part',
-    'Get full details for a single part by its primary key (PK).',
     {
-      pk: z.number().int().positive().describe('The part primary key (PK integer)'),
+      description: 'Get full details for a single part by its primary key (PK).',
+      inputSchema: {
+        pk: z.number().int().positive().describe('The part primary key (PK integer)'),
+      },
     },
     async ({ pk }) => {
       try {
-        const data = await client.get<PartSummary>(`/Parts/${pk}`)
+        const raw = await client.get(`/Parts/${pk}`)
+        const data = PartListSchema.parse(raw)
         return toToolText(data)
       } catch (err) {
         return toToolError(err)
