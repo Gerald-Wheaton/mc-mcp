@@ -12,10 +12,10 @@ export function register(server: McpServer, client: McClient): void {
     'mc_list_parts',
     {
       description:
-        'List parts (inventory items) from Maintenance Connection. 3,305 total records. ' +
-        'Useful boolean filters: Active eq true (3300/3305), DirectIssue eq true (3185), AvailableToRequester eq true (3180). ' +
-        'CostRuleDetails.Value codes: S=Standard Cost (156), AVG=Average Cost (2); most parts have null. ' +
-        'IssueUnitsDetails.Value: E=Each (1 record); nearly all null. ' +
+        'List parts (inventory items) from Maintenance Connection. ' +
+        'Useful boolean filters: Active eq true, DirectIssue eq true, AvailableToRequester eq true. ' +
+        'CostRuleDetails.Value codes: S=Standard Cost, AVG=Average Cost. ' +
+        'IssueUnitsDetails.Value: E=Each. ' +
         'IMPORTANT: Quantity-on-hand, on-order, reserved, and reorder fields are NOT on this endpoint — use PartLocations for stock levels. ' +
         'Key fields: Name, ID, InternalPartNumber, PartDescription, IssueUnitCost, LastOrderUnitPrice, LastOrdered, LastIssued, CategoryRef, ClassificationRef. ' +
         'String filters use double quotes: ID eq "9429994", Name eq "Control Board".',

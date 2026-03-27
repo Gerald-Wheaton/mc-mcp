@@ -12,11 +12,11 @@ export function register(server: McpServer, client: McClient): void {
     'mc_list_work_orders',
     {
       description:
-        'List work orders from Maintenance Connection. 645 total records. ' +
-        'Type codes (filter: Type eq "CM"): CM=Corrective Maintenance (77), IN=Inspection (228), PM=Preventive Maintenance (299), SR=Service Request (5), CAP=Capital Project (29), ADMN=Administration (3), FO=Follow-up (2), PC=Part Checkout (2). ' +
-        'Status codes: ISSUED (531), CLOSED (86), REQUESTED (26), CANCELED (2). ' +
+        'List work orders from Maintenance Connection. ' +
+        'Type codes (filter: Type eq "CM"): CM=Corrective Maintenance, IN=Inspection, PM=Preventive Maintenance, SR=Service Request, CAP=Capital Project, ADMN=Administration, FO=Follow-up, PC=Part Checkout. ' +
+        'Status codes: ISSUED, CLOSED, REQUESTED, CANCELED. ' +
         'Priority codes: 0=Emergency, 2=Normal, 3=Low. ' +
-        'Useful boolean filters: IsOpen eq true (557), IsAssigned eq true (263), IsPartsReserved eq true (381), IsFollowupWork eq true (7). ' +
+        'Useful boolean filters: IsOpen eq true, IsAssigned eq true, IsPartsReserved eq true, IsFollowupWork eq true. ' +
         'String filters use double quotes: Type eq "CM", StatusDetails/Value eq "CLOSED". ' +
         'PM records have PMRef populated; non-PMs have PMRef=null.',
       inputSchema: { ...odataShape },

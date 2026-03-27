@@ -17,10 +17,9 @@ export function register(server: McpServer, client: McClient): void {
     'mc_list_purchase_orders',
     {
       description:
-        'List purchase orders from Maintenance Connection. 74 total records. ' +
-        'Status codes: ISSUED (54), REQUESTED (16), CANCELED (2), CLOSED (2). ' +
-        'Useful boolean filters: IsOpen eq true (71/74), IsPartsOrdered eq true (55/74). ' +
-        'Priority is always "2=Normal" for this customer — not a useful filter. ' +
+        'List purchase orders from Maintenance Connection. ' +
+        'Status codes: ISSUED, REQUESTED, CANCELED, CLOSED. ' +
+        'Useful boolean filters: IsOpen eq true, IsPartsOrdered eq true. ' +
         'Key cost fields: Total, Subtotal, FreightCharge, TaxAmount, Discount. ' +
         'Key refs: VendorRef, RequesterRef, BuyerRef, DepartmentRef. ' +
         'ShippingInfo and BillingInfo contain address/freight details (mostly null). ' +
@@ -64,7 +63,7 @@ export function register(server: McpServer, client: McClient): void {
     'mc_list_po_line_items',
     {
       description:
-        'List purchase order line items from Maintenance Connection. 159 total records across 74 POs (~2 per PO on average). ' +
+        'List purchase order line items from Maintenance Connection. ' +
         'Each line item is one part/item ordered on a PO, with quantities ordered, received, backordered, and canceled. ' +
         'Key filter: PurchaseOrderPK eq {pk} — returns all lines for a specific PO. ' +
         'Also filterable by PartRef/PK to find all POs that ordered a specific part. ' +

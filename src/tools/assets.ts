@@ -12,7 +12,7 @@ export function register(server: McpServer, client: McClient): void {
     'mc_list_assets',
     {
       description:
-        'List assets (equipment and facilities) from Maintenance Connection. 33,639 total records in a hierarchy. Use IsLocation eq false to return equipment only. Use AssetLevel eq 2 for campus-level nodes. String filters require double quotes: ID eq "AC001/001", Name eq "Air Compressor". Boolean filters: IsLocation eq false, IsUp eq true.',
+        'List assets (equipment and facilities) from Maintenance Connection. Assets exist in a hierarchy. Use IsLocation eq false to return equipment only. Use AssetLevel eq 2 for campus-level nodes. String filters require double quotes: ID eq "AC001/001", Name eq "Air Compressor". Boolean filters: IsLocation eq false, IsUp eq true.',
       inputSchema: { ...odataShape },
     },
     async (input) => {
