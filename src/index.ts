@@ -8,6 +8,11 @@ import { register as registerWorkOrders } from '@/tools/work-orders.js'
 import { register as registerAssets } from '@/tools/assets.js'
 import { register as registerParts } from '@/tools/parts.js'
 import { register as registerPurchaseOrders } from '@/tools/purchase-orders.js'
+import { register as registerOperationalPrompts } from '@/prompts/operational.js'
+import { register as registerAssetPrompts } from '@/prompts/assets.js'
+import { register as registerInventoryPrompts } from '@/prompts/inventory.js'
+import { register as registerPmPrompts } from '@/prompts/pm.js'
+import { register as registerProcurementPrompts } from '@/prompts/procurement.js'
 
 const config = loadConfig()
 const client = new McClient(config)
@@ -24,5 +29,12 @@ registerWorkOrders(server, client)
 registerAssets(server, client)
 registerParts(server, client)
 registerPurchaseOrders(server, client)
+
+// Register prompt templates — add new categories here as one import + one line
+registerOperationalPrompts(server)
+registerAssetPrompts(server)
+registerInventoryPrompts(server)
+registerPmPrompts(server)
+registerProcurementPrompts(server)
 
 await server.connect(new StdioServerTransport())
