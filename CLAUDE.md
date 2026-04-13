@@ -189,8 +189,15 @@ Must be completed for each entity before Phase 3. Follow this checklist for ever
 
 ### Phase 3: Analysis UX
 
-- [ ] Add prompt templates for common CMMS analysis questions
-- [ ] Add richer tool descriptions for LLM tool selection
+> **Read first:** `docs/live-context-resources.md` — architectural ideation on MCP Resources as a context layer (staleness tiers, proposed resource URIs, ID enrichment, system prompt + resources interplay). The context layer is the foundation Phase 3 depends on — build it before prompt templates.
+>
+> **Read also:** `docs/phase3-prompts-and-repair-center.md` — repair center recon findings (filter syntax, schema presence per entity, discovery problem) and the full plan for adding optional args (`repair_center`, `asset_name`, `vendor_name`, `type`, `category`) to prompt templates.
+
+- [ ] Build context layer: implement `mc://context/*` MCP Resources (time, summary, labors, asset-locations, lookup-tables)
+- [ ] Add TTL cache to `McClient` to support session-tier resources
+- [ ] Convert `mc_list_datasets` tool to `mc://context/datasets` resource
+- [ ] Add prompt templates for common CMMS analysis questions (requires context layer)
+- [ ] Add behavioral rules to system prompt: which resources to fetch before which tools
 
 ### Phase 4: Hardening
 

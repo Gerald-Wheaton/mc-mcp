@@ -1,0 +1,2240 @@
+{
+  "description": "User and team ID to name mappings. Use this to translate userID, completedByUser, teamID values in API responses.",
+  "users": {
+    "220593": {
+      "name": "John Rimer",
+      "email": "john.fm360consulting@outlook.com",
+      "active": true
+    },
+    "224202": {
+      "name": "Tina Brenize (E100000)",
+      "email": "tina@fm360consulting.com",
+      "active": true
+    },
+    "224203": {
+      "name": "Tim Prado",
+      "email": "tim@fm360consulting.com",
+      "active": true
+    },
+    "231029": {
+      "name": "Tyler Prado",
+      "email": "OLDTyler@fm360consulting.com",
+      "active": true
+    },
+    "244882": {
+      "name": "Brad Austin",
+      "email": "brad@fm360consulting.com",
+      "active": true
+    },
+    "334289": {
+      "name": "Ethan Morris",
+      "email": "ethan@fm360consulting.com",
+      "active": true
+    },
+    "335723": {
+      "name": "Margee Keller",
+      "email": "mkeller@redeemerweb.com",
+      "active": true
+    },
+    "335724": {
+      "name": "Ian Sifford",
+      "email": "iansifford@yahoo.com",
+      "active": true
+    },
+    "335730": {
+      "name": "Michael Hough",
+      "email": "mhough@redeemerweb.com",
+      "active": true
+    },
+    "357814": {
+      "name": "Ben Steelman",
+      "email": "ben@fm360consulting.com",
+      "active": true
+    },
+    "366215": {
+      "name": "Logan Schanz",
+      "email": "lschanz@liberty.edu",
+      "active": true
+    },
+    "375887": {
+      "name": "Technician Schanz",
+      "email": "loganschanz99@gmail.com",
+      "active": true
+    },
+    "376539": {
+      "name": "Joseph Sharp",
+      "email": "OLDjoseph@fm360consulting.com",
+      "active": true
+    },
+    "377390": {
+      "name": "Ethan FM360",
+      "email": "we@go.com",
+      "active": true
+    },
+    "377590": {
+      "name": "Stan Croy",
+      "email": "testing@testing.com",
+      "active": true
+    },
+    "378196": {
+      "name": "Dave Kurtz",
+      "email": "davek64@proton.me",
+      "active": true
+    },
+    "381591": {
+      "name": "Tester McTest",
+      "email": "tester@gmail.com",
+      "active": true
+    },
+    "381593": {
+      "name": "John Dough",
+      "email": "johndough@gmail.com",
+      "active": true
+    },
+    "381845": {
+      "name": "John Dough",
+      "email": "johndough1@gmail.com",
+      "active": true
+    },
+    "381846": {
+      "name": "Creek Tester",
+      "email": "creektester@gmail.com",
+      "active": true
+    },
+    "381860": {
+      "name": "John Dough",
+      "email": "johndough2@gmail.com",
+      "active": true
+    },
+    "382004": {
+      "name": "Tester Testy",
+      "email": "testertesty@gmail.com",
+      "active": true
+    },
+    "383401": {
+      "name": "Evan The Electrician (E0321)",
+      "email": "123@abc.com",
+      "active": true
+    },
+    "383402": {
+      "name": "Harold The HVAC Technician",
+      "email": "234@abc.com",
+      "active": true
+    },
+    "383408": {
+      "name": "Tom Technician (E00342)",
+      "email": "tom@tech.nician",
+      "active": true
+    },
+    "383639": {
+      "name": "Nathan Striebel (E0123)",
+      "email": "nathan@fm360consulting.com",
+      "active": true
+    },
+    "383931": {
+      "name": "Gerald Wheaton",
+      "email": "gerald@fm360consulting.com",
+      "active": true
+    },
+    "384726": {
+      "name": "Techno Tom (E1234)",
+      "email": "TechnoT@gmail.com",
+      "active": true
+    },
+    "386486": {
+      "name": "Andrew Emmott",
+      "email": "test@fake123.com",
+      "active": true
+    },
+    "387330": {
+      "name": "Julia Stoyles",
+      "email": "js@test.com",
+      "active": true
+    },
+    "387331": {
+      "name": "Lucas Piercey",
+      "email": "lp@test.com",
+      "active": true
+    },
+    "387332": {
+      "name": "Trevor Jackson",
+      "email": "jt@test.com",
+      "active": true
+    },
+    "387333": {
+      "name": "Justin Rolfe",
+      "email": "jr@test.com",
+      "active": true
+    },
+    "387424": {
+      "name": "V0239 - Contracty McContractor (With McKay Metis)",
+      "email": "contractor@test.com",
+      "active": true
+    },
+    "387433": {
+      "name": "V0239 - Worky McWorker",
+      "email": "wm@test.com",
+      "active": true
+    },
+    "387434": {
+      "name": "V0020 - Different Vendor",
+      "email": "dv@test.com",
+      "active": true
+    },
+    "389194": {
+      "name": "V0048 - Big D",
+      "email": "bigD@bdw.com",
+      "active": true
+    },
+    "389272": {
+      "name": "V0001 - Albert Overnight",
+      "email": "alberta@overnight.org",
+      "active": true
+    },
+    "389273": {
+      "name": "V0001 - Another Fake Worker",
+      "email": "fake@worker.gov",
+      "active": true
+    },
+    "389274": {
+      "name": "V0001 - A Third Fake Worker",
+      "email": "fake@worker.edu",
+      "active": true
+    },
+    "389275": {
+      "name": "V0099 - Don Diamond",
+      "email": "don@diamondinternational.me",
+      "active": true
+    }
+  },
+  "teams": {
+    "121851": {
+      "name": "Tim Prado, John Rimer",
+      "locationID": 31635
+    },
+    "124458": {
+      "name": "General Maintenance",
+      "locationID": 31635
+    },
+    "124459": {
+      "name": "HVAC",
+      "locationID": 31635
+    },
+    "174280": {
+      "name": "John Rimer, Tina Brenize (E100000)",
+      "locationID": 31635
+    },
+    "291831": {
+      "name": "MAINTENANCE",
+      "locationID": 31635
+    },
+    "339413": {
+      "name": "Maintenance",
+      "locationID": 69144
+    },
+    "339414": {
+      "name": "Deacon Lead",
+      "locationID": 69144
+    },
+    "339416": {
+      "name": "Sound Booth",
+      "locationID": 69144
+    },
+    "339419": {
+      "name": "Michael Hough, Margee Keller, Ian Sifford",
+      "locationID": 69144
+    },
+    "390274": {
+      "name": "Team 1",
+      "locationID": 66868
+    },
+    "390409": {
+      "name": "Coastal 1",
+      "locationID": 67297
+    },
+    "391387": {
+      "name": "Margee Keller, Ian Sifford",
+      "locationID": 69144
+    },
+    "433094": {
+      "name": "Maintenance",
+      "locationID": 81060
+    },
+    "435899": {
+      "name": "Brad Austin, Ethan Morris",
+      "locationID": 54539
+    },
+    "435955": {
+      "name": "Cold End Tech -",
+      "locationID": 54539
+    },
+    "448571": {
+      "name": "Tuls' Maint.",
+      "locationID": 82034
+    },
+    "487209": {
+      "name": "Housekeeping",
+      "locationID": 86051
+    },
+    "487210": {
+      "name": "Custodial",
+      "locationID": 86051
+    },
+    "487211": {
+      "name": "Plumbing",
+      "locationID": 86051
+    },
+    "488196": {
+      "name": "Technician Schanz, Logan Schanz",
+      "locationID": 81060
+    },
+    "493306": {
+      "name": "New Team",
+      "locationID": 31635
+    },
+    "500284": {
+      "name": "Test Team",
+      "locationID": 89947
+    },
+    "501386": {
+      "name": "New Team",
+      "locationID": 90213
+    },
+    "502269": {
+      "name": "New Team1",
+      "locationID": 90214
+    },
+    "507233": {
+      "name": "John Dough, Tester Testy",
+      "locationID": 90214
+    },
+    "516581": {
+      "name": "John Dough, Creek Tester",
+      "locationID": 90213
+    },
+    "516649": {
+      "name": "Tom Technician (E00342), Nathan Striebel (E0123)",
+      "locationID": 91352
+    },
+    "528044": {
+      "name": "Inventory Team",
+      "locationID": 91936
+    },
+    "532714": {
+      "name": "Jakarta WR Dispatcher",
+      "locationID": 93572
+    },
+    "535719": {
+      "name": "Tom Technician (E00342), Evan The Electrician (E0321), Techno Tom (E1234)",
+      "locationID": 93583
+    },
+    "535728": {
+      "name": "Evan The Electrician (E0321), Techno Tom (E1234)",
+      "locationID": 93583
+    },
+    "538125": {
+      "name": "AOR - basement 1",
+      "locationID": 94307
+    },
+    "538126": {
+      "name": "AOR - batch house 1",
+      "locationID": 94307
+    },
+    "538127": {
+      "name": "AOR - batch house 2",
+      "locationID": 94307
+    },
+    "538128": {
+      "name": "AOR - ce shift mechanic a1",
+      "locationID": 94307
+    },
+    "538129": {
+      "name": "AOR - basement 2",
+      "locationID": 94307
+    },
+    "538130": {
+      "name": "AOR - ce shift mechanic  d1",
+      "locationID": 94307
+    },
+    "538131": {
+      "name": "AOR - ce shift mechanic b1",
+      "locationID": 94307
+    },
+    "538132": {
+      "name": "AOR - ce shift mechanic c1",
+      "locationID": 94307
+    },
+    "538133": {
+      "name": "AOR - gauging specialist 1",
+      "locationID": 94307
+    },
+    "538134": {
+      "name": "AOR - machine repair 1",
+      "locationID": 94307
+    },
+    "538135": {
+      "name": "AOR - day shift electrician 2",
+      "locationID": 94307
+    },
+    "538136": {
+      "name": "AOR - shift maintenance a2",
+      "locationID": 94307
+    },
+    "538137": {
+      "name": "AOR - shift mechanic d2",
+      "locationID": 94307
+    },
+    "538138": {
+      "name": "AOR - undecided",
+      "locationID": 94307
+    },
+    "538139": {
+      "name": "AOR - day shift electrician 1",
+      "locationID": 94307
+    },
+    "538140": {
+      "name": "AOR - gauging specialist 2",
+      "locationID": 94307
+    },
+    "538141": {
+      "name": "AOR - hot repair 1",
+      "locationID": 94307
+    },
+    "538142": {
+      "name": "AOR - machine repair 2",
+      "locationID": 94307
+    },
+    "538143": {
+      "name": "AOR - hot repair 2",
+      "locationID": 94307
+    },
+    "538144": {
+      "name": "AOR - shift maintenance b2",
+      "locationID": 94307
+    },
+    "538145": {
+      "name": "AOR - shift electrician shift  b1",
+      "locationID": 94307
+    },
+    "538146": {
+      "name": "AOR - maintenance lead",
+      "locationID": 94307
+    },
+    "538147": {
+      "name": "AOR - maintenance trainer",
+      "locationID": 94307
+    },
+    "538148": {
+      "name": "AOR - shift maintenance c2",
+      "locationID": 94307
+    },
+    "538149": {
+      "name": "AOR - shift mechanic a2",
+      "locationID": 94307
+    },
+    "538150": {
+      "name": "AOR - shift mechanic c2",
+      "locationID": 94307
+    },
+    "538151": {
+      "name": "AOR - shift mechanic b2",
+      "locationID": 94307
+    },
+    "538152": {
+      "name": "AOR - shift maintenance d2",
+      "locationID": 94307
+    },
+    "538196": {
+      "name": "AOR - ce shift mechanic  d1",
+      "locationID": 94309
+    },
+    "538197": {
+      "name": "AOR - basement 1",
+      "locationID": 94309
+    },
+    "538198": {
+      "name": "AOR - basement 2",
+      "locationID": 94309
+    },
+    "538199": {
+      "name": "AOR - batch house 1",
+      "locationID": 94309
+    },
+    "538200": {
+      "name": "AOR - ce shift mechanic a1",
+      "locationID": 94309
+    },
+    "538201": {
+      "name": "AOR - batch house 2",
+      "locationID": 94309
+    },
+    "538202": {
+      "name": "AOR - ce shift mechanic b1",
+      "locationID": 94309
+    },
+    "538203": {
+      "name": "AOR - hot repair 2",
+      "locationID": 94309
+    },
+    "538204": {
+      "name": "AOR - hot repair 1",
+      "locationID": 94309
+    },
+    "538205": {
+      "name": "AOR - day shift electrician 1",
+      "locationID": 94309
+    },
+    "538206": {
+      "name": "AOR - maintenance trainer",
+      "locationID": 94309
+    },
+    "538207": {
+      "name": "AOR - machine repair 2",
+      "locationID": 94309
+    },
+    "538208": {
+      "name": "AOR - shift maintenance a2",
+      "locationID": 94309
+    },
+    "538209": {
+      "name": "AOR - shift mechanic a2",
+      "locationID": 94309
+    },
+    "538210": {
+      "name": "AOR - shift maintenance c2",
+      "locationID": 94309
+    },
+    "538211": {
+      "name": "AOR - ce shift mechanic c1",
+      "locationID": 94309
+    },
+    "538212": {
+      "name": "AOR - gauging specialist 2",
+      "locationID": 94309
+    },
+    "538213": {
+      "name": "AOR - gauging specialist 1",
+      "locationID": 94309
+    },
+    "538214": {
+      "name": "AOR - machine repair 1",
+      "locationID": 94309
+    },
+    "538215": {
+      "name": "AOR - maintenance lead",
+      "locationID": 94309
+    },
+    "538216": {
+      "name": "AOR - shift electrician shift  b1",
+      "locationID": 94309
+    },
+    "538217": {
+      "name": "AOR - day shift electrician 2",
+      "locationID": 94309
+    },
+    "538218": {
+      "name": "AOR - shift maintenance b2",
+      "locationID": 94309
+    },
+    "538219": {
+      "name": "AOR - shift maintenance d2",
+      "locationID": 94309
+    },
+    "538220": {
+      "name": "AOR - shift mechanic b2",
+      "locationID": 94309
+    },
+    "538221": {
+      "name": "AOR - undecided",
+      "locationID": 94309
+    },
+    "538222": {
+      "name": "AOR - shift mechanic c2",
+      "locationID": 94309
+    },
+    "538223": {
+      "name": "AOR - shift mechanic d2",
+      "locationID": 94309
+    },
+    "538224": {
+      "name": "AOR - basement 1",
+      "locationID": 94310
+    },
+    "538225": {
+      "name": "AOR - batch house 2",
+      "locationID": 94310
+    },
+    "538226": {
+      "name": "AOR - batch house 1",
+      "locationID": 94310
+    },
+    "538227": {
+      "name": "AOR - ce shift mechanic b1",
+      "locationID": 94310
+    },
+    "538228": {
+      "name": "AOR - ce shift mechanic  d1",
+      "locationID": 94310
+    },
+    "538229": {
+      "name": "AOR - ce shift mechanic a1",
+      "locationID": 94310
+    },
+    "538230": {
+      "name": "AOR - gauging specialist 2",
+      "locationID": 94310
+    },
+    "538231": {
+      "name": "AOR - day shift electrician 1",
+      "locationID": 94310
+    },
+    "538232": {
+      "name": "AOR - day shift electrician 2",
+      "locationID": 94310
+    },
+    "538233": {
+      "name": "AOR - basement 2",
+      "locationID": 94310
+    },
+    "538234": {
+      "name": "AOR - gauging specialist 1",
+      "locationID": 94310
+    },
+    "538235": {
+      "name": "AOR - ce shift mechanic c1",
+      "locationID": 94310
+    },
+    "538236": {
+      "name": "AOR - shift electrician shift  b1",
+      "locationID": 94310
+    },
+    "538237": {
+      "name": "AOR - machine repair 2",
+      "locationID": 94310
+    },
+    "538238": {
+      "name": "AOR - maintenance trainer",
+      "locationID": 94310
+    },
+    "538239": {
+      "name": "AOR - shift mechanic a2",
+      "locationID": 94310
+    },
+    "538240": {
+      "name": "AOR - shift maintenance b2",
+      "locationID": 94310
+    },
+    "538241": {
+      "name": "AOR - shift maintenance c2",
+      "locationID": 94310
+    },
+    "538242": {
+      "name": "AOR - shift maintenance d2",
+      "locationID": 94310
+    },
+    "538243": {
+      "name": "AOR - undecided",
+      "locationID": 94310
+    },
+    "538244": {
+      "name": "AOR - shift mechanic d2",
+      "locationID": 94310
+    },
+    "538245": {
+      "name": "AOR - hot repair 1",
+      "locationID": 94310
+    },
+    "538246": {
+      "name": "AOR - machine repair 1",
+      "locationID": 94310
+    },
+    "538247": {
+      "name": "AOR - hot repair 2",
+      "locationID": 94310
+    },
+    "538248": {
+      "name": "AOR - maintenance lead",
+      "locationID": 94310
+    },
+    "538249": {
+      "name": "AOR - shift maintenance a2",
+      "locationID": 94310
+    },
+    "538250": {
+      "name": "AOR - shift mechanic b2",
+      "locationID": 94310
+    },
+    "538251": {
+      "name": "AOR - shift mechanic c2",
+      "locationID": 94310
+    },
+    "538252": {
+      "name": "AOR - a",
+      "locationID": 94311
+    },
+    "538253": {
+      "name": "AOR - abcd",
+      "locationID": 94311
+    },
+    "538254": {
+      "name": "AOR - abcdf",
+      "locationID": 94311
+    },
+    "538255": {
+      "name": "AOR - b",
+      "locationID": 94311
+    },
+    "538256": {
+      "name": "AOR - contractor",
+      "locationID": 94311
+    },
+    "538257": {
+      "name": "AOR - f",
+      "locationID": 94311
+    },
+    "538258": {
+      "name": "AOR - c",
+      "locationID": 94311
+    },
+    "538259": {
+      "name": "AOR - lead",
+      "locationID": 94311
+    },
+    "538260": {
+      "name": "AOR - f1",
+      "locationID": 94311
+    },
+    "538261": {
+      "name": "AOR - machine repair 2",
+      "locationID": 94311
+    },
+    "538262": {
+      "name": "AOR - x2",
+      "locationID": 94311
+    },
+    "538263": {
+      "name": "AOR - machine repair 1",
+      "locationID": 94311
+    },
+    "538264": {
+      "name": "AOR - x4",
+      "locationID": 94311
+    },
+    "538265": {
+      "name": "AOR - y4",
+      "locationID": 94311
+    },
+    "538266": {
+      "name": "AOR - x6",
+      "locationID": 94311
+    },
+    "538267": {
+      "name": "AOR - y2",
+      "locationID": 94311
+    },
+    "538268": {
+      "name": "AOR - d",
+      "locationID": 94311
+    },
+    "538269": {
+      "name": "AOR - f2",
+      "locationID": 94311
+    },
+    "538270": {
+      "name": "AOR - x3",
+      "locationID": 94311
+    },
+    "538271": {
+      "name": "AOR - x5",
+      "locationID": 94311
+    },
+    "538272": {
+      "name": "AOR - x1",
+      "locationID": 94311
+    },
+    "538273": {
+      "name": "AOR - machine repair 3",
+      "locationID": 94311
+    },
+    "538274": {
+      "name": "AOR - machine repair 4",
+      "locationID": 94311
+    },
+    "538275": {
+      "name": "AOR - y3",
+      "locationID": 94311
+    },
+    "538276": {
+      "name": "AOR - y1",
+      "locationID": 94311
+    },
+    "538277": {
+      "name": "AOR - z",
+      "locationID": 94311
+    },
+    "538657": {
+      "name": "AOR - basement 2",
+      "locationID": 94341
+    },
+    "538658": {
+      "name": "AOR - batch house 1",
+      "locationID": 94341
+    },
+    "538659": {
+      "name": "AOR - ce shift mechanic  d1",
+      "locationID": 94341
+    },
+    "538660": {
+      "name": "AOR - batch house 2",
+      "locationID": 94341
+    },
+    "538661": {
+      "name": "AOR - ce shift mechanic c1",
+      "locationID": 94341
+    },
+    "538662": {
+      "name": "AOR - gauging specialist 1",
+      "locationID": 94341
+    },
+    "538663": {
+      "name": "AOR - day shift electrician 1",
+      "locationID": 94341
+    },
+    "538664": {
+      "name": "AOR - day shift electrician 2",
+      "locationID": 94341
+    },
+    "538665": {
+      "name": "AOR - machine repair 1",
+      "locationID": 94341
+    },
+    "538666": {
+      "name": "AOR - hot repair 1",
+      "locationID": 94341
+    },
+    "538667": {
+      "name": "AOR - shift maintenance a2",
+      "locationID": 94341
+    },
+    "538668": {
+      "name": "AOR - maintenance lead",
+      "locationID": 94341
+    },
+    "538669": {
+      "name": "AOR - shift mechanic c2",
+      "locationID": 94341
+    },
+    "538670": {
+      "name": "AOR - shift mechanic d2",
+      "locationID": 94341
+    },
+    "538671": {
+      "name": "AOR - shift maintenance b2",
+      "locationID": 94341
+    },
+    "538672": {
+      "name": "AOR - maintenance trainer",
+      "locationID": 94341
+    },
+    "538673": {
+      "name": "AOR - gauging specialist 2",
+      "locationID": 94341
+    },
+    "538674": {
+      "name": "AOR - shift maintenance c2",
+      "locationID": 94341
+    },
+    "538675": {
+      "name": "AOR - shift electrician shift  b1",
+      "locationID": 94341
+    },
+    "538676": {
+      "name": "AOR - shift maintenance d2",
+      "locationID": 94341
+    },
+    "538677": {
+      "name": "AOR - shift mechanic a2",
+      "locationID": 94341
+    },
+    "538678": {
+      "name": "AOR - undecided",
+      "locationID": 94341
+    },
+    "538679": {
+      "name": "AOR - shift mechanic b2",
+      "locationID": 94341
+    },
+    "538680": {
+      "name": "AOR - hot repair 2",
+      "locationID": 94341
+    },
+    "538681": {
+      "name": "AOR - ce shift mechanic b1",
+      "locationID": 94341
+    },
+    "538683": {
+      "name": "AOR - machine repair 2",
+      "locationID": 94341
+    },
+    "538684": {
+      "name": "AOR - ce shift mechanic a1",
+      "locationID": 94341
+    },
+    "538773": {
+      "name": "AOR - basement 2",
+      "locationID": 94347
+    },
+    "538774": {
+      "name": "AOR - ce shift mechanic a1",
+      "locationID": 94347
+    },
+    "538775": {
+      "name": "AOR - batch house 2",
+      "locationID": 94347
+    },
+    "538776": {
+      "name": "AOR - basement 1",
+      "locationID": 94347
+    },
+    "538777": {
+      "name": "AOR - batch house 1",
+      "locationID": 94347
+    },
+    "538778": {
+      "name": "AOR - ce shift mechanic b1",
+      "locationID": 94347
+    },
+    "538779": {
+      "name": "AOR - day shift electrician 2",
+      "locationID": 94347
+    },
+    "538780": {
+      "name": "AOR - gauging specialist 1",
+      "locationID": 94347
+    },
+    "538781": {
+      "name": "AOR - hot repair 1",
+      "locationID": 94347
+    },
+    "538782": {
+      "name": "AOR - hot repair 2",
+      "locationID": 94347
+    },
+    "538783": {
+      "name": "AOR - maintenance trainer",
+      "locationID": 94347
+    },
+    "538784": {
+      "name": "AOR - shift maintenance d2",
+      "locationID": 94347
+    },
+    "538785": {
+      "name": "AOR - shift maintenance b2",
+      "locationID": 94347
+    },
+    "538786": {
+      "name": "AOR - shift electrician shift  b1",
+      "locationID": 94347
+    },
+    "538787": {
+      "name": "AOR - shift maintenance c2",
+      "locationID": 94347
+    },
+    "538788": {
+      "name": "AOR - ce shift mechanic  d1",
+      "locationID": 94347
+    },
+    "538789": {
+      "name": "AOR - ce shift mechanic c1",
+      "locationID": 94347
+    },
+    "538790": {
+      "name": "AOR - gauging specialist 2",
+      "locationID": 94347
+    },
+    "538791": {
+      "name": "AOR - day shift electrician 1",
+      "locationID": 94347
+    },
+    "538792": {
+      "name": "AOR - maintenance lead",
+      "locationID": 94347
+    },
+    "538793": {
+      "name": "AOR - machine repair 2",
+      "locationID": 94347
+    },
+    "538794": {
+      "name": "AOR - machine repair 1",
+      "locationID": 94347
+    },
+    "538795": {
+      "name": "AOR - shift mechanic c2",
+      "locationID": 94347
+    },
+    "538796": {
+      "name": "AOR - shift mechanic b2",
+      "locationID": 94347
+    },
+    "538797": {
+      "name": "AOR - shift mechanic a2",
+      "locationID": 94347
+    },
+    "538798": {
+      "name": "AOR - shift mechanic d2",
+      "locationID": 94347
+    },
+    "538799": {
+      "name": "AOR - shift maintenance a2",
+      "locationID": 94347
+    },
+    "538800": {
+      "name": "AOR - undecided",
+      "locationID": 94347
+    },
+    "538803": {
+      "name": "AOR - basement 1",
+      "locationID": 94348
+    },
+    "538804": {
+      "name": "AOR - basement 2",
+      "locationID": 94348
+    },
+    "538805": {
+      "name": "AOR - batch house 1",
+      "locationID": 94348
+    },
+    "538806": {
+      "name": "AOR - batch house 2",
+      "locationID": 94348
+    },
+    "538807": {
+      "name": "AOR - day shift electrician 2",
+      "locationID": 94348
+    },
+    "538808": {
+      "name": "AOR - ce shift mechanic  d1",
+      "locationID": 94348
+    },
+    "538809": {
+      "name": "AOR - ce shift mechanic a1",
+      "locationID": 94348
+    },
+    "538810": {
+      "name": "AOR - ce shift mechanic c1",
+      "locationID": 94348
+    },
+    "538811": {
+      "name": "AOR - ce shift mechanic b1",
+      "locationID": 94348
+    },
+    "538812": {
+      "name": "AOR - gauging specialist 1",
+      "locationID": 94348
+    },
+    "538813": {
+      "name": "AOR - gauging specialist 2",
+      "locationID": 94348
+    },
+    "538814": {
+      "name": "AOR - shift electrician shift  b1",
+      "locationID": 94348
+    },
+    "538815": {
+      "name": "AOR - machine repair 1",
+      "locationID": 94348
+    },
+    "538816": {
+      "name": "AOR - machine repair 2",
+      "locationID": 94348
+    },
+    "538817": {
+      "name": "AOR - hot repair 2",
+      "locationID": 94348
+    },
+    "538818": {
+      "name": "AOR - maintenance trainer",
+      "locationID": 94348
+    },
+    "538819": {
+      "name": "AOR - shift maintenance b2",
+      "locationID": 94348
+    },
+    "538820": {
+      "name": "AOR - shift maintenance c2",
+      "locationID": 94348
+    },
+    "538821": {
+      "name": "AOR - shift mechanic c2",
+      "locationID": 94348
+    },
+    "538822": {
+      "name": "AOR - shift mechanic b2",
+      "locationID": 94348
+    },
+    "538823": {
+      "name": "AOR - hot repair 1",
+      "locationID": 94348
+    },
+    "538824": {
+      "name": "AOR - day shift electrician 1",
+      "locationID": 94348
+    },
+    "538825": {
+      "name": "AOR - maintenance lead",
+      "locationID": 94348
+    },
+    "538826": {
+      "name": "AOR - undecided",
+      "locationID": 94348
+    },
+    "538827": {
+      "name": "AOR - shift maintenance a2",
+      "locationID": 94348
+    },
+    "538828": {
+      "name": "AOR - shift maintenance d2",
+      "locationID": 94348
+    },
+    "538829": {
+      "name": "AOR - shift mechanic d2",
+      "locationID": 94348
+    },
+    "538830": {
+      "name": "AOR - shift mechanic a2",
+      "locationID": 94348
+    },
+    "538832": {
+      "name": "AOR - basement 2",
+      "locationID": 94349
+    },
+    "538833": {
+      "name": "AOR - ce shift mechanic  d1",
+      "locationID": 94349
+    },
+    "538834": {
+      "name": "AOR - batch house 1",
+      "locationID": 94349
+    },
+    "538835": {
+      "name": "AOR - ce shift mechanic b1",
+      "locationID": 94349
+    },
+    "538836": {
+      "name": "AOR - ce shift mechanic a1",
+      "locationID": 94349
+    },
+    "538837": {
+      "name": "AOR - ce shift mechanic c1",
+      "locationID": 94349
+    },
+    "538838": {
+      "name": "AOR - batch house 2",
+      "locationID": 94349
+    },
+    "538839": {
+      "name": "AOR - day shift electrician 1",
+      "locationID": 94349
+    },
+    "538840": {
+      "name": "AOR - gauging specialist 1",
+      "locationID": 94349
+    },
+    "538841": {
+      "name": "AOR - gauging specialist 2",
+      "locationID": 94349
+    },
+    "538842": {
+      "name": "AOR - hot repair 1",
+      "locationID": 94349
+    },
+    "538843": {
+      "name": "AOR - day shift electrician 2",
+      "locationID": 94349
+    },
+    "538844": {
+      "name": "AOR - machine repair 2",
+      "locationID": 94349
+    },
+    "538845": {
+      "name": "AOR - machine repair 1",
+      "locationID": 94349
+    },
+    "538846": {
+      "name": "AOR - hot repair 2",
+      "locationID": 94349
+    },
+    "538847": {
+      "name": "AOR - shift maintenance b2",
+      "locationID": 94349
+    },
+    "538848": {
+      "name": "AOR - shift maintenance c2",
+      "locationID": 94349
+    },
+    "538849": {
+      "name": "AOR - maintenance lead",
+      "locationID": 94349
+    },
+    "538850": {
+      "name": "AOR - shift maintenance d2",
+      "locationID": 94349
+    },
+    "538851": {
+      "name": "AOR - shift mechanic c2",
+      "locationID": 94349
+    },
+    "538852": {
+      "name": "AOR - shift mechanic a2",
+      "locationID": 94349
+    },
+    "538853": {
+      "name": "AOR - undecided",
+      "locationID": 94349
+    },
+    "538854": {
+      "name": "AOR - shift mechanic d2",
+      "locationID": 94349
+    },
+    "538855": {
+      "name": "AOR - shift electrician shift  b1",
+      "locationID": 94349
+    },
+    "538856": {
+      "name": "AOR - shift mechanic b2",
+      "locationID": 94349
+    },
+    "538857": {
+      "name": "AOR - shift maintenance a2",
+      "locationID": 94349
+    },
+    "538858": {
+      "name": "AOR - maintenance trainer",
+      "locationID": 94349
+    },
+    "538859": {
+      "name": "AOR - basement 1",
+      "locationID": 94349
+    },
+    "538860": {
+      "name": "AOR - batch house 1",
+      "locationID": 94350
+    },
+    "538861": {
+      "name": "AOR - basement 1",
+      "locationID": 94350
+    },
+    "538862": {
+      "name": "AOR - batch house 2",
+      "locationID": 94350
+    },
+    "538863": {
+      "name": "AOR - basement 2",
+      "locationID": 94350
+    },
+    "538864": {
+      "name": "AOR - ce shift mechanic a1",
+      "locationID": 94350
+    },
+    "538865": {
+      "name": "AOR - ce shift mechanic b1",
+      "locationID": 94350
+    },
+    "538866": {
+      "name": "AOR - ce shift mechanic  d1",
+      "locationID": 94350
+    },
+    "538867": {
+      "name": "AOR - gauging specialist 1",
+      "locationID": 94350
+    },
+    "538868": {
+      "name": "AOR - ce shift mechanic c1",
+      "locationID": 94350
+    },
+    "538869": {
+      "name": "AOR - day shift electrician 1",
+      "locationID": 94350
+    },
+    "538870": {
+      "name": "AOR - gauging specialist 2",
+      "locationID": 94350
+    },
+    "538871": {
+      "name": "AOR - day shift electrician 2",
+      "locationID": 94350
+    },
+    "538872": {
+      "name": "AOR - hot repair 1",
+      "locationID": 94350
+    },
+    "538873": {
+      "name": "AOR - maintenance lead",
+      "locationID": 94350
+    },
+    "538874": {
+      "name": "AOR - maintenance trainer",
+      "locationID": 94350
+    },
+    "538875": {
+      "name": "AOR - hot repair 2",
+      "locationID": 94350
+    },
+    "538876": {
+      "name": "AOR - machine repair 2",
+      "locationID": 94350
+    },
+    "538877": {
+      "name": "AOR - shift maintenance a2",
+      "locationID": 94350
+    },
+    "538878": {
+      "name": "AOR - machine repair 1",
+      "locationID": 94350
+    },
+    "538879": {
+      "name": "AOR - shift maintenance b2",
+      "locationID": 94350
+    },
+    "538880": {
+      "name": "AOR - shift electrician shift  b1",
+      "locationID": 94350
+    },
+    "538881": {
+      "name": "AOR - shift maintenance c2",
+      "locationID": 94350
+    },
+    "538882": {
+      "name": "AOR - shift maintenance d2",
+      "locationID": 94350
+    },
+    "538883": {
+      "name": "AOR - shift mechanic d2",
+      "locationID": 94350
+    },
+    "538884": {
+      "name": "AOR - shift mechanic a2",
+      "locationID": 94350
+    },
+    "538885": {
+      "name": "AOR - shift mechanic b2",
+      "locationID": 94350
+    },
+    "538886": {
+      "name": "AOR - undecided",
+      "locationID": 94350
+    },
+    "538887": {
+      "name": "AOR - shift mechanic c2",
+      "locationID": 94350
+    },
+    "538896": {
+      "name": "AOR - basement 2",
+      "locationID": 94352
+    },
+    "538897": {
+      "name": "AOR - basement 1",
+      "locationID": 94352
+    },
+    "538898": {
+      "name": "AOR - ce shift mechanic  d1",
+      "locationID": 94352
+    },
+    "538899": {
+      "name": "AOR - batch house 1",
+      "locationID": 94352
+    },
+    "538900": {
+      "name": "AOR - day shift electrician 2",
+      "locationID": 94352
+    },
+    "538901": {
+      "name": "AOR - batch house 2",
+      "locationID": 94352
+    },
+    "538902": {
+      "name": "AOR - ce shift mechanic c1",
+      "locationID": 94352
+    },
+    "538903": {
+      "name": "AOR - ce shift mechanic a1",
+      "locationID": 94352
+    },
+    "538904": {
+      "name": "AOR - day shift electrician 1",
+      "locationID": 94352
+    },
+    "538905": {
+      "name": "AOR - ce shift mechanic b1",
+      "locationID": 94352
+    },
+    "538906": {
+      "name": "AOR - gauging specialist 2",
+      "locationID": 94352
+    },
+    "538907": {
+      "name": "AOR - gauging specialist 1",
+      "locationID": 94352
+    },
+    "538908": {
+      "name": "AOR - maintenance lead",
+      "locationID": 94352
+    },
+    "538909": {
+      "name": "AOR - machine repair 2",
+      "locationID": 94352
+    },
+    "538910": {
+      "name": "AOR - maintenance trainer",
+      "locationID": 94352
+    },
+    "538911": {
+      "name": "AOR - hot repair 1",
+      "locationID": 94352
+    },
+    "538912": {
+      "name": "AOR - machine repair 1",
+      "locationID": 94352
+    },
+    "538913": {
+      "name": "AOR - shift maintenance a2",
+      "locationID": 94352
+    },
+    "538914": {
+      "name": "AOR - shift maintenance b2",
+      "locationID": 94352
+    },
+    "538915": {
+      "name": "AOR - shift electrician shift  b1",
+      "locationID": 94352
+    },
+    "538916": {
+      "name": "AOR - shift maintenance d2",
+      "locationID": 94352
+    },
+    "538917": {
+      "name": "AOR - hot repair 2",
+      "locationID": 94352
+    },
+    "538918": {
+      "name": "AOR - shift maintenance c2",
+      "locationID": 94352
+    },
+    "538919": {
+      "name": "AOR - shift mechanic b2",
+      "locationID": 94352
+    },
+    "538920": {
+      "name": "AOR - shift mechanic d2",
+      "locationID": 94352
+    },
+    "538921": {
+      "name": "AOR - shift mechanic c2",
+      "locationID": 94352
+    },
+    "538922": {
+      "name": "AOR - shift mechanic a2",
+      "locationID": 94352
+    },
+    "538923": {
+      "name": "AOR - undecided",
+      "locationID": 94352
+    },
+    "540903": {
+      "name": "AOR - batch house 2",
+      "locationID": 94476
+    },
+    "540904": {
+      "name": "AOR - basement 2",
+      "locationID": 94476
+    },
+    "540905": {
+      "name": "AOR - basement 1",
+      "locationID": 94476
+    },
+    "540906": {
+      "name": "AOR - ce shift mechanic a1",
+      "locationID": 94476
+    },
+    "540907": {
+      "name": "AOR - batch house 1",
+      "locationID": 94476
+    },
+    "540908": {
+      "name": "AOR - ce shift mechanic  d1",
+      "locationID": 94476
+    },
+    "540909": {
+      "name": "AOR - gauging specialist 1",
+      "locationID": 94476
+    },
+    "540910": {
+      "name": "AOR - machine repair 1",
+      "locationID": 94476
+    },
+    "540911": {
+      "name": "AOR - day shift electrician 2",
+      "locationID": 94476
+    },
+    "540912": {
+      "name": "AOR - machine repair 2",
+      "locationID": 94476
+    },
+    "540913": {
+      "name": "AOR - maintenance trainer",
+      "locationID": 94476
+    },
+    "540914": {
+      "name": "AOR - shift mechanic b2",
+      "locationID": 94476
+    },
+    "540915": {
+      "name": "AOR - shift mechanic d2",
+      "locationID": 94476
+    },
+    "540916": {
+      "name": "AOR - shift maintenance a2",
+      "locationID": 94476
+    },
+    "540917": {
+      "name": "AOR - undecided",
+      "locationID": 94476
+    },
+    "540918": {
+      "name": "AOR - ce shift mechanic b1",
+      "locationID": 94476
+    },
+    "540919": {
+      "name": "AOR - day shift electrician 1",
+      "locationID": 94476
+    },
+    "540920": {
+      "name": "AOR - ce shift mechanic c1",
+      "locationID": 94476
+    },
+    "540921": {
+      "name": "AOR - hot repair 2",
+      "locationID": 94476
+    },
+    "540922": {
+      "name": "AOR - gauging specialist 2",
+      "locationID": 94476
+    },
+    "540923": {
+      "name": "AOR - hot repair 1",
+      "locationID": 94476
+    },
+    "540924": {
+      "name": "AOR - shift mechanic a2",
+      "locationID": 94476
+    },
+    "540925": {
+      "name": "AOR - shift maintenance c2",
+      "locationID": 94476
+    },
+    "540926": {
+      "name": "AOR - shift maintenance d2",
+      "locationID": 94476
+    },
+    "540927": {
+      "name": "AOR - maintenance lead",
+      "locationID": 94476
+    },
+    "540928": {
+      "name": "AOR - shift electrician shift  b1",
+      "locationID": 94476
+    },
+    "540929": {
+      "name": "AOR - shift mechanic c2",
+      "locationID": 94476
+    },
+    "540930": {
+      "name": "AOR - shift maintenance b2",
+      "locationID": 94476
+    },
+    "540975": {
+      "name": "undefinedbasement 2",
+      "locationID": 94486
+    },
+    "540976": {
+      "name": "undefinedbasement 1",
+      "locationID": 94486
+    },
+    "540977": {
+      "name": "undefinedce shift mechanic  d1",
+      "locationID": 94486
+    },
+    "540978": {
+      "name": "undefinedce shift mechanic c1",
+      "locationID": 94486
+    },
+    "540979": {
+      "name": "undefinedbatch house 2",
+      "locationID": 94486
+    },
+    "540980": {
+      "name": "undefinedce shift mechanic b1",
+      "locationID": 94486
+    },
+    "540981": {
+      "name": "undefinedday shift electrician 2",
+      "locationID": 94486
+    },
+    "540982": {
+      "name": "undefinedgauging specialist 1",
+      "locationID": 94486
+    },
+    "540983": {
+      "name": "undefinedmachine repair 1",
+      "locationID": 94486
+    },
+    "540984": {
+      "name": "undefinedhot repair 1",
+      "locationID": 94486
+    },
+    "540985": {
+      "name": "undefinedday shift electrician 1",
+      "locationID": 94486
+    },
+    "540986": {
+      "name": "undefinedhot repair 2",
+      "locationID": 94486
+    },
+    "540987": {
+      "name": "undefinedshift electrician shift  b1",
+      "locationID": 94486
+    },
+    "540988": {
+      "name": "undefinedshift maintenance b2",
+      "locationID": 94486
+    },
+    "540989": {
+      "name": "undefinedundecided",
+      "locationID": 94486
+    },
+    "540990": {
+      "name": "undefinedshift maintenance c2",
+      "locationID": 94486
+    },
+    "540991": {
+      "name": "undefinedshift maintenance a2",
+      "locationID": 94486
+    },
+    "540992": {
+      "name": "undefinedbatch house 1",
+      "locationID": 94486
+    },
+    "540993": {
+      "name": "undefinedce shift mechanic a1",
+      "locationID": 94486
+    },
+    "540994": {
+      "name": "undefinedmachine repair 2",
+      "locationID": 94486
+    },
+    "540995": {
+      "name": "undefinedgauging specialist 2",
+      "locationID": 94486
+    },
+    "540996": {
+      "name": "undefinedmaintenance trainer",
+      "locationID": 94486
+    },
+    "540997": {
+      "name": "undefinedshift maintenance d2",
+      "locationID": 94486
+    },
+    "540998": {
+      "name": "undefinedmaintenance lead",
+      "locationID": 94486
+    },
+    "540999": {
+      "name": "undefinedshift mechanic d2",
+      "locationID": 94486
+    },
+    "541000": {
+      "name": "undefinedshift mechanic b2",
+      "locationID": 94486
+    },
+    "541001": {
+      "name": "undefinedshift mechanic a2",
+      "locationID": 94486
+    },
+    "541002": {
+      "name": "undefinedshift mechanic c2",
+      "locationID": 94486
+    },
+    "541017": {
+      "name": "AOR - undefinedbasement 1",
+      "locationID": 94488
+    },
+    "541018": {
+      "name": "AOR - undefinedce shift mechanic a1",
+      "locationID": 94488
+    },
+    "541019": {
+      "name": "AOR - undefinedbatch house 2",
+      "locationID": 94488
+    },
+    "541020": {
+      "name": "AOR - undefinedbatch house 1",
+      "locationID": 94488
+    },
+    "541021": {
+      "name": "AOR - undefinedbasement 2",
+      "locationID": 94488
+    },
+    "541022": {
+      "name": "AOR - undefinedce shift mechanic b1",
+      "locationID": 94488
+    },
+    "541023": {
+      "name": "AOR - undefinedgauging specialist 1",
+      "locationID": 94488
+    },
+    "541024": {
+      "name": "AOR - undefinedhot repair 1",
+      "locationID": 94488
+    },
+    "541025": {
+      "name": "AOR - undefinedday shift electrician 2",
+      "locationID": 94488
+    },
+    "541026": {
+      "name": "AOR - undefinedce shift mechanic c1",
+      "locationID": 94488
+    },
+    "541027": {
+      "name": "AOR - undefinedmachine repair 2",
+      "locationID": 94488
+    },
+    "541028": {
+      "name": "AOR - undefinedmaintenance trainer",
+      "locationID": 94488
+    },
+    "541029": {
+      "name": "AOR - undefinedmaintenance lead",
+      "locationID": 94488
+    },
+    "541030": {
+      "name": "AOR - undefinedshift maintenance d2",
+      "locationID": 94488
+    },
+    "541031": {
+      "name": "AOR - undefinedshift mechanic b2",
+      "locationID": 94488
+    },
+    "541032": {
+      "name": "AOR - undefinedshift mechanic c2",
+      "locationID": 94488
+    },
+    "541033": {
+      "name": "AOR - undefinedce shift mechanic  d1",
+      "locationID": 94488
+    },
+    "541034": {
+      "name": "AOR - undefinedday shift electrician 1",
+      "locationID": 94488
+    },
+    "541035": {
+      "name": "AOR - undefinedmachine repair 1",
+      "locationID": 94488
+    },
+    "541036": {
+      "name": "AOR - undefinedgauging specialist 2",
+      "locationID": 94488
+    },
+    "541037": {
+      "name": "AOR - undefinedshift maintenance b2",
+      "locationID": 94488
+    },
+    "541038": {
+      "name": "AOR - undefinedshift maintenance a2",
+      "locationID": 94488
+    },
+    "541039": {
+      "name": "AOR - undefinedshift electrician shift  b1",
+      "locationID": 94488
+    },
+    "541040": {
+      "name": "AOR - undefinedshift mechanic a2",
+      "locationID": 94488
+    },
+    "541041": {
+      "name": "AOR - undefinedshift maintenance c2",
+      "locationID": 94488
+    },
+    "541042": {
+      "name": "AOR - undefinedshift mechanic d2",
+      "locationID": 94488
+    },
+    "541043": {
+      "name": "AOR - undefinedundecided",
+      "locationID": 94488
+    },
+    "541044": {
+      "name": "AOR - undefinedhot repair 2",
+      "locationID": 94488
+    },
+    "541049": {
+      "name": "AOR - basement 1",
+      "locationID": 94490
+    },
+    "541050": {
+      "name": "AOR - ce shift mechanic c1",
+      "locationID": 94490
+    },
+    "541051": {
+      "name": "AOR - ce shift mechanic  d1",
+      "locationID": 94490
+    },
+    "541052": {
+      "name": "AOR - day shift electrician 1",
+      "locationID": 94490
+    },
+    "541053": {
+      "name": "AOR - batch house 1",
+      "locationID": 94490
+    },
+    "541054": {
+      "name": "AOR - ce shift mechanic b1",
+      "locationID": 94490
+    },
+    "541055": {
+      "name": "AOR - ce shift mechanic a1",
+      "locationID": 94490
+    },
+    "541056": {
+      "name": "AOR - basement 2",
+      "locationID": 94490
+    },
+    "541057": {
+      "name": "AOR - gauging specialist 1",
+      "locationID": 94490
+    },
+    "541058": {
+      "name": "AOR - gauging specialist 2",
+      "locationID": 94490
+    },
+    "541059": {
+      "name": "AOR - day shift electrician 2",
+      "locationID": 94490
+    },
+    "541060": {
+      "name": "AOR - machine repair 1",
+      "locationID": 94490
+    },
+    "541061": {
+      "name": "AOR - machine repair 2",
+      "locationID": 94490
+    },
+    "541062": {
+      "name": "AOR - maintenance trainer",
+      "locationID": 94490
+    },
+    "541063": {
+      "name": "AOR - shift maintenance b2",
+      "locationID": 94490
+    },
+    "541064": {
+      "name": "AOR - hot repair 2",
+      "locationID": 94490
+    },
+    "541065": {
+      "name": "AOR - hot repair 1",
+      "locationID": 94490
+    },
+    "541066": {
+      "name": "AOR - maintenance lead",
+      "locationID": 94490
+    },
+    "541067": {
+      "name": "AOR - shift mechanic a2",
+      "locationID": 94490
+    },
+    "541068": {
+      "name": "AOR - shift mechanic c2",
+      "locationID": 94490
+    },
+    "541069": {
+      "name": "AOR - undecided",
+      "locationID": 94490
+    },
+    "541070": {
+      "name": "AOR - shift maintenance d2",
+      "locationID": 94490
+    },
+    "541071": {
+      "name": "AOR - batch house 2",
+      "locationID": 94490
+    },
+    "541072": {
+      "name": "AOR - shift mechanic d2",
+      "locationID": 94490
+    },
+    "541073": {
+      "name": "AOR - shift maintenance a2",
+      "locationID": 94490
+    },
+    "541074": {
+      "name": "AOR - shift electrician shift  b1",
+      "locationID": 94490
+    },
+    "541075": {
+      "name": "AOR - shift mechanic b2",
+      "locationID": 94490
+    },
+    "541076": {
+      "name": "AOR - shift maintenance c2",
+      "locationID": 94490
+    },
+    "541079": {
+      "name": "AOR - basement 1",
+      "locationID": 94492
+    },
+    "541080": {
+      "name": "AOR - batch house 1",
+      "locationID": 94492
+    },
+    "541081": {
+      "name": "AOR - basement 2",
+      "locationID": 94492
+    },
+    "541082": {
+      "name": "AOR - batch house 2",
+      "locationID": 94492
+    },
+    "541083": {
+      "name": "AOR - day shift electrician 2",
+      "locationID": 94492
+    },
+    "541084": {
+      "name": "AOR - ce shift mechanic  d1",
+      "locationID": 94492
+    },
+    "541085": {
+      "name": "AOR - ce shift mechanic a1",
+      "locationID": 94492
+    },
+    "541086": {
+      "name": "AOR - ce shift mechanic b1",
+      "locationID": 94492
+    },
+    "541087": {
+      "name": "AOR - ce shift mechanic c1",
+      "locationID": 94492
+    },
+    "541088": {
+      "name": "AOR - hot repair 2",
+      "locationID": 94492
+    },
+    "541089": {
+      "name": "AOR - machine repair 1",
+      "locationID": 94492
+    },
+    "541090": {
+      "name": "AOR - maintenance lead",
+      "locationID": 94492
+    },
+    "541091": {
+      "name": "AOR - gauging specialist 1",
+      "locationID": 94492
+    },
+    "541092": {
+      "name": "AOR - hot repair 1",
+      "locationID": 94492
+    },
+    "541093": {
+      "name": "AOR - gauging specialist 2",
+      "locationID": 94492
+    },
+    "541094": {
+      "name": "AOR - maintenance trainer",
+      "locationID": 94492
+    },
+    "541095": {
+      "name": "AOR - shift maintenance a2",
+      "locationID": 94492
+    },
+    "541096": {
+      "name": "AOR - machine repair 2",
+      "locationID": 94492
+    },
+    "541097": {
+      "name": "AOR - shift maintenance b2",
+      "locationID": 94492
+    },
+    "541098": {
+      "name": "AOR - shift mechanic a2",
+      "locationID": 94492
+    },
+    "541099": {
+      "name": "AOR - shift maintenance c2",
+      "locationID": 94492
+    },
+    "541100": {
+      "name": "AOR - shift mechanic d2",
+      "locationID": 94492
+    },
+    "541101": {
+      "name": "AOR - shift mechanic b2",
+      "locationID": 94492
+    },
+    "541102": {
+      "name": "AOR - shift mechanic c2",
+      "locationID": 94492
+    },
+    "541103": {
+      "name": "AOR - undecided",
+      "locationID": 94492
+    },
+    "541104": {
+      "name": "AOR - day shift electrician 1",
+      "locationID": 94492
+    },
+    "541105": {
+      "name": "AOR - shift electrician shift  b1",
+      "locationID": 94492
+    },
+    "541106": {
+      "name": "AOR - shift maintenance d2",
+      "locationID": 94492
+    },
+    "541111": {
+      "name": "AOR - basement 1",
+      "locationID": 94493
+    },
+    "541112": {
+      "name": "AOR - basement 2",
+      "locationID": 94493
+    },
+    "541113": {
+      "name": "AOR - batch house 1",
+      "locationID": 94493
+    },
+    "541114": {
+      "name": "AOR - batch house 2",
+      "locationID": 94493
+    },
+    "541115": {
+      "name": "AOR - ce shift mechanic  d1",
+      "locationID": 94493
+    },
+    "541116": {
+      "name": "AOR - ce shift mechanic b1",
+      "locationID": 94493
+    },
+    "541117": {
+      "name": "AOR - gauging specialist 2",
+      "locationID": 94493
+    },
+    "541118": {
+      "name": "AOR - hot repair 1",
+      "locationID": 94493
+    },
+    "541119": {
+      "name": "AOR - ce shift mechanic a1",
+      "locationID": 94493
+    },
+    "541120": {
+      "name": "AOR - day shift electrician 2",
+      "locationID": 94493
+    },
+    "541121": {
+      "name": "AOR - day shift electrician 1",
+      "locationID": 94493
+    },
+    "541122": {
+      "name": "AOR - gauging specialist 1",
+      "locationID": 94493
+    },
+    "541123": {
+      "name": "AOR - hot repair 2",
+      "locationID": 94493
+    },
+    "541124": {
+      "name": "AOR - machine repair 1",
+      "locationID": 94493
+    },
+    "541125": {
+      "name": "AOR - shift maintenance c2",
+      "locationID": 94493
+    },
+    "541126": {
+      "name": "AOR - shift electrician shift  b1",
+      "locationID": 94493
+    },
+    "541127": {
+      "name": "AOR - shift maintenance a2",
+      "locationID": 94493
+    },
+    "541128": {
+      "name": "AOR - shift maintenance b2",
+      "locationID": 94493
+    },
+    "541129": {
+      "name": "AOR - machine repair 2",
+      "locationID": 94493
+    },
+    "541130": {
+      "name": "AOR - maintenance lead",
+      "locationID": 94493
+    },
+    "541131": {
+      "name": "AOR - maintenance trainer",
+      "locationID": 94493
+    },
+    "541132": {
+      "name": "AOR - shift mechanic d2",
+      "locationID": 94493
+    },
+    "541133": {
+      "name": "AOR - shift mechanic c2",
+      "locationID": 94493
+    },
+    "541134": {
+      "name": "AOR - shift mechanic b2",
+      "locationID": 94493
+    },
+    "541135": {
+      "name": "AOR - ce shift mechanic c1",
+      "locationID": 94493
+    },
+    "541136": {
+      "name": "AOR - shift mechanic a2",
+      "locationID": 94493
+    },
+    "541137": {
+      "name": "AOR - undecided",
+      "locationID": 94493
+    },
+    "541138": {
+      "name": "AOR - shift maintenance d2",
+      "locationID": 94493
+    },
+    "541339": {
+      "name": "AOR - Basement 1",
+      "locationID": 94505
+    },
+    "541340": {
+      "name": "AOR - Ce Shift Mechanic A1",
+      "locationID": 94505
+    },
+    "541341": {
+      "name": "AOR - Ce Shift Mechanic  D1",
+      "locationID": 94505
+    },
+    "541342": {
+      "name": "AOR - Day Shift Electrician 1",
+      "locationID": 94505
+    },
+    "541343": {
+      "name": "AOR - Ce Shift Mechanic C1",
+      "locationID": 94505
+    },
+    "541344": {
+      "name": "AOR - Basement 2",
+      "locationID": 94505
+    },
+    "541345": {
+      "name": "AOR - Day Shift Electrician 2",
+      "locationID": 94505
+    },
+    "541346": {
+      "name": "AOR - Gauging Specialist 2",
+      "locationID": 94505
+    },
+    "541347": {
+      "name": "AOR - Hot Repair 1",
+      "locationID": 94505
+    },
+    "541348": {
+      "name": "AOR - Maintenance Lead",
+      "locationID": 94505
+    },
+    "541349": {
+      "name": "AOR - Machine Repair 1",
+      "locationID": 94505
+    },
+    "541350": {
+      "name": "AOR - Shift Mechanic B2",
+      "locationID": 94505
+    },
+    "541351": {
+      "name": "AOR - Batch House 1",
+      "locationID": 94505
+    },
+    "541352": {
+      "name": "AOR - Shift Mechanic C2",
+      "locationID": 94505
+    },
+    "541353": {
+      "name": "AOR - Ce Shift Mechanic B1",
+      "locationID": 94505
+    },
+    "541354": {
+      "name": "AOR - Batch House 2",
+      "locationID": 94505
+    },
+    "541355": {
+      "name": "AOR - Hot Repair 2",
+      "locationID": 94505
+    },
+    "541356": {
+      "name": "AOR - Machine Repair 2",
+      "locationID": 94505
+    },
+    "541357": {
+      "name": "AOR - Shift Maintenance A2",
+      "locationID": 94505
+    },
+    "541358": {
+      "name": "AOR - Shift Electrician Shift  B1",
+      "locationID": 94505
+    },
+    "541359": {
+      "name": "AOR - Gauging Specialist 1",
+      "locationID": 94505
+    },
+    "541360": {
+      "name": "AOR - Maintenance Trainer",
+      "locationID": 94505
+    },
+    "541361": {
+      "name": "AOR - Shift Maintenance B2",
+      "locationID": 94505
+    },
+    "541362": {
+      "name": "AOR - Shift Maintenance D2",
+      "locationID": 94505
+    },
+    "541363": {
+      "name": "AOR - Shift Maintenance C2",
+      "locationID": 94505
+    },
+    "541364": {
+      "name": "AOR - Shift Mechanic D2",
+      "locationID": 94505
+    },
+    "541365": {
+      "name": "AOR - Undecided",
+      "locationID": 94505
+    },
+    "541366": {
+      "name": "AOR - Shift Mechanic A2",
+      "locationID": 94505
+    },
+    "546410": {
+      "name": "Andrew Emmott, Julia Stoyles",
+      "locationID": 92917
+    }
+  },
+  "counts": {
+    "users": 41,
+    "teams": 505
+  },
+  "usage": {
+    "example": "When a task has completedByUser: 223860, look up users[223860].name",
+    "note": "userID=0 or teamID=0 typically means unassigned"
+  }
+}
