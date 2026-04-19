@@ -1,12 +1,18 @@
+import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { McClient } from '@/mc-client.js'
+import { McApiError, type McClient } from '@/mc-client.js'
 import { DATASETS, DATASETS_TRANSITION_NOTE } from '@/shared/datasets.js'
+import { McApiResponseSchema } from '@/shared/types.js'
 
 const JSON_MIME_TYPE = 'application/json'
 const TIME_RESOURCE_URI = 'mc://context/time'
 const DATASETS_RESOURCE_URI = 'mc://context/datasets'
+const SUMMARY_RESOURCE_URI = 'mc://context/summary'
+const SUMMARY_TTL_MS = 60 * 60 * 1000
 
-export function register(server: McpServer, _client: McClient): void {
+const CountResponseSchema = McApiResponseSchema(z.unknown())
+
+export function register(server: McpServer, client: McClient): void {
   server.registerResource(
     'mc-context-time',
     TIME_RESOURCE_URI,
@@ -35,6 +41,17 @@ export function register(server: McpServer, _client: McClient): void {
         datasets: DATASETS,
       }),
   )
+
+  server.registerResource(
+    'mc-context-summary',
+    SUMMARY_RESOURCE_URI,
+    {
+      title: 'MC Context: Summary',
+      description: 'Session-tier summary counts for the major MC entities exposed by this server.',
+      mimeType: JSON_MIME_TYPE,
+    },
+    async () => readResource(SUMMARY_RESOURCE_URI, () => readSummaryContext(client)),
+  )
 }
 
 function toJsonResource(uri: string, data: unknown) {
@@ -46,6 +63,14 @@ function toJsonResource(uri: string, data: unknown) {
         text: JSON.stringify(data, null, 2),
       },
     ],
+  }
+}
+
+async function readResource(uri: string, loader: () => Promise<unknown>) {
+  try {
+    return toJsonResource(uri, await loader())
+  } catch (err) {
+    throw new Error(formatResourceError(err))
   }
 }
 
@@ -71,6 +96,55 @@ function buildTimeContext() {
       startOfMonth: formatDateInTimeZone(startOfMonth(zonedNow), timeZone),
     },
   }
+}
+
+async function readSummaryContext(client: McClient) {
+  return client.getCached('context:summary', SUMMARY_TTL_MS, async () => {
+    const [
+      workOrders,
+      assets,
+      locationAssets,
+      equipmentAssets,
+      parts,
+      purchaseOrders,
+      purchaseOrderLineItems,
+    ] = await Promise.all([
+      countRecords(client, '/workorders'),
+      countRecords(client, '/Assets'),
+      countRecords(client, '/Assets', 'IsLocation eq true'),
+      countRecords(client, '/Assets', 'IsLocation eq false'),
+      countRecords(client, '/Parts'),
+      countRecords(client, '/purchaseorders'),
+      countRecords(client, '/PurchaseOrderLineItems'),
+    ])
+
+    return {
+      generatedAt: new Date().toISOString(),
+      cacheTtlMs: SUMMARY_TTL_MS,
+      counts: {
+        workOrders,
+        assets: {
+          total: assets,
+          locations: locationAssets,
+          equipment: equipmentAssets,
+        },
+        parts,
+        purchaseOrders,
+        purchaseOrderLineItems,
+      },
+    }
+  })
+}
+
+async function countRecords(client: McClient, path: string, filter?: string): Promise<number> {
+  const raw = await client.get(path, {
+    params: {
+      $top: 1,
+      ...(filter ? { $filter: filter } : {}),
+    },
+  })
+  const data = CountResponseSchema.parse(raw)
+  return data.Total
 }
 
 function formatDateInTimeZone(date: Date, timeZone: string): string {
@@ -107,4 +181,16 @@ function startOfMonth(date: Date): Date {
   const next = new Date(date)
   next.setDate(1)
   return next
+}
+
+function formatResourceError(err: unknown): string {
+  if (err instanceof McApiError) {
+    return `MC API error ${err.status}: ${err.body || err.message}`
+  }
+
+  if (err instanceof Error) {
+    return err.message
+  }
+
+  return String(err)
 }
