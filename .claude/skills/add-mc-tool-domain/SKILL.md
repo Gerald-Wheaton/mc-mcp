@@ -141,4 +141,4 @@ Also add `.describe()` to any tool-specific params beyond OData — include exam
    | `mc_get_<domain_singular>` | Get a single <entity> by PK |
    ```
 
-2. Update `CLAUDE.md` Phase 2 checklist to mark the new entity as done.
+2. Update `docs/implementation-plan.md` Phase 2 checklist to mark the new entity as done.
