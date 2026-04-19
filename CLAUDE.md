@@ -4,7 +4,7 @@
 
 Build a read-only MCP server that wraps the Accruent Maintenance Connection (MC) REST API, enabling LLM clients to reason about a customer's CMMS data. The target experience is conversational: customers ask "why" questions about their facilities data and the LLM answers by querying live MC data.
 
-**Current status:** Phase 2.5 (deep entity exploration) complete. Phase 3 (Analysis UX / context layer) is next.
+**Current status:** Phase 2.5 (deep entity exploration) is complete, and the first Phase 3 context resources are now shipped. Next up is finishing the Analysis UX layer on top of that context foundation.
 
 ## What MC Is
 
@@ -84,13 +84,16 @@ mc-mcp/
     ├── index.ts               # Server entry point — creates McClient, registers all tools, connects transport
     ├── config.ts              # Reads MC_BASE_URL and MC_API_KEY; throws on missing values
     ├── mc-client.ts           # McClient class — all HTTP/auth logic; McApiError type
+    ├── resources/
+    │   └── context.ts         # mc://context/* MCP resources (time, summary, labors, asset-locations, datasets)
     ├── shared/
+    │   ├── datasets.ts        # Shared dataset catalog used by the transitional tool + preferred context resource
     │   ├── odata.ts           # odataShape — Zod fragment spread into every list tool ($filter/$top/$skip/$orderby)
     │   ├── response.ts        # toToolText() / toToolError() — standardizes all tool return values
     │   └── types.ts           # McApiResponse<T> envelope + minimal entity summary types
     └── tools/
         ├── ping.ts            # mc_ping — connectivity + auth check
-        ├── datasets.ts        # mc_list_datasets — static resource family index
+        ├── datasets.ts        # mc_list_datasets — transitional compatibility tool; prefer mc://context/datasets
         ├── work-orders.ts     # mc_list_work_orders, mc_get_work_order
         ├── assets.ts          # mc_list_assets, mc_get_asset
         ├── parts.ts           # mc_list_parts, mc_get_part
