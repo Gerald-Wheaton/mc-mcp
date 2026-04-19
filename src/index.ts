@@ -2,6 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { loadConfig } from '@/config.js'
 import { McClient } from '@/mc-client.js'
+import { register as registerContextResources } from '@/resources/context.js'
 import { register as registerPing } from '@/tools/ping.js'
 import { register as registerDatasets } from '@/tools/datasets.js'
 import { register as registerWorkOrders } from '@/tools/work-orders.js'
@@ -21,6 +22,9 @@ const server = new McpServer({
   name: 'mc-mcp',
   version: '0.1.0',
 })
+
+// Register context resources — add new URIs in src/resources/context.ts
+registerContextResources(server, client)
 
 // Register tool domains — add new domains here as one import + one line
 registerPing(server, client)
