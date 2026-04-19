@@ -2,15 +2,29 @@ import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { McApiError, type McClient } from '@/mc-client.js'
 import { DATASETS, DATASETS_TRANSITION_NOTE } from '@/shared/datasets.js'
-import { McApiResponseSchema } from '@/shared/types.js'
+import { AssetSummarySchema, EntityRefSchema, McApiResponseSchema } from '@/shared/types.js'
 
 const JSON_MIME_TYPE = 'application/json'
 const TIME_RESOURCE_URI = 'mc://context/time'
 const DATASETS_RESOURCE_URI = 'mc://context/datasets'
 const SUMMARY_RESOURCE_URI = 'mc://context/summary'
+const LABORS_RESOURCE_URI = 'mc://context/labors'
+const ASSET_LOCATIONS_RESOURCE_URI = 'mc://context/asset-locations'
 const SUMMARY_TTL_MS = 60 * 60 * 1000
+const SLOW_CONTEXT_TTL_MS = 12 * 60 * 60 * 1000
 
 const CountResponseSchema = McApiResponseSchema(z.unknown())
+const LaborContextSchema = z.object({
+  PK: z.number(),
+  ID: z.string(),
+  Name: z.string(),
+  Active: z.boolean().optional(),
+  Initials: z.string().nullable().optional(),
+  RepairCenterRef: EntityRefSchema.nullable().optional(),
+  ShopRef: EntityRefSchema.nullable().optional(),
+})
+const LaborListSchema = McApiResponseSchema(LaborContextSchema)
+const AssetListSchema = McApiResponseSchema(AssetSummarySchema)
 
 export function register(server: McpServer, client: McClient): void {
   server.registerResource(
@@ -51,6 +65,28 @@ export function register(server: McpServer, client: McClient): void {
       mimeType: JSON_MIME_TYPE,
     },
     async () => readResource(SUMMARY_RESOURCE_URI, () => readSummaryContext(client)),
+  )
+
+  server.registerResource(
+    'mc-context-labors',
+    LABORS_RESOURCE_URI,
+    {
+      title: 'MC Context: Labors',
+      description: 'Cached labor roster for resolving assignee and technician references.',
+      mimeType: JSON_MIME_TYPE,
+    },
+    async () => readResource(LABORS_RESOURCE_URI, () => readLaborContext(client)),
+  )
+
+  server.registerResource(
+    'mc-context-asset-locations',
+    ASSET_LOCATIONS_RESOURCE_URI,
+    {
+      title: 'MC Context: Asset Locations',
+      description: 'Cached location-only asset hierarchy context for translating parent/location references.',
+      mimeType: JSON_MIME_TYPE,
+    },
+    async () => readResource(ASSET_LOCATIONS_RESOURCE_URI, () => readAssetLocationContext(client)),
   )
 }
 
@@ -132,6 +168,72 @@ async function readSummaryContext(client: McClient) {
         purchaseOrders,
         purchaseOrderLineItems,
       },
+    }
+  })
+}
+
+async function readLaborContext(client: McClient) {
+  return client.getCached('context:labors', SLOW_CONTEXT_TTL_MS, async () => {
+    const raw = await client.getAllPages<z.infer<typeof LaborContextSchema>>('/Labors', {
+      params: {
+        $orderby: 'Name asc',
+      },
+    })
+    const data = LaborListSchema.parse(raw)
+    const labors = data.Results.map((labor) => ({
+      PK: labor.PK,
+      ID: labor.ID,
+      Name: labor.Name,
+      Active: labor.Active ?? true,
+      Initials: labor.Initials ?? null,
+      RepairCenterRef: labor.RepairCenterRef ?? null,
+      ShopRef: labor.ShopRef ?? null,
+    }))
+
+    return {
+      generatedAt: new Date().toISOString(),
+      cacheTtlMs: SLOW_CONTEXT_TTL_MS,
+      total: data.Total,
+      activeCount: labors.filter((labor) => labor.Active).length,
+      inactiveCount: labors.filter((labor) => !labor.Active).length,
+      labors,
+    }
+  })
+}
+
+async function readAssetLocationContext(client: McClient) {
+  return client.getCached('context:asset-locations', SLOW_CONTEXT_TTL_MS, async () => {
+    const raw = await client.getAllPages<z.infer<typeof AssetSummarySchema>>('/Assets', {
+      params: {
+        $filter: 'IsLocation eq true',
+        $orderby: 'Name asc',
+      },
+    })
+    const data = AssetListSchema.parse(raw)
+    const locations = data.Results.map((asset) => ({
+      PK: asset.PK,
+      ID: asset.ID,
+      Name: asset.Name,
+      IsLocation: asset.IsLocation ?? true,
+      AssetLevel: asset.AssetLevel ?? null,
+      ParentRef: asset.ParentRef ?? null,
+    }))
+    const levels = new Map<number, number>()
+
+    for (const location of locations) {
+      if (location.AssetLevel !== null) {
+        levels.set(location.AssetLevel, (levels.get(location.AssetLevel) ?? 0) + 1)
+      }
+    }
+
+    return {
+      generatedAt: new Date().toISOString(),
+      cacheTtlMs: SLOW_CONTEXT_TTL_MS,
+      total: data.Total,
+      assetLevels: Array.from(levels.entries())
+        .sort(([left], [right]) => left - right)
+        .map(([assetLevel, count]) => ({ assetLevel, count })),
+      locations,
     }
   })
 }
