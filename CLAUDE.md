@@ -25,6 +25,7 @@ Maintenance Connection is a CMMS (Computerized Maintenance Management System). C
 - **Base path:** `https://api.maintenanceconnection.com/v8`
 - **Spec format:** Swagger 2.0
 - **Auth:** HTTP Basic — `Authorization: Basic base64(CONNECTION_KEY:API_KEY)`. Connection key is the username (identifies tenant); API key is the password. Store pre-encoded value in `MC_BASIC_AUTH_ENCODED`.
+- **NodeNext import convention:** local TypeScript source files use `.js` in import specifiers (for example `@/config.js`) because the repo emits ESM JavaScript into `dist/`. The files on disk are still `.ts`.
 - **API map files** (pre-built from swagger, do not regenerate from swagger directly):
   - `api-docs/mc-normalized-api-map.json` — structured source of truth for all endpoints and schemas
   - `api-docs/mc-llm-api-chunks.json` — semantic retrieval layer for fuzzy endpoint discovery

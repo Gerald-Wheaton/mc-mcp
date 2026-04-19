@@ -15,6 +15,9 @@ import { register as registerInventoryPrompts } from '@/prompts/inventory.js'
 import { register as registerPmPrompts } from '@/prompts/pm.js'
 import { register as registerProcurementPrompts } from '@/prompts/procurement.js'
 
+// This repo uses NodeNext ESM. Local import specifiers intentionally end in
+// `.js` even though the source files are `.ts`, because the emitted runtime
+// files in `dist/` are JavaScript.
 const config = loadConfig()
 const client = new McClient(config)
 
