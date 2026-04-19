@@ -1,0 +1,185 @@
+{
+  "description": "Asset summary providing an overview of equipment in the system. Use this to understand the asset landscape before making specific queries.",
+  "summary": {
+    "totalAssets": 3378,
+    "locationCount": 23,
+    "topLevelAssetCount": 163
+  },
+  "byLocation": {
+    "31635": {
+      "count": 1730
+    },
+    "54539": {
+      "count": 278
+    },
+    "69144": {
+      "count": 37
+    },
+    "77680": {
+      "count": 3
+    },
+    "81060": {
+      "count": 22
+    },
+    "82034": {
+      "count": 1
+    },
+    "85997": {
+      "count": 2
+    },
+    "86051": {
+      "count": 294
+    },
+    "86962": {
+      "count": 291
+    },
+    "87089": {
+      "count": 2
+    },
+    "89764": {
+      "count": 8
+    },
+    "89947": {
+      "count": 1
+    },
+    "91352": {
+      "count": 8
+    },
+    "91800": {
+      "count": 10
+    },
+    "91936": {
+      "count": 24
+    },
+    "91937": {
+      "count": 18
+    },
+    "91938": {
+      "count": 36
+    },
+    "92917": {
+      "count": 7
+    },
+    "93572": {
+      "count": 6
+    },
+    "93670": {
+      "count": 59
+    },
+    "93675": {
+      "count": 539
+    },
+    "94493": {
+      "count": 1
+    },
+    "94505": {
+      "count": 1
+    }
+  },
+  "topLevelAssets": [
+    {
+      "assetID": 16947,
+      "name": "12 Truck",
+      "locationID": 87089
+    },
+    {
+      "assetID": 18277,
+      "name": "17G Excavator",
+      "locationID": 93670
+    },
+    {
+      "assetID": 16948,
+      "name": "223_Heavy Equipment",
+      "locationID": 87089
+    },
+    {
+      "assetID": 18275,
+      "name": "324L Payloader",
+      "locationID": 93670
+    },
+    {
+      "assetID": 18280,
+      "name": "35G Excavator",
+      "locationID": 93670
+    },
+    {
+      "assetID": 18278,
+      "name": "50G Excavator",
+      "locationID": 93670
+    },
+    {
+      "assetID": 18276,
+      "name": "60P with Engcon",
+      "locationID": 93670
+    },
+    {
+      "assetID": 18274,
+      "name": "9330007575",
+      "locationID": 93670
+    },
+    {
+      "assetID": 18273,
+      "name": "9330008957",
+      "locationID": 93670
+    },
+    {
+      "assetID": 17071,
+      "name": "A-L1",
+      "locationID": 91937
+    },
+    {
+      "assetID": 17069,
+      "name": "A-L2",
+      "locationID": 91937
+    },
+    {
+      "assetID": 17067,
+      "name": "A-L3",
+      "locationID": 91937
+    },
+    {
+      "assetID": 2389,
+      "name": "Another test unit",
+      "locationID": 31635
+    },
+    {
+      "assetID": 17102,
+      "name": "Area A",
+      "locationID": 91938
+    },
+    {
+      "assetID": 17092,
+      "name": "Area B",
+      "locationID": 91938
+    },
+    {
+      "assetID": 17083,
+      "name": "Area C",
+      "locationID": 91938
+    },
+    {
+      "assetID": 18324,
+      "name": "Bad Asset",
+      "locationID": 93670
+    },
+    {
+      "assetID": 16984,
+      "name": "Big Chiller",
+      "locationID": 91352
+    },
+    {
+      "assetID": 22,
+      "name": "Boise Locations",
+      "locationID": 31635
+    },
+    {
+      "assetID": 18434,
+      "name": "Bonnyville",
+      "locationID": 93675
+    }
+  ],
+  "usage": {
+    "example": "Check byLocation to see asset distribution across facilities",
+    "note": "Top-level assets have no parentAssetID and represent major equipment categories or standalone assets"
+  }
+}

@@ -1,0 +1,273 @@
+{
+  "message": "🚀 Welcome to Limble MCP Server!",
+  "serverName": "limble-mcp",
+  "toolCount": 56,
+  "overview": "This server provides comprehensive access to Limble CMMS functionality.",
+  "quickStart": [
+    "• Use list_mcp_tools for detailed tool specifications",
+    "• Most tools support filtering and pagination parameters",
+    "• All tools return JSON data from the Limble API",
+    "• Resources provide documentation and discovery information"
+  ],
+  "categorySummary": [
+    "Asset Management: 7 tools",
+    "Task Operations: 8 tools",
+    "User Management: 5 tools",
+    "Parts & Inventory: 9 tools",
+    "Financial: 6 tools",
+    "Vendor Management: 4 tools",
+    "System Configuration: 5 tools",
+    "Discovery: 1 tools",
+    "Other: 11 tools"
+  ],
+  "toolsByCategory": {
+    "Asset Management": [
+      {
+        "name": "get_assets",
+        "description": "Retrieve asset records with comprehensive details including assetID, name, location, parent/child..."
+      },
+      {
+        "name": "get_asset_fields",
+        "description": "Retrieve custom field definitions and values for specific assets. Each record contains fieldID (f..."
+      },
+      {
+        "name": "get_asset_field_history",
+        "description": "Retrieve custom field change history across assets. Tracks modifications to asset custom fields s..."
+      },
+      {
+        "name": "get_asset_parts",
+        "description": "Retrieve parts linked to specific assets, showing the relationship between inventory items and eq..."
+      },
+      {
+        "name": "get_suggested_asset_fields",
+        "description": "Retrieve organization-wide suggested (template) field definitions for assets. These are reusable ..."
+      },
+      {
+        "name": "resolve_asset_context",
+        "description": "Efficiently resolve multiple asset IDs to human-readable context including assetName, locationNam..."
+      },
+      {
+        "name": "get_assets_by_maintenance_cost",
+        "description": "Rank assets by total maintenance spend (parts + labor). Aggregates costs from work orders to iden..."
+      }
+    ],
+    "Task Operations": [
+      {
+        "name": "get_tasks",
+        "description": "Retrieve work order/task records with comprehensive details including taskID, name, assigned user..."
+      },
+      {
+        "name": "get_open_tasks_count",
+        "description": "Quickly retrieve the count of incomplete (open) tasks without fetching full task records. Automat..."
+      },
+      {
+        "name": "get_task_comments",
+        "description": "Retrieve all comments (conversation history) for a specific task. Each comment includes commentID..."
+      },
+      {
+        "name": "get_task_instructions",
+        "description": "Retrieve step-by-step instructions (procedure checklist) for a specific task. Each instruction in..."
+      },
+      {
+        "name": "get_task_labor",
+        "description": "Retrieve time tracking/labor entries logged against tasks. Each entry includes laborID, taskID, u..."
+      },
+      {
+        "name": "batch_task_instructions",
+        "description": "Efficiently retrieve instructions for multiple tasks in a single call. Required: tasks parameter ..."
+      },
+      {
+        "name": "get_task_tags",
+        "description": "Retrieve custom tags (labels/categories) applied to a specific task. Required: taskID parameter. ..."
+      },
+      {
+        "name": "list_wr_submissions",
+        "description": "Retrieve work request submissions (user-initiated maintenance requests) with details including su..."
+      }
+    ],
+    "User Management": [
+      {
+        "name": "get_users",
+        "description": "Retrieve user account records with comprehensive details including userID, username, email, phone..."
+      },
+      {
+        "name": "get_user_roles",
+        "description": "Retrieve all permission roles assigned to a specific user across locations. Required: userID para..."
+      },
+      {
+        "name": "get_user_teams",
+        "description": "Retrieve all teams a specific user belongs to across locations. Required: userID parameter. Each ..."
+      },
+      {
+        "name": "get_teams",
+        "description": "Retrieve team definitions (work groups/crews) with details including teamID, team name, locationI..."
+      },
+      {
+        "name": "get_roles",
+        "description": "Retrieve permission role definitions with details including roleID and role name (e.g., \"Technici..."
+      }
+    ],
+    "Parts & Inventory": [
+      {
+        "name": "get_attached_parts",
+        "description": "Retrieve parts attached/used on a specific task (work order). Each entry includes partID, part na..."
+      },
+      {
+        "name": "get_all_attached_parts",
+        "description": "Efficiently retrieve parts attached to multiple tasks in a single call. Required: tasks parameter..."
+      },
+      {
+        "name": "get_parts",
+        "description": "Retrieve inventory parts/items with full details including partID, part number, name, general sto..."
+      },
+      {
+        "name": "get_part_fields",
+        "description": "Retrieve custom field definitions and values for inventory parts. Each record contains fieldID (f..."
+      },
+      {
+        "name": "get_part_logs",
+        "description": "Retrieve complete audit trail for a specific part. Logs track: (1) Field updates - name, number, ..."
+      },
+      {
+        "name": "get_all_part_logs",
+        "description": "Retrieve organization-wide audit trail across all parts inventory. Logs capture: (1) Field modifi..."
+      },
+      {
+        "name": "get_parts_usage",
+        "description": "Retrieve parts consumption/usage history showing when and where parts were used. Each entry inclu..."
+      },
+      {
+        "name": "get_part_suggested_fields",
+        "description": "Retrieve organization-wide suggested (template) field definitions for parts inventory. These are ..."
+      },
+      {
+        "name": "get_reserved_parts_by_location",
+        "description": "Generate a reserved parts report for a location. Retrieves actual work orders only (template=fals..."
+      }
+    ],
+    "Financial": [
+      {
+        "name": "get_invoices",
+        "description": "Retrieve invoice records linked to tasks/work orders. Each invoice includes invoiceID, taskID, fi..."
+      },
+      {
+        "name": "get_purchase_orders",
+        "description": "Retrieve records with comprehensive details including poID, budgetID, order number (poNumber, poN..."
+      },
+      {
+        "name": "get_purchase_order_items",
+        "description": "Retrieve line items within orders showing individual products/parts being purchased. Each item in..."
+      },
+      {
+        "name": "get_bill_comments",
+        "description": "Retrieve conversation history/comments for a specific bill record. Required: billID parameter. Ea..."
+      },
+      {
+        "name": "get_bill_transactions",
+        "description": "Retrieve financial transactions linked to bills, tracking payments and order item fulfillment. Ea..."
+      },
+      {
+        "name": "get_budgets",
+        "description": "Retrieve budget definitions for financial planning and tracking. Each budget includes budgetID, b..."
+      }
+    ],
+    "Vendor Management": [
+      {
+        "name": "get_vendors",
+        "description": "Retrieve vendor/supplier records with details including vendorID, name, email, phone, primary con..."
+      },
+      {
+        "name": "get_vendor_fields",
+        "description": "Retrieve custom field definitions and values for vendors. Each record contains fieldID (field typ..."
+      },
+      {
+        "name": "get_vendor_logs",
+        "description": "Retrieve manual log entries and notes for a specific vendor. Logs capture service records, mainte..."
+      },
+      {
+        "name": "get_vendor_suggested_fields",
+        "description": "Retrieve organization-wide suggested (template) field definitions for vendors. These are reusable..."
+      }
+    ],
+    "System Configuration": [
+      {
+        "name": "get_statuses",
+        "description": "Retrieve custom task status definitions (beyond default complete/incomplete). Each status include..."
+      },
+      {
+        "name": "get_regions",
+        "description": "Retrieve region definitions used for organizing locations into geographic or organizational group..."
+      },
+      {
+        "name": "get_tags",
+        "description": "Retrieve tag definitions (labels/categories used across tasks, assets, or other entities). Requir..."
+      },
+      {
+        "name": "get_webhooks",
+        "description": "Retrieve webhook integration configurations that send event notifications to external systems. Ea..."
+      },
+      {
+        "name": "get_locations",
+        "description": "Retrieve facility/site location records with comprehensive details including locationID, name, re..."
+      }
+    ],
+    "Discovery": [
+      {
+        "name": "list_mcp_tools",
+        "description": "DISCOVERY TOOL: Get a comprehensive list of all available MCP tools in this server with their des..."
+      }
+    ],
+    "Other": [
+      {
+        "name": "get_current_customer_info",
+        "description": "Retrieve basic account context including customerName and customerPlan. Returns a simple object w..."
+      },
+      {
+        "name": "get_instruction_options",
+        "description": "Retrieve available choices/options for dropdown or multiple-choice instruction steps. Required: t..."
+      },
+      {
+        "name": "get_labor_categories",
+        "description": "Retrieve organization-wide labor category definitions used for classifying work types. Each categ..."
+      },
+      {
+        "name": "get_po_comments",
+        "description": "Retrieve conversation history/comments for a specific order. Required: poID parameter. Each comme..."
+      },
+      {
+        "name": "get_po_state_transitions",
+        "description": "Retrieve valid workflow transitions (next states) available for a specific order based on current..."
+      },
+      {
+        "name": "get_categories",
+        "description": "Retrieve part/inventory category definitions used for organizing and classifying parts. Each cate..."
+      },
+      {
+        "name": "get_purchasables",
+        "description": "Retrieve vendor/supplier purchasing options for a specific part. Required: partID parameter. Each..."
+      },
+      {
+        "name": "get_priorities",
+        "description": "Retrieve priority level definitions used for task/work order prioritization. Each priority includ..."
+      },
+      {
+        "name": "get_units",
+        "description": "Retrieve unit of measurement definitions for inventory/parts tracking. Each unit includes unitCod..."
+      },
+      {
+        "name": "get_steps",
+        "description": "Retrieve budget step/approval workflow definitions. Each step includes stepID, step name, budgetI..."
+      },
+      {
+        "name": "get_general_ledgers",
+        "description": "Retrieve general ledger (GL) account codes used for financial categorization and accounting integ..."
+      }
+    ]
+  },
+  "resources": [
+    "limble://system-prompt/* - System documentation",
+    "limble://help - This help information",
+    "limble://discover - Discovery guide"
+  ],
+  "nextSteps": "Try: list_mcp_tools({format: \"detailed\"}) or any specific tool name"
+}
