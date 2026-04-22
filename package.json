@@ -2,11 +2,9 @@
   "name": "mc-mcp",
   "version": "0.1.0",
   "type": "module",
-  "main": "dist/index.js",
   "scripts": {
     "dev": "bun run src/index.ts",
     "build": "bunx tsc",
-    "start": "bun run dist/index.js",
     "format": "prettier --write src/**/*.ts"
   },
   "dependencies": {
