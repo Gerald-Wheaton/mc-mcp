@@ -31,7 +31,7 @@ export const DATASETS = [
     name: 'Purchase Orders',
     description: 'Procurement records with line items, receipts, and invoice status.',
     tools: ['mc_list_purchase_orders', 'mc_get_purchase_order'],
-    usableFilters: ['IsOpen eq true', 'IsApproved eq true', 'StatusDetails/Value eq "ISSUED"'],
+    usableFilters: ['IsOpen eq true', 'IsApproved eq true', 'Status eq "ISSUED"'],
   },
 ] as const
 
