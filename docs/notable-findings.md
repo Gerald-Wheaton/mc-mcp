@@ -119,6 +119,18 @@ All "task" entities are Work Orders filtered by `Type`. Confirmed codes in this 
 
 ---
 
+## Repair Centers (confirmed 2026-03-30, prompt scoping implemented 2026-04-22)
+
+- `RepairCenterRef` is populated on Work Orders and Assets for this client, and partially populated on Purchase Orders.
+- Confirmed working flat filters: `RepairCenterPK eq 1`, `RepairCenterID eq "M"`
+- Confirmed failing navigation filters: `RepairCenterRef/PK eq 1`, `RepairCenterRef/ID eq "M"`
+- Prompt templates now support repair center scoping by either:
+  - exact `repair_center_id`, or
+  - case-insensitive exact `repair_center_name`, resolved from sampled `RepairCenterRef` values before converting to `RepairCenterID`
+- Ambiguous duplicate repair center names are treated as an error; prompts instruct the model to stop and report the ambiguity rather than guess.
+
+---
+
 ## Live Data Snapshot (prod, 2026-03-26)
 
 - Total work orders: **645** (PM×299, IN×228, CM×77, CAP×29, SR×5, ADMN×3, FO×2, PC×2)
