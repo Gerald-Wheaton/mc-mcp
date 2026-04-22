@@ -88,9 +88,10 @@ Must be completed for each entity before Phase 3. Follow this checklist for ever
 >
 > **Read also:** `docs/phase3-prompts-and-repair-center.md` — repair center recon findings (filter syntax, schema presence per entity, discovery problem) and the full plan for adding optional args (`repair_center`, `asset_name`, `vendor_name`, `type`, `category`) to prompt templates.
 
-- [ ] Build context layer: implement `mc://context/*` MCP Resources (time, summary, labors, asset-locations, lookup-tables)
-- [ ] Add TTL cache to `McClient` to support session-tier resources
-- [ ] Convert `mc_list_datasets` tool to `mc://context/datasets` resource
+- [x] Build initial context layer: implement `mc://context/time`, `mc://context/summary`, `mc://context/labors`, `mc://context/asset-locations`, and `mc://context/datasets`
+- [x] Add TTL cache to `McClient` to support session-tier and slow-tier resources
+- [x] Add `mc://context/datasets` as the preferred dataset-orientation interface while keeping `mc_list_datasets` supported during the transition
+- [ ] Add `mc://context/lookup-tables` after the lookup-table API surface is explored and validated
 - [ ] Add prompt templates for common CMMS analysis questions (requires context layer)
 - [ ] Add behavioral rules to system prompt: which resources to fetch before which tools
 

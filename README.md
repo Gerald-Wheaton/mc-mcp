@@ -58,7 +58,7 @@ This server uses **stdio transport** — Claude Desktop spawns the server proces
 
 1. Open Claude Desktop
 2. Go to **Settings → Developer → Edit Config**
-3. Add the following entry inside the `"mcpServers"` object in `claude_desktop_config.json`:
+3. Add the following entry inside thelist `"mcpServers"` object in `claude_desktop_config.json`:
 
 ```json
 "mc-mcp": {
@@ -74,8 +74,8 @@ This server uses **stdio transport** — Claude Desktop spawns the server proces
 }
 ```
 
-4. Save and **restart Claude Desktop**
-5. Verify the server appears under the MCP tools icon (hammer icon) in the chat interface
+1. Save and **restart Claude Desktop**
+2. Verify the server appears under the MCP tools icon (hammer icon) in the chat interface
 
 > **Note:** The `command` path above is machine-specific. If running on a different machine, update it using `which bun`. The `args` path must also be the absolute path to `src/index.ts`.
 
@@ -88,19 +88,21 @@ This server uses **stdio transport** — Claude Desktop spawns the server proces
 
 ## Available Tools
 
-| Tool | Description |
-|------|-------------|
-| `mc_ping` | Verify connectivity and auth |
-| `mc_list_datasets` | List all available resource families and their tools — call this first to orient |
-| `mc_list_work_orders` | List work orders (types: CM=Corrective, PM=Preventive, SR=Service Request) |
-| `mc_get_work_order` | Get a single work order by PK |
-| `mc_list_assets` | List assets and locations (33,639 records, hierarchical) |
-| `mc_get_asset` | Get a single asset by PK |
-| `mc_list_parts` | List inventory parts (3,305 records) |
-| `mc_get_part` | Get a single part by PK |
-| `mc_list_purchase_orders` | List purchase orders (74 records) |
-| `mc_get_purchase_order` | Get a single purchase order by PK |
-| `mc_list_po_line_items` | List PO line items — filter by `PurchaseOrderPK eq {pk}` to see what was ordered on a PO, or by `PartRef/PK` to trace procurement history for a part |
+
+| Tool                      | Description                                                                                                                                          |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mc_ping`                 | Verify connectivity and auth                                                                                                                         |
+| `mc_list_datasets`        | List all available resource families and their tools — call this first to orient                                                                     |
+| `mc_list_work_orders`     | List work orders (types: CM=Corrective, PM=Preventive, SR=Service Request)                                                                           |
+| `mc_get_work_order`       | Get a single work order by PK                                                                                                                        |
+| `mc_list_assets`          | List assets and locations (33,639 records, hierarchical)                                                                                             |
+| `mc_get_asset`            | Get a single asset by PK                                                                                                                             |
+| `mc_list_parts`           | List inventory parts (3,305 records)                                                                                                                 |
+| `mc_get_part`             | Get a single part by PK                                                                                                                              |
+| `mc_list_purchase_orders` | List purchase orders (74 records)                                                                                                                    |
+| `mc_get_purchase_order`   | Get a single purchase order by PK                                                                                                                    |
+| `mc_list_po_line_items`   | List PO line items — filter by `PurchaseOrderPK eq {pk}` to see what was ordered on a PO, or by `PartRef/PK` to trace procurement history for a part |
+
 
 All list tools support OData pagination: `$top` (max 500), `$skip`, `$orderby`.
 
@@ -146,3 +148,4 @@ src/
 5. Run `bun run --bun tsc --noEmit` to type-check
 
 > If using Claude Code, the `add-mc-tool-domain` skill automates this process.
+

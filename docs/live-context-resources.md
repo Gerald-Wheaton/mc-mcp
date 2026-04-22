@@ -34,6 +34,8 @@ Not all context ages at the same rate. The refresh strategy should match the tie
 | `mc://context/lookup-tables` | Customer's configured lookup table values | Slow |
 | `mc://context/datasets` | Resource family index (currently `mc_list_datasets` tool) | Static |
 
+> **Implementation status (2026-04-19):** `time`, `summary`, `labors`, `asset-locations`, and `datasets` are now implemented in the server. `lookup-tables` remains deferred until the MC lookup-table endpoints are explored further.
+
 ## The Dynamic Counts Problem — Solved Properly
 
 Removing hardcoded counts from tool descriptions (done 2026-03-27) was treating a symptom. The real solution is `mc://context/summary`:
@@ -67,11 +69,14 @@ Before ALL tools:            fetch mc://context/time
 
 This is exactly the Phase 3 "prompt templates" work from the roadmap. Without `mc://context/time`, a prompt template has to say "figure out what date it is somehow" — unreliable. With it, the template is precise and LLM behavior is predictable.
 
-## `mc_list_datasets` Should Become a Resource
+## `mc_list_datasets` Transition
 
-It currently makes no API call and returns static data — it's a tool posing as a resource. Under this pattern it becomes `mc://context/datasets`. The LLM reads it for orientation before deciding which tool to use. This also means:
+`mc://context/datasets` now exists and is the preferred interface for MCP clients that support resources. The legacy `mc_list_datasets` tool remains supported during the transition so existing tool-only workflows do not break.
+
+The underlying reasoning is still the same: dataset orientation is resource-shaped, not action-shaped. The LLM should read `mc://context/datasets` before deciding which query tool to use. This also means:
 - It doesn't clutter the tool list
 - The LLM doesn't "spend" a tool invocation on what is fundamentally reading a menu
+- Deprecation of `mc_list_datasets` should be considered only after the resource path has been exercised and confirmed stable in real client workflows
 
 ## Lookup Tables Angle
 
@@ -79,7 +84,7 @@ MC has `LookupTables` and `LookupTableValues` endpoints — customer-configurabl
 
 ## Implementation Notes
 
-- MCP SDK exposes resources via `server.resource()` with a URI template and handler
+- MCP SDK exposes resources via `server.registerResource()` with a URI and handler
 - The handler can call `client.get()` just like a tool does
 - `McClient` needs a lightweight TTL cache layer to avoid re-fetching slow-tier resources on every message in a long conversation — small addition to `mc-client.ts`
 - Resources returning JSON should set MIME type `application/json`
