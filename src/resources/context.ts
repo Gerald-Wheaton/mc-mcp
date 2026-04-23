@@ -281,11 +281,7 @@ async function readLookupTablesContext(client: McClient) {
           $orderby: 'LookupTableID asc',
         },
       }),
-      client.getAllPages<z.infer<typeof LookupTableValueContextSchema>>('/LookupTableValues', {
-        params: {
-          $orderby: 'LookupTableID asc, CodeName asc',
-        },
-      }),
+      client.getAllPages<z.infer<typeof LookupTableValueContextSchema>>('/LookupTableValues'),
     ])
 
     const tables = LookupTableListSchema.parse(rawTables)
@@ -301,7 +297,10 @@ async function readLookupTablesContext(client: McClient) {
       }
     }
 
-    const normalizedTables = tables.Results.map((table) => {
+    const normalizedTables = tables.Results
+      .slice()
+      .sort((left, right) => left.LookupTableID.localeCompare(right.LookupTableID))
+      .map((table) => {
       const tableValues = (valuesByTable.get(table.LookupTableID) ?? [])
         .slice()
         .sort((left, right) => left.CodeName.localeCompare(right.CodeName))
