@@ -1,4 +1,32 @@
+import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+
+interface RepairCenterArgs {
+  repair_center_id?: string
+  repair_center_name?: string
+}
+
+interface BacklogArgs extends RepairCenterArgs {
+  type?: string
+}
+
+const repairCenterArgsSchema = {
+  repair_center_id: z
+    .string()
+    .optional()
+    .describe('Exact repair center ID to scope the analysis to, such as M.'),
+  repair_center_name: z
+    .string()
+    .optional()
+    .describe('Exact repair center name to resolve case-insensitively before scoping the analysis.'),
+}
+
+const workOrderTypeArgSchema = {
+  type: z
+    .string()
+    .optional()
+    .describe('Optional work order type code to focus on, such as CM, PM, IN, SR, CAP, ADMN, FO, or PC.'),
+}
 
 export function register(server: McpServer): void {
   server.registerPrompt(
@@ -7,16 +35,25 @@ export function register(server: McpServer): void {
       title: 'Daily maintenance review',
       description:
         "Get a summary of today's maintenance activity — open high-priority work orders, recently completed work, and anything that needs immediate attention.",
+      argsSchema: {
+        ...repairCenterArgsSchema,
+      },
     },
-    () => ({
+    (args: RepairCenterArgs) => ({
       messages: [
         {
           role: 'user',
           content: {
             type: 'text',
-            text: `You are a maintenance operations assistant with access to live Maintenance Connection data.
-
-Give me a daily maintenance review. Cover the following:
+            text: [
+              'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+              buildContextInstructions([
+                'Read mc://context/time before querying tools so relative dates are anchored correctly.',
+                'Read mc://context/labors before summarizing assignees or technician references.',
+                'Read mc://context/asset-locations when you need to translate asset parent/location references.',
+              ]),
+              buildRepairCenterInstructions(args),
+              `Give me a daily maintenance review. Cover the following:
 
 1. **Emergency and high-priority open work orders** — fetch open work orders with priority 0 ("Emergency / Immediate Response"). List each one with its ID, reason/description, asset, and how long it has been open (use DateOpened).
 
@@ -27,6 +64,9 @@ Give me a daily maintenance review. Cover the following:
 4. **Follow-up work orders** — fetch any open work orders of type FO (follow-up). These signal unresolved issues that needed a second pass.
 
 Summarize your findings in plain language a maintenance manager would understand. Flag anything that looks urgent or out of the ordinary.`,
+            ]
+              .filter(Boolean)
+              .join('\n\n'),
           },
         },
       ],
@@ -39,16 +79,42 @@ Summarize your findings in plain language a maintenance manager would understand
       title: 'Open work order backlog',
       description:
         'Analyze the full backlog of open work orders by type and priority to understand where effort is concentrated.',
+      argsSchema: {
+        ...repairCenterArgsSchema,
+        ...workOrderTypeArgSchema,
+      },
     },
-    () => ({
-      messages: [
-        {
-          role: 'user',
-          content: {
-            type: 'text',
-            text: `You are a maintenance operations assistant with access to live Maintenance Connection data.
+    (args: BacklogArgs) => {
+      const scopedType = cleanArg(args.type)
 
-Pull the full open work order backlog and analyze it. Walk through each work order type using $filter=IsOpen eq true, fetching each type separately if needed (CM, PM, IN, SR, CAP, ADMN, FO, PC).
+      return {
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: [
+                'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+                buildContextInstructions([
+                  'Read mc://context/time before querying tools so relative dates are anchored correctly.',
+                  'Read mc://context/labors before summarizing assignees or technician references.',
+                ]),
+                buildRepairCenterInstructions(args),
+                buildTypeInstructions(scopedType),
+                scopedType
+                  ? `Pull the open ${scopedType} work order backlog and analyze it.
+
+Focus only on work orders of type "${scopedType}" using double-quoted string filters such as Type eq "${scopedType}" together with IsOpen eq true.
+
+Summarize:
+- How many open work orders of this type exist?
+- What is the priority distribution (0=Emergency, 2=Normal, 3=Low)?
+- How many are unassigned (IsAssigned eq false)?
+- Are any notably old based on DateOpened?
+- Which assets or locations appear most often?
+
+Close with a one-paragraph executive summary about whether this specific backlog looks healthy or needs attention.`
+                  : `Pull the full open work order backlog and analyze it. Walk through each work order type using $filter=IsOpen eq true, fetching each type separately if needed (CM, PM, IN, SR, CAP, ADMN, FO, PC).
 
 For each type present in the data:
 - How many open work orders exist?
@@ -57,10 +123,14 @@ For each type present in the data:
 - Are any overdue or notably old based on DateOpened?
 
 After the per-type breakdown, give me a one-paragraph executive summary: where is the backlog concentrated, and what should the team focus on first?`,
+              ]
+                .filter(Boolean)
+                .join('\n\n'),
+            },
           },
-        },
-      ],
-    }),
+        ],
+      }
+    },
   )
 
   server.registerPrompt(
@@ -69,16 +139,44 @@ After the per-type breakdown, give me a one-paragraph executive summary: where i
       title: 'Unassigned work orders',
       description:
         'Show all open work orders that have not been assigned to a technician, sorted by priority.',
+      argsSchema: {
+        ...repairCenterArgsSchema,
+        ...workOrderTypeArgSchema,
+      },
     },
-    () => ({
-      messages: [
-        {
-          role: 'user',
-          content: {
-            type: 'text',
-            text: `You are a maintenance operations assistant with access to live Maintenance Connection data.
+    (args: BacklogArgs) => {
+      const scopedType = cleanArg(args.type)
 
-Fetch all open, unassigned work orders using:
+      return {
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: [
+                'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+                buildContextInstructions([
+                  'Read mc://context/time before querying tools so relative dates are anchored correctly.',
+                  'Read mc://context/labors before summarizing assignees or technician references.',
+                  'Read mc://context/asset-locations when you need to translate asset parent/location references.',
+                ]),
+                buildRepairCenterInstructions(args),
+                buildTypeInstructions(scopedType),
+                scopedType
+                  ? `Fetch all open, unassigned work orders of type "${scopedType}" using double-quoted string filters such as:
+  $filter=IsOpen eq true and IsAssigned eq false and Type eq "${scopedType}"
+  $orderby=Priority asc
+
+List each work order with:
+- ID and reason/description
+- Priority (0=Emergency, 2=Normal, 3=Low)
+- Asset name and location (if available)
+- Date opened
+
+Group the results by priority. For any Priority 0 items, call them out explicitly at the top of your response.
+
+Finish with a concise summary of how many unassigned "${scopedType}" work orders exist and whether they appear manageable or risky.`
+                  : `Fetch all open, unassigned work orders using:
   $filter=IsOpen eq true and IsAssigned eq false
   $orderby=Priority asc
 
@@ -92,10 +190,14 @@ List each work order with:
 Group the results by priority. For any Priority 0 items, call them out explicitly at the top of your response — these require immediate attention.
 
 Finish with a count summary: how many unassigned WOs by type and priority.`,
+              ]
+                .filter(Boolean)
+                .join('\n\n'),
+            },
           },
-        },
-      ],
-    }),
+        ],
+      }
+    },
   )
 
   server.registerPrompt(
@@ -104,16 +206,25 @@ Finish with a count summary: how many unassigned WOs by type and priority.`,
       title: 'Emergency work orders',
       description:
         'Surface all open emergency (Priority 0) work orders that require immediate response.',
+      argsSchema: {
+        ...repairCenterArgsSchema,
+      },
     },
-    () => ({
+    (args: RepairCenterArgs) => ({
       messages: [
         {
           role: 'user',
           content: {
             type: 'text',
-            text: `You are a maintenance operations assistant with access to live Maintenance Connection data.
-
-Fetch all open work orders at Priority 0 (Emergency / Immediate Response) using:
+            text: [
+              'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+              buildContextInstructions([
+                'Read mc://context/time before querying tools so relative dates are anchored correctly.',
+                'Read mc://context/labors before summarizing assignees or technician references.',
+                'Read mc://context/asset-locations when you need to translate asset parent/location references.',
+              ]),
+              buildRepairCenterInstructions(args),
+              `Fetch all open work orders at Priority 0 (Emergency / Immediate Response) using:
   $filter=IsOpen eq true and Priority eq 0
 
 For each one, tell me:
@@ -126,9 +237,58 @@ For each one, tell me:
 If there are no open emergency work orders, say so clearly — that is a good sign worth noting.
 
 Close with a plain-language assessment: is the emergency situation under control, or are there items that have been sitting open too long?`,
+            ]
+              .filter(Boolean)
+              .join('\n\n'),
           },
         },
       ],
     }),
   )
+}
+
+function cleanArg(value?: string): string | undefined {
+  const trimmed = value?.trim()
+  return trimmed ? trimmed : undefined
+}
+
+function buildContextInstructions(lines: string[]): string {
+  return `Before querying tools:
+${lines.map((line) => `- ${line}`).join('\n')}`
+}
+
+function buildRepairCenterInstructions(args: RepairCenterArgs): string | undefined {
+  const repairCenterId = cleanArg(args.repair_center_id)
+  const repairCenterName = cleanArg(args.repair_center_name)
+
+  if (repairCenterId && repairCenterName) {
+    throw new Error(
+      'Provide only one repair center input. Use either repair_center_id or repair_center_name.',
+    )
+  }
+
+  if (repairCenterId) {
+    return `Scope all relevant work-order queries to repair center ID "${repairCenterId}" using the filter RepairCenterID eq "${repairCenterId}". Do not use RepairCenterRef navigation paths in filters.`
+  }
+
+  if (repairCenterName) {
+    return `Resolve the repair center before the main analysis:
+- Fetch a small sample of work orders or assets that include RepairCenterRef values.
+- Build a distinct list of repair centers using each record's RepairCenterRef.ID and RepairCenterRef.Name.
+- Compare names after trimming whitespace and converting to lowercase.
+- If zero exact matches are found for "${repairCenterName}", stop and say the repair center name could not be resolved.
+- If more than one exact match is found for "${repairCenterName}", stop and say duplicate repair centers were found and the request is ambiguous.
+- Once exactly one repair center is resolved, use its ID and scope all subsequent work-order queries with RepairCenterID eq "{resolvedID}".
+- Do not use RepairCenterRef/PK or RepairCenterRef/ID navigation filters.`
+  }
+
+  return undefined
+}
+
+function buildTypeInstructions(workOrderType?: string): string | undefined {
+  if (!workOrderType) {
+    return undefined
+  }
+
+  return `Focus only on work orders of type "${workOrderType}". Use double-quoted string filters such as Type eq "${workOrderType}", and do not broaden the analysis to other work order types unless you first explain why the scope could not be applied.`
 }

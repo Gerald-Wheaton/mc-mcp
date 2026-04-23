@@ -5,7 +5,7 @@
 - [x] API swagger obtained and normalized
 - [x] Confirm auth model — HTTP Basic, `base64(CONNECTION_KEY:API_KEY)`
 - [x] Identify priority entities — Assets, Work Orders (CM), PMs, Work Requests (SR)
-- [ ] Confirm target MCP client (Claude Desktop, VS Code, custom?)
+- [x] Confirm target MCP client — Claude Desktop first
 - [ ] Confirm sandbox/non-prod environment (DEV key not yet working)
 
 ## Phase 1: Skeleton Server (COMPLETE)
@@ -91,9 +91,9 @@ Must be completed for each entity before Phase 3. Follow this checklist for ever
 - [x] Build initial context layer: implement `mc://context/time`, `mc://context/summary`, `mc://context/labors`, `mc://context/asset-locations`, and `mc://context/datasets`
 - [x] Add TTL cache to `McClient` to support session-tier and slow-tier resources
 - [x] Add `mc://context/datasets` as the preferred dataset-orientation interface while keeping `mc_list_datasets` supported during the transition
-- [ ] Add `mc://context/lookup-tables` after the lookup-table API surface is explored and validated
-- [ ] Add prompt templates for common CMMS analysis questions (requires context layer)
-- [ ] Add behavioral rules to system prompt: which resources to fetch before which tools
+- [x] Add `mc://context/lookup-tables` after the lookup-table API surface is explored and validated
+- [x] Add prompt templates for common CMMS analysis questions (requires context layer)
+- [x] Add behavioral rules to prompt text: which resources to fetch before which tools
 
 ## Phase 4: Hardening
 
@@ -101,7 +101,17 @@ Must be completed for each entity before Phase 3. Follow this checklist for ever
   - Add a `fetchAll` mode to `McClient` that loops `$skip` until `Results.length + $skip >= Total`
   - Or surface `Total` and `nextSkip` in tool responses so the LLM knows to call again
   - Consider a hard cap (e.g. 2,000 records) to protect context window size
+- [ ] **Address hanging or very slow requests** — `mc_ping` can succeed while larger list endpoints such as Assets or Parts still hang or degrade. We need to turn hangs into diagnosable errors instead of silent waits. Options:
+  - Add hard request timeouts in `McClient` using `AbortController`
+  - Add request-level logging with path, params, status, and duration so slow endpoints are visible
+  - Return explicit timeout/tool errors such as `MC API request timed out after Ns on /Assets`
+  - Add retry/backoff only for transient failures such as network errors or 5xx responses
+  - Add safer defaults or response caps for heavy list endpoints so broad queries are less likely to stall
+  - Add a fallback message for timeout cases telling the user to retry with narrower filters or smaller `$top`
+  - Consider emitting progress/logging messages for long-running MCP calls so the client does not appear frozen
+  - Track endpoint-specific reliability separately; ping confirms auth/connectivity, not heavy-query health
 - [ ] Tests
 - [ ] Caching and rate-limit handling
 - [ ] Logging and error handling
 - [ ] Deployment docs
+- [ ] **End-user UX audit** — review all prompt templates and tool descriptions to ensure the LLM never surfaces OData syntax or other developer-facing details to end users. The LLM should translate user intent into filters silently; replies should offer plain-English follow-up options, not raw filter strings. See `docs/open-questions.md` for the full design concern and example.
