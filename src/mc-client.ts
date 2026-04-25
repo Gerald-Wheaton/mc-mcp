@@ -1,5 +1,3 @@
-import type { McConfig } from './config.js'
-
 const MAX_PAGE_SIZE = 500
 
 type McRequestParamValue = string | number | undefined
@@ -19,12 +17,17 @@ interface CacheEntry {
   inFlight?: Promise<unknown>
 }
 
+interface McClientConfig {
+  baseUrl: string
+  basicAuth: string
+}
+
 export class McClient {
   private baseUrl: string
   private basicAuth: string
   private cache = new Map<string, CacheEntry>()
 
-  constructor(config: McConfig) {
+  constructor(config: McClientConfig) {
     this.baseUrl = config.baseUrl
     this.basicAuth = config.basicAuth
   }
