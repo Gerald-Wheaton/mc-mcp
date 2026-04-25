@@ -35,6 +35,7 @@
 Must be completed for each entity before Phase 3. Follow this checklist for every entity. Assets is the completed reference example.
 
 **Exploration checklist per entity:**
+
 1. [ ] Fetch a sample of live records (use `$top: 20` minimum) — inspect for variation across records
 2. [ ] Fetch a single record by PK — confirm the full field set including all `*Ref` and `*Details` fields
 3. [ ] Identify all meaningful enum/lookup values in the data (e.g. status codes, type codes) — document in `docs/notable-findings.md`
@@ -47,6 +48,7 @@ Must be completed for each entity before Phase 3. Follow this checklist for ever
 ---
 
 #### Work Orders — deep exploration (COMPLETE)
+
 - [x] Type codes confirmed across all 645 records (see notable-findings.md — 8 codes, not 4)
 - [x] Schema expanded to full field set, `parse()` verified against all 8 type codes
 - [x] Samples fetched for CM, IN, PM, SR, CAP, ADMN, FO, PC — field set is identical across types, only population varies
@@ -55,6 +57,7 @@ Must be completed for each entity before Phase 3. Follow this checklist for ever
 - [x] Tool description updated with all type codes, status codes, priority codes, and useful filters
 
 #### Assets — deep exploration (COMPLETE)
+
 - [x] Hierarchy confirmed: `AssetLevel` 1=root, 2=campus, deeper=buildings/equipment
 - [x] `IsLocation eq false` filters to equipment only
 - [x] `TypeDetails.Value = "L"` means Location node
@@ -62,6 +65,7 @@ Must be completed for each entity before Phase 3. Follow this checklist for ever
 - [x] Tool description updated
 
 #### Parts — deep exploration (COMPLETE)
+
 - [x] Fetched 30-record sample and all 3305 records — full field key set confirmed
 - [x] Fetched two single records by PK — full field set confirmed including all nullables
 - [x] Boolean filters confirmed: Active (3300/5), DirectIssue (3185/120), AvailableToRequester (3180/125)
@@ -72,6 +76,7 @@ Must be completed for each entity before Phase 3. Follow this checklist for ever
 - [x] Tool description updated with confirmed filters, key fields, and PartLocations caveat
 
 #### Purchase Orders — deep exploration (COMPLETE)
+
 - [x] Fetched all 74 records — full field key set confirmed
 - [x] Fetched two single records by PK — ShippingInfo/BillingInfo confirmed (mostly null nested objects)
 - [x] All status codes confirmed: ISSUED(54), REQUESTED(16), CANCELED(2), CLOSED(2)
@@ -115,3 +120,11 @@ Must be completed for each entity before Phase 3. Follow this checklist for ever
 - [ ] Logging and error handling
 - [ ] Deployment docs
 - [ ] **End-user UX audit** — review all prompt templates and tool descriptions to ensure the LLM never surfaces OData syntax or other developer-facing details to end users. The LLM should translate user intent into filters silently; replies should offer plain-English follow-up options, not raw filter strings. See `docs/open-questions.md` for the full design concern and example.
+
+- Full OAuth 2.1 flow (authorization server, token exchange, refresh tokens) — not needed for pilot; static API
+  keys are sufficient
+  - HTTPS/TLS — handled by a reverse proxy (Cloudflare, nginx, fly.io proxy); the server speaks plain HTTP
+  - Rate limiting — Phase 4 item, deferred
+  - API key rotation UI — keys are rotated by updating TENANTS_JSON and restarting the server
+  - Backward compatibility with stdio — stdio mode is removed; existing local users update their Claude Desktop
+    config to point to the hosted URL

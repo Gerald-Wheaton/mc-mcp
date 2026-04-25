@@ -1,17 +1,13 @@
-export interface McConfig {
-  baseUrl: string
-  basicAuth: string
+export interface ServerConfig {
+  port: number
+  mcBaseUrl: string
 }
 
-export function loadConfig(): McConfig {
-  const baseUrl = process.env.MC_BASE_URL
-  const basicAuth = process.env.MC_BASIC_AUTH_ENCODED
+export function loadConfig(): ServerConfig {
+  const port = parseInt(process.env.PORT ?? '3000', 10)
+  const mcBaseUrl = (
+    process.env.MC_BASE_URL ?? 'https://api.maintenanceconnection.com/v8'
+  ).replace(/\/$/, '')
 
-  if (!baseUrl) throw new Error('MC_BASE_URL environment variable is required')
-  if (!basicAuth) throw new Error('MC_BASIC_AUTH_ENCODED environment variable is required')
-
-  return {
-    baseUrl: baseUrl.replace(/\/$/, ''),
-    basicAuth,
-  }
+  return { port, mcBaseUrl }
 }
