@@ -50,6 +50,38 @@ console.log('Connected. Total WOs:', r.Total)
 "
 ```
 
+## Testing
+
+Run the full local test suite with:
+
+```bash
+bun run test
+```
+
+This suite covers:
+
+- `McClient` behavior: success paths, 401s, timeouts, pagination, and caching
+- MCP contract checks: tools, prompts, resources, and request routing
+- Domain tool handlers with fake MC responses
+- Dynamic context resources such as `mc://context/summary`, `mc://context/labors`, `mc://context/asset-locations`, and `mc://context/lookup-tables`
+- Schema fixture parsing for work orders, assets, parts, purchase orders, and PO line items
+
+Type-check the project with:
+
+```bash
+bun run build
+```
+
+### Optional Live Smoke Tests
+
+Live smoke tests are skipped by default. To run them against a real MC tenant:
+
+```bash
+MC_LIVE_TESTS=true MC_BASIC_AUTH_ENCODED=... bun run test
+```
+
+These smoke tests are intended as a quick confidence check for real credentials and core endpoints. They are not required for normal local development.
+
 ## Connecting to Claude Desktop
 
 This server uses **HTTP transport**. Claude Desktop connects via `mcp-remote`, which bridges the local stdio expectation to the remote HTTP endpoint.
@@ -65,7 +97,7 @@ This server uses **HTTP transport**. Claude Desktop connects via `mcp-remote`, w
   "command": "npx",
   "args": [
     "mcp-remote",
-    "https://mc-mcp.up.railway.app/mcp",
+    "https://mc-mcp-production-d25a.up.railway.app/mcp",
     "--header",
     "X-MC-Basic-Auth: base64(CONNECTION_KEY:API_KEY)"
   ]
@@ -152,4 +184,3 @@ src/
 5. Run `bun run --bun tsc --noEmit` to type-check
 
 > If using Claude Code, the `add-mc-tool-domain` skill automates this process.
-

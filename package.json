@@ -6,6 +6,7 @@
     "start": "bun run src/index.ts",
     "dev": "bun run src/index.ts",
     "build": "bunx tsc",
+    "test": "bun test",
     "format": "prettier --write src/**/*.ts"
   },
   "dependencies": {
