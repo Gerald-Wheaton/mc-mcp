@@ -5,7 +5,7 @@
 - [x] API swagger obtained and normalized
 - [x] Confirm auth model — HTTP Basic, `base64(CONNECTION_KEY:API_KEY)`
 - [x] Identify priority entities — Assets, Work Orders (CM), PMs, Work Requests (SR)
-- [ ] Confirm target MCP client (Claude Desktop, VS Code, custom?)
+- [x] Confirm target MCP client — Claude Desktop first
 - [ ] Confirm sandbox/non-prod environment (DEV key not yet working)
 
 ## Phase 1: Skeleton Server (COMPLETE)
@@ -35,6 +35,7 @@
 Must be completed for each entity before Phase 3. Follow this checklist for every entity. Assets is the completed reference example.
 
 **Exploration checklist per entity:**
+
 1. [ ] Fetch a sample of live records (use `$top: 20` minimum) — inspect for variation across records
 2. [ ] Fetch a single record by PK — confirm the full field set including all `*Ref` and `*Details` fields
 3. [ ] Identify all meaningful enum/lookup values in the data (e.g. status codes, type codes) — document in `docs/notable-findings.md`
@@ -47,6 +48,7 @@ Must be completed for each entity before Phase 3. Follow this checklist for ever
 ---
 
 #### Work Orders — deep exploration (COMPLETE)
+
 - [x] Type codes confirmed across all 645 records (see notable-findings.md — 8 codes, not 4)
 - [x] Schema expanded to full field set, `parse()` verified against all 8 type codes
 - [x] Samples fetched for CM, IN, PM, SR, CAP, ADMN, FO, PC — field set is identical across types, only population varies
@@ -55,6 +57,7 @@ Must be completed for each entity before Phase 3. Follow this checklist for ever
 - [x] Tool description updated with all type codes, status codes, priority codes, and useful filters
 
 #### Assets — deep exploration (COMPLETE)
+
 - [x] Hierarchy confirmed: `AssetLevel` 1=root, 2=campus, deeper=buildings/equipment
 - [x] `IsLocation eq false` filters to equipment only
 - [x] `TypeDetails.Value = "L"` means Location node
@@ -62,6 +65,7 @@ Must be completed for each entity before Phase 3. Follow this checklist for ever
 - [x] Tool description updated
 
 #### Parts — deep exploration (COMPLETE)
+
 - [x] Fetched 30-record sample and all 3305 records — full field key set confirmed
 - [x] Fetched two single records by PK — full field set confirmed including all nullables
 - [x] Boolean filters confirmed: Active (3300/5), DirectIssue (3185/120), AvailableToRequester (3180/125)
@@ -72,6 +76,7 @@ Must be completed for each entity before Phase 3. Follow this checklist for ever
 - [x] Tool description updated with confirmed filters, key fields, and PartLocations caveat
 
 #### Purchase Orders — deep exploration (COMPLETE)
+
 - [x] Fetched all 74 records — full field key set confirmed
 - [x] Fetched two single records by PK — ShippingInfo/BillingInfo confirmed (mostly null nested objects)
 - [x] All status codes confirmed: ISSUED(54), REQUESTED(16), CANCELED(2), CLOSED(2)
@@ -91,9 +96,9 @@ Must be completed for each entity before Phase 3. Follow this checklist for ever
 - [x] Build initial context layer: implement `mc://context/time`, `mc://context/summary`, `mc://context/labors`, `mc://context/asset-locations`, and `mc://context/datasets`
 - [x] Add TTL cache to `McClient` to support session-tier and slow-tier resources
 - [x] Add `mc://context/datasets` as the preferred dataset-orientation interface while keeping `mc_list_datasets` supported during the transition
-- [ ] Add `mc://context/lookup-tables` after the lookup-table API surface is explored and validated
-- [ ] Add prompt templates for common CMMS analysis questions (requires context layer)
-- [ ] Add behavioral rules to system prompt: which resources to fetch before which tools
+- [x] Add `mc://context/lookup-tables` after the lookup-table API surface is explored and validated
+- [x] Add prompt templates for common CMMS analysis questions (requires context layer)
+- [x] Add behavioral rules to prompt text: which resources to fetch before which tools
 
 ## Phase 4: Hardening
 
@@ -101,7 +106,25 @@ Must be completed for each entity before Phase 3. Follow this checklist for ever
   - Add a `fetchAll` mode to `McClient` that loops `$skip` until `Results.length + $skip >= Total`
   - Or surface `Total` and `nextSkip` in tool responses so the LLM knows to call again
   - Consider a hard cap (e.g. 2,000 records) to protect context window size
+- [ ] **Address hanging or very slow requests** — `mc_ping` can succeed while larger list endpoints such as Assets or Parts still hang or degrade. We need to turn hangs into diagnosable errors instead of silent waits. Options:
+  - Add hard request timeouts in `McClient` using `AbortController`
+  - Add request-level logging with path, params, status, and duration so slow endpoints are visible
+  - Return explicit timeout/tool errors such as `MC API request timed out after Ns on /Assets`
+  - Add retry/backoff only for transient failures such as network errors or 5xx responses
+  - Add safer defaults or response caps for heavy list endpoints so broad queries are less likely to stall
+  - Add a fallback message for timeout cases telling the user to retry with narrower filters or smaller `$top`
+  - Consider emitting progress/logging messages for long-running MCP calls so the client does not appear frozen
+  - Track endpoint-specific reliability separately; ping confirms auth/connectivity, not heavy-query health
 - [ ] Tests
 - [ ] Caching and rate-limit handling
 - [ ] Logging and error handling
 - [ ] Deployment docs
+- [ ] **End-user UX audit** — review all prompt templates and tool descriptions to ensure the LLM never surfaces OData syntax or other developer-facing details to end users. The LLM should translate user intent into filters silently; replies should offer plain-English follow-up options, not raw filter strings. See `docs/open-questions.md` for the full design concern and example.
+
+- Full OAuth 2.1 flow (authorization server, token exchange, refresh tokens) — not needed for pilot; static API
+  keys are sufficient
+  - HTTPS/TLS — handled by a reverse proxy (Cloudflare, nginx, fly.io proxy); the server speaks plain HTTP
+  - Rate limiting — Phase 4 item, deferred
+  - API key rotation UI — keys are rotated by updating TENANTS_JSON and restarting the server
+  - Backward compatibility with stdio — stdio mode is removed; existing local users update their Claude Desktop
+    config to point to the hosted URL

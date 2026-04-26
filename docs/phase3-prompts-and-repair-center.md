@@ -1,7 +1,7 @@
 # Phase 3: Prompt Args & Repair Center Filtering
 
-> **Status:** Research complete, implementation not yet started.
-> Pick up here when resuming Phase 3 prompt work.
+> **Status:** Research complete, core implementation landed on 2026-04-22.
+> Prompt templates now support scoped args, including repair center by exact ID or case-insensitive exact name. Keep this doc for rationale and follow-on ideas.
 
 ---
 
@@ -93,11 +93,17 @@ We prefer **optional** here so a single prompt covers both the "overall report" 
 
 ### Which prompts get args (and which args)
 
-#### `repair_center` arg (cross-cutting, high priority for multi-site clients)
+#### Repair center prompt args (implemented)
 
 Applies to all WO, Asset, and PO prompts. Not applicable to Parts prompts (RepairCenterRef is absent from the Parts schema).
 
-Filter to inject when provided: `RepairCenterID eq "{value}"` (or `RepairCenterPK eq {pk}` if an integer is given).
+Implemented prompt args:
+- `repair_center_id` — exact ID, injected as `RepairCenterID eq "{value}"`
+- `repair_center_name` — resolved from sampled `RepairCenterRef` values using case-insensitive exact-name matching, then converted to `RepairCenterID eq "{resolvedID}"`
+
+If both are supplied, the prompt fails fast and asks the user to provide only one.
+If the provided repair center name resolves to zero matches, the prompt tells the model to stop and report that it could not be resolved.
+If the provided repair center name resolves to more than one exact match after normalization, the prompt tells the model to stop and report that duplicate repair centers were found.
 
 | Prompt | `repair_center` arg |
 |---|---|
@@ -134,9 +140,9 @@ These narrow the prompt to a specific asset, vendor, or WO type:
 
 ### Recommended implementation order
 
-1. **Add `repair_center` arg first** — highest value for multi-site clients, cross-cutting across all WO/Asset/PO prompts. Inject as `RepairCenterID eq "{value}"` into `$filter`.
-2. **Add entity-scoping args** — `asset_name`, `vendor_name`, `type`, `category` — these are the "drill-down" layer.
-3. **Update Zod schemas** in `types.ts` to include `RepairCenterRef: EntityRefSchema.nullable()` on WorkOrder, Asset, and PurchaseOrder before shipping.
+1. **Add repair center args first** — `repair_center_id` / `repair_center_name`
+2. **Add entity-scoping args** — `asset_name`, `vendor_name`, `type`, `category`
+3. **Keep filtering on `RepairCenterID`** — never on `RepairCenterRef/...`
 
 ### Prompt text branching pattern
 
@@ -161,18 +167,39 @@ When an entity-scope arg is provided (e.g. `asset_name`), add the lookup step at
 
 ## 3. Implementation Checklist
 
-- [ ] Update `src/shared/types.ts` — add `RepairCenterRef: EntityRefSchema.nullable()` to WorkOrder, Asset, PurchaseOrder Zod schemas
-- [ ] Update `src/prompts/operational.ts` — add optional `repair_center` and `type` args to applicable prompts
-- [ ] Update `src/prompts/assets.ts` — add optional `repair_center` and `asset_name` args
-- [ ] Update `src/prompts/inventory.ts` — add optional `asset_name` and `category` args (no repair_center — Parts schema doesn't have it)
-- [ ] Update `src/prompts/pm.ts` — add optional `repair_center` and `asset_name` args
-- [ ] Update `src/prompts/procurement.ts` — add optional `repair_center` and `vendor_name` args
+- [x] Update `src/shared/types.ts` — add `RepairCenterRef: EntityRefSchema.nullable()` to WorkOrder, Asset, PurchaseOrder Zod schemas
+- [x] Update `src/prompts/operational.ts` — add optional repair center and `type` args to applicable prompts
+- [x] Update `src/prompts/assets.ts` — add optional repair center and `asset_name` args
+- [x] Update `src/prompts/inventory.ts` — add optional `asset_name` and `category` args (no repair center on Parts-only prompts)
+- [x] Update `src/prompts/pm.ts` — add optional repair center and `asset_name` args
+- [x] Update `src/prompts/procurement.ts` — add optional repair center and `vendor_name` args
 - [ ] Update `CLAUDE.md` Notable Findings with RepairCenter confirmation
-- [ ] Update `src/prompts/PROMPTS.md` sketch file to reflect arg additions
+- [x] Update `src/prompts/PROMPTS.md` sketch file to reflect arg additions
 
 ---
 
-## 4. Open Questions
+## 4. Prompt Text Branching — Shared Helper Module
 
-- Should `repair_center` accept a name string (fuzzy, user-friendly) or require the exact ID code (e.g. "M")? For this client it's moot (only one), but for multi-site clients the ID may not be obvious. Consider accepting a name and instructing the LLM to resolve it against sample data.
+> **Status:** Not yet started. Ideate and implement before or alongside the arg addition work in § 2.
+
+When five prompt files all branch on `repair_center`, `asset_name`, `vendor_name`, `type`, and `category`, the branching logic and preamble text will duplicate across every file. Extract a small shared module (`src/shared/prompt-helpers.ts` or similar) before that duplication sets in.
+
+The helper should generate:
+
+- **Repair-center scoping preamble** — `RepairCenterID eq "{value}"` injection text (or "no filter" default)
+- **Entity-scoping preamble** — lookup step for `asset_name`, `vendor_name`, `type`, `category`
+- **"No scope" default text** — fleet-wide fallback for each optional arg
+- **Validation / error text** — mutually exclusive arg combinations (if any emerge)
+
+This keeps all prompt files aligned on:
+
+- Filter syntax using double-quoted string values (OData convention — see `docs/notable-findings.md`)
+- Resource-first behavior (fetch context resources before issuing tool calls)
+- Consistent scoping language across all prompts
+
+---
+
+## 5. Open Questions
+
+- Resolved: prompt templates now accept either `repair_center_id` or `repair_center_name`. Name resolution is case-insensitive exact match only; no partial-name fallback is implemented in this phase.
 - Should we add a `mc_list_repair_centers` tool that discovers RC values by sampling WO/Asset records? Would make the filter arg more discoverable for users who don't know their RC codes.

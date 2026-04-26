@@ -5,6 +5,27 @@ any parameters, and the full prompt text the LLM will receive.
 
 Status key: `[ draft ]` `[ reviewed ]` `[ implemented ]`
 
+## Implemented Prompt Args (2026-04-22)
+
+The live prompt registrations in `src/prompts/*.ts` now support optional scoped inputs. This sketch file remains useful for prompt intent, but the source files are the implementation of record.
+
+| Prompt | Optional args |
+| --- | --- |
+| `mc_daily_maintenance_review` | `repair_center_id`, `repair_center_name` |
+| `mc_open_work_order_backlog` | `repair_center_id`, `repair_center_name`, `type` |
+| `mc_unassigned_work_orders` | `repair_center_id`, `repair_center_name`, `type` |
+| `mc_emergency_work_orders` | `repair_center_id`, `repair_center_name` |
+| `mc_asset_health_check` | `repair_center_id`, `repair_center_name`, `asset_name` |
+| `mc_location_equipment_breakdown` | `repair_center_id`, `repair_center_name` |
+| `mc_reserved_parts_audit` | `repair_center_id`, `repair_center_name`, `asset_name` |
+| `mc_inventory_audit` | `category` |
+| `mc_slow_moving_parts` | `category` |
+| `mc_pm_compliance_review` | `repair_center_id`, `repair_center_name`, `asset_name` |
+| `mc_inspection_summary` | `repair_center_id`, `repair_center_name` |
+| `mc_open_purchase_orders` | `repair_center_id`, `repair_center_name`, `vendor_name` |
+| `mc_vendor_performance` | `repair_center_id`, `repair_center_name`, `vendor_name` |
+| `mc_po_approval_pipeline` | `repair_center_id`, `repair_center_name` |
+
 ---
 
 ## Operational / Daily

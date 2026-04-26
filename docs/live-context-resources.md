@@ -34,7 +34,7 @@ Not all context ages at the same rate. The refresh strategy should match the tie
 | `mc://context/lookup-tables` | Customer's configured lookup table values | Slow |
 | `mc://context/datasets` | Resource family index (currently `mc_list_datasets` tool) | Static |
 
-> **Implementation status (2026-04-19):** `time`, `summary`, `labors`, `asset-locations`, and `datasets` are now implemented in the server. `lookup-tables` remains deferred until the MC lookup-table endpoints are explored further.
+> **Implementation status (2026-04-22):** `time`, `summary`, `labors`, `asset-locations`, `lookup-tables`, and `datasets` are implemented in the server. `lookup-tables` is populated dynamically from the connected tenant at read time; no customer-specific lookup values are hard-coded in repo state.
 
 ## The Dynamic Counts Problem — Solved Properly
 
@@ -80,7 +80,7 @@ The underlying reasoning is still the same: dataset orientation is resource-shap
 
 ## Lookup Tables Angle
 
-MC has `LookupTables` and `LookupTableValues` endpoints — customer-configurable dropdowns used across entities. We haven't explored these yet. Pre-loading commonly used tables (work order categories, failure codes, etc.) into `mc://context/lookup-tables` would make filter construction more accurate without requiring mid-conversation API calls.
+MC has `LookupTables` and `LookupTableValues` endpoints — customer-configurable dropdowns used across entities. `mc://context/lookup-tables` now reads those endpoints at runtime and exposes normalized table/value data without hard-coding tenant-specific labels, IDs, or examples in the repo. This gives the LLM live category/code context while keeping the server portable across Maintenance Connection customers.
 
 ## Implementation Notes
 

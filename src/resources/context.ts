@@ -10,6 +10,7 @@ const DATASETS_RESOURCE_URI = 'mc://context/datasets'
 const SUMMARY_RESOURCE_URI = 'mc://context/summary'
 const LABORS_RESOURCE_URI = 'mc://context/labors'
 const ASSET_LOCATIONS_RESOURCE_URI = 'mc://context/asset-locations'
+const LOOKUP_TABLES_RESOURCE_URI = 'mc://context/lookup-tables'
 const SUMMARY_TTL_MS = 60 * 60 * 1000
 const SLOW_CONTEXT_TTL_MS = 12 * 60 * 60 * 1000
 
@@ -25,6 +26,29 @@ const LaborContextSchema = z.object({
 })
 const LaborListSchema = McApiResponseSchema(LaborContextSchema)
 const AssetListSchema = McApiResponseSchema(AssetSummarySchema)
+const LookupTableContextSchema = z.object({
+  LookupTableID: z.string(),
+  Description: z.string().nullable().optional(),
+  CodeWidth: z.number().nullable().optional(),
+  DescriptionWidth: z.number().nullable().optional(),
+  Internal: z.boolean().optional(),
+  Enabled: z.boolean().optional(),
+  SkipValidation: z.boolean().optional(),
+  CanModify: z.boolean().optional(),
+  NoCascadeUpdate: z.boolean().optional(),
+  LastModifiedDate: z.string().nullable().optional(),
+})
+const LookupTableValueContextSchema = z.object({
+  LookupTableID: z.string(),
+  CodeName: z.string(),
+  CodeDesc: z.string().nullable().optional(),
+  CodeValue: z.number().nullable().optional(),
+  SystemCode: z.boolean().optional(),
+  AvailableToRequester: z.boolean().optional(),
+  LastModifiedDate: z.string().nullable().optional(),
+})
+const LookupTableListSchema = McApiResponseSchema(LookupTableContextSchema)
+const LookupTableValueListSchema = McApiResponseSchema(LookupTableValueContextSchema)
 
 export function register(server: McpServer, client: McClient): void {
   server.registerResource(
@@ -87,6 +111,17 @@ export function register(server: McpServer, client: McClient): void {
       mimeType: JSON_MIME_TYPE,
     },
     async () => readResource(ASSET_LOCATIONS_RESOURCE_URI, () => readAssetLocationContext(client)),
+  )
+
+  server.registerResource(
+    'mc-context-lookup-tables',
+    LOOKUP_TABLES_RESOURCE_URI,
+    {
+      title: 'MC Context: Lookup Tables',
+      description: 'Cached lookup table metadata and values for customer-configured dropdowns and codes.',
+      mimeType: JSON_MIME_TYPE,
+    },
+    async () => readResource(LOOKUP_TABLES_RESOURCE_URI, () => readLookupTablesContext(client)),
   )
 }
 
@@ -237,6 +272,75 @@ async function readAssetLocationContext(client: McClient) {
     }
   })
 }
+
+async function readLookupTablesContext(client: McClient) {
+  return client.getCached('context:lookup-tables', SLOW_CONTEXT_TTL_MS, async () => {
+    const [rawTables, rawValues] = await Promise.all([
+      client.getAllPages<z.infer<typeof LookupTableContextSchema>>('/LookupTables', {
+        params: {
+          $orderby: 'LookupTableID asc',
+        },
+      }),
+      client.getAllPages<z.infer<typeof LookupTableValueContextSchema>>('/LookupTableValues'),
+    ])
+
+    const tables = LookupTableListSchema.parse(rawTables)
+    const values = LookupTableValueListSchema.parse(rawValues)
+    const valuesByTable = new Map<string, z.infer<typeof LookupTableValueContextSchema>[]>()
+
+    for (const value of values.Results) {
+      const existing = valuesByTable.get(value.LookupTableID)
+      if (existing) {
+        existing.push(value)
+      } else {
+        valuesByTable.set(value.LookupTableID, [value])
+      }
+    }
+
+    const normalizedTables = tables.Results
+      .slice()
+      .sort((left, right) => left.LookupTableID.localeCompare(right.LookupTableID))
+      .map((table) => {
+      const tableValues = (valuesByTable.get(table.LookupTableID) ?? [])
+        .slice()
+        .sort((left, right) => left.CodeName.localeCompare(right.CodeName))
+        .map((value) => ({
+          codeName: value.CodeName,
+          description: value.CodeDesc ?? null,
+          numericValue: value.CodeValue ?? null,
+          systemCode: value.SystemCode ?? false,
+          availableToRequester: value.AvailableToRequester ?? false,
+          lastModifiedDate: value.LastModifiedDate ?? null,
+        }))
+
+      return {
+        lookupTableID: table.LookupTableID,
+        description: table.Description ?? null,
+        enabled: table.Enabled ?? true,
+        internal: table.Internal ?? false,
+        canModify: table.CanModify ?? false,
+        skipValidation: table.SkipValidation ?? false,
+        noCascadeUpdate: table.NoCascadeUpdate ?? false,
+        codeWidth: table.CodeWidth ?? null,
+        descriptionWidth: table.DescriptionWidth ?? null,
+        lastModifiedDate: table.LastModifiedDate ?? null,
+        valueCount: tableValues.length,
+        values: tableValues,
+      }
+    })
+
+    return {
+      generatedAt: new Date().toISOString(),
+      cacheTtlMs: SLOW_CONTEXT_TTL_MS,
+      totalTables: normalizedTables.length,
+      totalValues: normalizedTables.reduce((sum, table) => sum + table.valueCount, 0),
+      enabledTables: normalizedTables.filter((table) => table.enabled).length,
+      internalTables: normalizedTables.filter((table) => table.internal).length,
+      tables: normalizedTables,
+    }
+  })
+}
+
 
 async function countRecords(client: McClient, path: string, filter?: string): Promise<number> {
   const raw = await client.get(path, {

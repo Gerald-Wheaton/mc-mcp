@@ -1,4 +1,39 @@
+import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+
+interface ReservedPartsArgs {
+  repair_center_id?: string
+  repair_center_name?: string
+  asset_name?: string
+}
+
+interface CategoryArgs {
+  category?: string
+}
+
+const reservedPartsArgsSchema = {
+  repair_center_id: z
+    .string()
+    .optional()
+    .describe('Exact repair center ID to scope the work-order side of the audit to, such as M.'),
+  repair_center_name: z
+    .string()
+    .optional()
+    .describe(
+      'Exact repair center name to resolve case-insensitively before scoping the work-order side of the audit.',
+    ),
+  asset_name: z
+    .string()
+    .optional()
+    .describe('Asset name or partial name to resolve before focusing the audit on one asset.'),
+}
+
+const categoryArgSchema = {
+  category: z
+    .string()
+    .optional()
+    .describe('Category name to focus the parts analysis on after resolving the category from live data.'),
+}
 
 export function register(server: McpServer): void {
   server.registerPrompt(
@@ -7,16 +42,45 @@ export function register(server: McpServer): void {
       title: 'Reserved parts audit',
       description:
         'Show all open work orders with parts reserved and surface which parts are tied up, to help identify inventory bottlenecks.',
+      argsSchema: {
+        ...reservedPartsArgsSchema,
+      },
     },
-    () => ({
-      messages: [
-        {
-          role: 'user',
-          content: {
-            type: 'text',
-            text: `You are a maintenance operations assistant with access to live Maintenance Connection data.
+    (args: ReservedPartsArgs) => {
+      const assetName = cleanArg(args.asset_name)
 
-A "reserved parts" situation means a work order has parts allocated to it but the work may not yet be complete. I want to audit what is currently reserved.
+      return {
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: [
+                'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+                buildContextInstructions([
+                  'Read mc://context/time before querying tools so relative dates are anchored correctly.',
+                  'Read mc://context/labors before summarizing assignees or technician references on work orders.',
+                  'Read mc://context/lookup-tables when you need lookup-backed labels or codes during the audit.',
+                ]),
+                buildRepairCenterInstructions(args),
+                buildAssetResolutionInstructions(assetName),
+                assetName
+                  ? `A "reserved parts" situation means a work order has parts allocated to it but the work may not yet be complete. I want to audit reserved parts only for the resolved asset matching "${assetName}".
+
+Step 1: Resolve the target asset first. If multiple assets plausibly match, stop and ask the user to clarify which asset they mean.
+
+Step 2: Fetch open work orders with reserved parts for that resolved asset. Apply any repair-center scope only on the work-order queries, not on the part lookups.
+
+Step 3: For each unique part referenced across those work orders, fetch the part record using mc_get_part to get Name, ID, InternalPartNumber, IssueUnitCost, and Active status.
+
+Summarize:
+- How many open work orders for this asset have parts reserved?
+- Which parts are reserved most often for this asset?
+- Are any reserved parts inactive?
+- Which reserved-part work orders for this asset have been open the longest?
+
+Close with a plain-language assessment of whether this asset's reserved-parts situation looks healthy or stalled.`
+                  : `A "reserved parts" situation means a work order has parts allocated to it but the work may not yet be complete. I want to audit what is currently reserved.
 
 Step 1: Fetch all open work orders with parts reserved:
   $filter=IsOpen eq true and IsPartsReserved eq true
@@ -32,10 +96,14 @@ Step 3: Summarize:
 - Which work orders have been open the longest with parts still reserved — these may represent stalled work?
 
 Close with a plain-language assessment of whether the reserved parts situation looks healthy or whether action is needed.`,
+              ]
+                .filter(Boolean)
+                .join('\n\n'),
+            },
           },
-        },
-      ],
-    }),
+        ],
+      }
+    },
   )
 
   server.registerPrompt(
@@ -44,16 +112,42 @@ Close with a plain-language assessment of whether the reserved parts situation l
       title: 'Inventory audit',
       description:
         'Get a high-level overview of the parts catalog — active vs inactive parts, cost rule distribution, and general inventory health.',
+      argsSchema: {
+        ...categoryArgSchema,
+      },
     },
-    () => ({
-      messages: [
-        {
-          role: 'user',
-          content: {
-            type: 'text',
-            text: `You are a maintenance operations assistant with access to live Maintenance Connection data.
+    (args: CategoryArgs) => {
+      const category = cleanArg(args.category)
 
-Give me a high-level inventory audit of the parts catalog.
+      return {
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: [
+                'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+                buildContextInstructions([
+                  'Read mc://context/time before querying tools so relative dates are anchored correctly.',
+                  'Read mc://context/lookup-tables before resolving any category or other lookup-backed value.',
+                ]),
+                buildCategoryInstructions(category),
+                category
+                  ? `Give me a high-level inventory audit focused only on parts in the resolved category "${category}".
+
+First resolve the category from live lookup-table data or observed CategoryRef values. If the category cannot be resolved uniquely, stop and tell the user.
+
+After the category is resolved, focus the audit only on parts in that category. Do not invent unsupported category filter paths; if the API-side category filter path is not confirmed, keep the scoping in your analysis and say so briefly.
+
+Summarize:
+- Total parts in this category
+- Active vs inactive split
+- How many are available to requesters
+- Whether cost fields and descriptions are generally well-populated
+- Any data quality flags or cleanup opportunities
+
+Keep the summary concise and specific to the chosen category.`
+                  : `Give me a high-level inventory audit of the parts catalog.
 
 Step 1: Fetch a broad sample of parts (use $top=100, no filter) to understand the general shape of the catalog — field population, cost data, category distribution.
 
@@ -71,10 +165,14 @@ Summarize:
 - Any data quality flags — parts with no description, no category, or zero cost?
 
 Keep the summary concise — this is an orientation, not an exhaustive ledger.`,
+              ]
+                .filter(Boolean)
+                .join('\n\n'),
+            },
           },
-        },
-      ],
-    }),
+        ],
+      }
+    },
   )
 
   server.registerPrompt(
@@ -83,16 +181,41 @@ Keep the summary concise — this is an orientation, not an exhaustive ledger.`,
       title: 'Slow-moving parts',
       description:
         'Identify parts that have not been issued or ordered recently — candidates for reorder review or catalog cleanup.',
+      argsSchema: {
+        ...categoryArgSchema,
+      },
     },
-    () => ({
-      messages: [
-        {
-          role: 'user',
-          content: {
-            type: 'text',
-            text: `You are a maintenance operations assistant with access to live Maintenance Connection data.
+    (args: CategoryArgs) => {
+      const category = cleanArg(args.category)
 
-I want to find parts that haven't been moving — not issued recently, not ordered recently. These are candidates for reorder policy review or catalog cleanup.
+      return {
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: [
+                'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+                buildContextInstructions([
+                  'Read mc://context/time before querying tools so relative dates are anchored correctly.',
+                  'Read mc://context/lookup-tables before resolving any category or other lookup-backed value.',
+                ]),
+                buildCategoryInstructions(category),
+                category
+                  ? `I want to find slow-moving parts only within the resolved category "${category}".
+
+First resolve the category from live lookup-table data or observed CategoryRef values. If the category cannot be resolved uniquely, stop and tell the user.
+
+Then focus only on parts in that category. Do not invent unsupported category filter paths; if the API-side category filter path is not confirmed, keep the scoping in your analysis and say so briefly.
+
+Within that category:
+- Identify parts with the oldest LastIssued values
+- Identify parts with the oldest LastOrdered values
+- Highlight parts that appear slow on both dimensions
+- Include Name, ID, InternalPartNumber, LastIssued, LastOrdered, and IssueUnitCost
+
+Close with a plain-language summary of whether this category looks well-managed or overdue for cleanup.`
+                  : `I want to find parts that haven't been moving — not issued recently, not ordered recently. These are candidates for reorder policy review or catalog cleanup.
 
 Step 1: Fetch active parts, ordered by LastIssued ascending (oldest first):
   $filter=Active eq true
@@ -109,9 +232,76 @@ For parts appearing in both lists (slow on both issuing and ordering), highlight
 For each highlighted part include: Name, ID, InternalPartNumber, LastIssued, LastOrdered, IssueUnitCost.
 
 Close with a plain-language summary: how many parts appear genuinely slow-moving, and does the catalog seem well-maintained or overdue for a cleanup pass?`,
+              ]
+                .filter(Boolean)
+                .join('\n\n'),
+            },
           },
-        },
-      ],
-    }),
+        ],
+      }
+    },
   )
+}
+
+function cleanArg(value?: string): string | undefined {
+  const trimmed = value?.trim()
+  return trimmed ? trimmed : undefined
+}
+
+function buildContextInstructions(lines: string[]): string {
+  return `Before querying tools:
+${lines.map((line) => `- ${line}`).join('\n')}`
+}
+
+function buildRepairCenterInstructions(args: ReservedPartsArgs): string | undefined {
+  const repairCenterId = cleanArg(args.repair_center_id)
+  const repairCenterName = cleanArg(args.repair_center_name)
+
+  if (repairCenterId && repairCenterName) {
+    throw new Error(
+      'Provide only one repair center input. Use either repair_center_id or repair_center_name.',
+    )
+  }
+
+  if (repairCenterId) {
+    return `Scope the work-order side of this audit to repair center ID "${repairCenterId}" using the filter RepairCenterID eq "${repairCenterId}". Do not apply repair-center filters to the part lookups, and do not use RepairCenterRef navigation paths in filters.`
+  }
+
+  if (repairCenterName) {
+    return `Resolve the repair center before the main analysis:
+- Fetch a small sample of work orders or assets that include RepairCenterRef values.
+- Build a distinct list of repair centers using each record's RepairCenterRef.ID and RepairCenterRef.Name.
+- Compare names after trimming whitespace and converting to lowercase.
+- If zero exact matches are found for "${repairCenterName}", stop and say the repair center name could not be resolved.
+- If more than one exact match is found for "${repairCenterName}", stop and say duplicate repair centers were found and the request is ambiguous.
+- Once exactly one repair center is resolved, use its ID and scope subsequent work-order queries with RepairCenterID eq "{resolvedID}".
+- Do not apply repair-center filters to the part lookups, and do not use RepairCenterRef/PK or RepairCenterRef/ID navigation filters.`
+  }
+
+  return undefined
+}
+
+function buildAssetResolutionInstructions(assetName?: string): string | undefined {
+  if (!assetName) {
+    return undefined
+  }
+
+  return `Resolve the target asset before the main analysis:
+- Use mc_list_assets to find candidates whose IDs or names match "${assetName}".
+- Prefer an exact match when one exists.
+- If multiple assets plausibly match, stop and ask the user to clarify which asset they want.
+- Once one asset is resolved, use that asset's exact PK, ID, and Name to keep the rest of the analysis focused on it.`
+}
+
+function buildCategoryInstructions(category?: string): string | undefined {
+  if (!category) {
+    return undefined
+  }
+
+  return `Resolve the category before the main analysis:
+- Use mc://context/lookup-tables and observed CategoryRef values in live part data to find the exact category that matches "${category}".
+- Compare category names after trimming whitespace and converting to lowercase.
+- If zero exact matches are found, stop and say the category could not be resolved.
+- If more than one exact match is found, stop and say the category is ambiguous.
+- Once resolved, keep the remainder of the analysis focused on that category and avoid inventing unsupported OData filter paths.`
 }

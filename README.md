@@ -52,7 +52,7 @@ console.log('Connected. Total WOs:', r.Total)
 
 ## Connecting to Claude Desktop
 
-This server uses **stdio transport** — Claude Desktop spawns the server process directly rather than connecting over HTTP. There is no URL.
+This server uses **HTTP transport**. Claude Desktop connects via `mcp-remote`, which bridges the local stdio expectation to the remote HTTP endpoint.
 
 **Steps:**
 
@@ -62,22 +62,26 @@ This server uses **stdio transport** — Claude Desktop spawns the server proces
 
 ```json
 "mc-mcp": {
-  "command": "/Users/geraldwheaton/.bun/bin/bun",
+  "command": "npx",
   "args": [
-    "run",
-    "/Users/geraldwheaton/Desktop/fm360-pjcts/mc-mcp/src/index.ts"
-  ],
-  "env": {
-    "MC_BASE_URL": "https://api.maintenanceconnection.com/v8",
-    "MC_BASIC_AUTH_ENCODED": "<your-encoded-credentials>"
-  }
+    "mcp-remote",
+    "https://mc-mcp.up.railway.app/mcp",
+    "--header",
+    "X-MC-Basic-Auth: base64(CONNECTION_KEY:API_KEY)"
+  ]
 }
 ```
 
-1. Save and **restart Claude Desktop**
-2. Verify the server appears under the MCP tools icon (hammer icon) in the chat interface
+> **HTTPS is handled by Railway** — the server speaks plain HTTP internally; clients always connect over `https://`.
 
-> **Note:** The `command` path above is machine-specific. If running on a different machine, update it using `which bun`. The `args` path must also be the absolute path to `src/index.ts`.
+Replace the header value with your encoded MC credentials:
+
+```bash
+echo -n "YOUR_CONNECTION_KEY:YOUR_API_KEY" | base64
+```
+
+4. Save and **restart Claude Desktop**
+5. Verify the server appears under the MCP tools icon (hammer icon) in the chat interface
 
 **Suggested first prompts:**
 
