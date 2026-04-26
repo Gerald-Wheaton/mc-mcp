@@ -20,31 +20,47 @@ interface CacheEntry {
 interface McClientConfig {
   baseUrl: string
   basicAuth: string
+  timeoutMs?: number // default 30000
 }
 
 export class McClient {
   private baseUrl: string
   private basicAuth: string
+  private timeoutMs: number
   private cache = new Map<string, CacheEntry>()
 
   constructor(config: McClientConfig) {
     this.baseUrl = config.baseUrl
     this.basicAuth = config.basicAuth
+    this.timeoutMs = config.timeoutMs ?? 30_000
   }
 
   async get<T>(path: string, options: McRequestOptions = {}): Promise<T> {
     const url = this.buildUrl(path, options)
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), this.timeoutMs)
+    const start = Date.now()
 
-    const response = await fetch(url.toString(), {
-      headers: this.buildHeaders(),
-    })
-
-    if (!response.ok) {
-      const body = await response.text().catch(() => '')
-      throw new McApiError(response.status, path, body)
+    try {
+      const response = await fetch(url.toString(), {
+        headers: this.buildHeaders(),
+        signal: controller.signal,
+      })
+      console.log(`[mc] GET ${path} → ${response.status} in ${Date.now() - start}ms`)
+      if (!response.ok) {
+        const body = await response.text().catch(() => '')
+        throw new McApiError(response.status, path, body)
+      }
+      return response.json() as Promise<T>
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        console.error(`[mc] GET ${path} → TIMEOUT after ${this.timeoutMs}ms`)
+        throw new McTimeoutError(path, this.timeoutMs)
+      }
+      throw err
+    } finally {
+      clearTimeout(timer)
     }
-
-    return response.json() as Promise<T>
   }
 
   async getCached<T>(key: string, ttlMs: number, loader: () => Promise<T>): Promise<T> {
@@ -175,5 +191,14 @@ export class McApiError extends Error {
     public readonly body: string,
   ) {
     super(`MC API error ${status} on ${path}: ${body}`)
+  }
+}
+
+export class McTimeoutError extends Error {
+  constructor(
+    public readonly path: string,
+    public readonly timeoutMs: number,
+  ) {
+    super(`MC API request timed out after ${timeoutMs}ms on ${path}`)
   }
 }

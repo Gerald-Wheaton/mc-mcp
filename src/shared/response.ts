@@ -1,4 +1,4 @@
-import { McApiError } from '../mc-client.js'
+import { McApiError, McTimeoutError } from '../mc-client.js'
 
 export interface ToolResult {
   [key: string]: unknown
@@ -18,12 +18,18 @@ export function toToolText(data: unknown): ToolResult {
 }
 
 export function toToolError(err: unknown): ToolResult {
-  const message =
-    err instanceof McApiError
-      ? `MC API error ${err.status}: ${err.body || err.message}`
-      : err instanceof Error
-        ? err.message
-        : String(err)
+  let message: string
+  if (err instanceof McTimeoutError) {
+    message = `${err.message} — try narrowing your filter or reducing $top`
+  } else if (err instanceof McApiError && err.status === 401) {
+    message = `MC credentials rejected — verify your X-MC-Basic-Auth header is correctly base64-encoded (CONNECTION_KEY:API_KEY)`
+  } else if (err instanceof McApiError) {
+    message = `MC API error ${err.status}: ${err.body || err.message}`
+  } else if (err instanceof Error) {
+    message = err.message
+  } else {
+    message = String(err)
+  }
 
   return {
     content: [{ type: 'text', text: `Error: ${message}` }],

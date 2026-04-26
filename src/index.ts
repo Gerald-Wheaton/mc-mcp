@@ -78,6 +78,12 @@ const httpServer = createServer(async (req: IncomingMessage, res: ServerResponse
   const url = req.url ?? ''
   const method = req.method ?? ''
 
+  const start = Date.now()
+  res.on('finish', () => {
+    const sid = (req.headers['mcp-session-id'] as string | undefined)?.slice(0, 8) ?? 'new'
+    console.log(`[http] ${method} ${url} session=${sid} → ${res.statusCode} in ${Date.now() - start}ms`)
+  })
+
   // Health check — no auth required
   if (url === '/health' && method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'text/plain' })
