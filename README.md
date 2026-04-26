@@ -58,7 +58,7 @@ This server uses **HTTP transport**. Claude Desktop connects via `mcp-remote`, w
 
 1. Open Claude Desktop
 2. Go to **Settings → Developer → Edit Config**
-3. Add the following entry inside the `"mcpServers"` object in `claude_desktop_config.json`:
+3. Add the following entry inside thelist `"mcpServers"` object in `claude_desktop_config.json`:
 
 ```json
 "mc-mcp": {

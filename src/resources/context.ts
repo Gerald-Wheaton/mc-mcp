@@ -341,6 +341,7 @@ async function readLookupTablesContext(client: McClient) {
   })
 }
 
+
 async function countRecords(client: McClient, path: string, filter?: string): Promise<number> {
   const raw = await client.get(path, {
     params: {
