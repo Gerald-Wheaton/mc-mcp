@@ -65,14 +65,16 @@ This server uses **HTTP transport**. Claude Desktop connects via `mcp-remote`, w
   "command": "npx",
   "args": [
     "mcp-remote",
-    "https://your-mc-mcp-server.com/mcp",
+    "https://mc-mcp.up.railway.app/mcp",
     "--header",
     "X-MC-Basic-Auth: base64(CONNECTION_KEY:API_KEY)"
   ]
 }
 ```
 
-Replace `https://your-mc-mcp-server.com/mcp` with the hosted server URL and the header value with your encoded MC credentials:
+> **HTTPS is handled by Railway** — the server speaks plain HTTP internally; clients always connect over `https://`.
+
+Replace the header value with your encoded MC credentials:
 
 ```bash
 echo -n "YOUR_CONNECTION_KEY:YOUR_API_KEY" | base64
