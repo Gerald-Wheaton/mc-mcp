@@ -102,23 +102,12 @@ Must be completed for each entity before Phase 3. Follow this checklist for ever
 
 ## Phase 4: Hardening
 
-- [ ] **Automatic pagination** — currently `$top` max is 500 and the LLM must manually issue follow-up calls with `$skip` to page through large result sets. For datasets like Assets (33,639) and Parts (3,305) this is critical. Options:
-  - Add a `fetchAll` mode to `McClient` that loops `$skip` until `Results.length + $skip >= Total`
-  - Or surface `Total` and `nextSkip` in tool responses so the LLM knows to call again
-  - Consider a hard cap (e.g. 2,000 records) to protect context window size
-- [ ] **Address hanging or very slow requests** — `mc_ping` can succeed while larger list endpoints such as Assets or Parts still hang or degrade. We need to turn hangs into diagnosable errors instead of silent waits. Options:
-  - Add hard request timeouts in `McClient` using `AbortController`
-  - Add request-level logging with path, params, status, and duration so slow endpoints are visible
-  - Return explicit timeout/tool errors such as `MC API request timed out after Ns on /Assets`
-  - Add retry/backoff only for transient failures such as network errors or 5xx responses
-  - Add safer defaults or response caps for heavy list endpoints so broad queries are less likely to stall
-  - Add a fallback message for timeout cases telling the user to retry with narrower filters or smaller `$top`
-  - Consider emitting progress/logging messages for long-running MCP calls so the client does not appear frozen
-  - Track endpoint-specific reliability separately; ping confirms auth/connectivity, not heavy-query health
-- [ ] Tests
-- [ ] Caching and rate-limit handling
-- [ ] Logging and error handling
-- [ ] Deployment docs
+- [x] **Automatic pagination** — `$fetchAll` flag added to all list tools; `McClient.getAllPages` loops `$skip` internally until the collection is exhausted or the 2,000-record hard cap is hit. `toListToolText` surfaces `fetchedAll` and `cappedAt` in pagination metadata so the LLM knows when results were capped.
+- [x] **Address hanging or very slow requests** — `AbortController` timeout already existed; added retry/backoff (2 retries, exponential delay, 5xx only — 4xx and timeouts throw immediately); `[mc]` structured logging emits path, status, duration, timeout, and retry events; `McTimeoutError` message tells the user to narrow filters or reduce `$top`; `mc_ping` now probes `/workorders`, `/Assets`, and `/Parts` in parallel and returns `status: ok | degraded | error` so heavy-endpoint health is tracked separately from auth.
+- [x] **Tests** — expanded to cover `getAllPages` (empty, single-page, multi-page), retry behavior (503 retries, 4xx no-retry, exhausted retries), concurrent `getCached` dedup, `mc_ping` ok/degraded/all-failed, `$fetchAll` tool handler paths, default `$top` injection, and `fetchedAll`/`cappedAt` pagination metadata.
+- [ ] **Caching and rate-limit handling** — TTL cache exists for context resources; cache hit/miss/join/stored logging added. Rate-limiting (throttling outbound MC API requests) is not yet implemented; noted as a known limitation in `docs/deployment.md`.
+- [x] **Logging and error handling** — structured log prefixes throughout: `[mc]` for API calls, cache events, retries, and timeouts; `[tool]` for non-4xx tool errors (with stack traces); `[resource]` for context resource failures. Log format documented in `docs/deployment.md`.
+- [x] **Deployment docs** — `docs/deployment.md` added: env vars, Railway config, local dev, credential format, credential rotation, log format table, known limitations. README updated with pointer.
 - [ ] **End-user UX audit** — review all prompt templates and tool descriptions to ensure the LLM never surfaces OData syntax or other developer-facing details to end users. The LLM should translate user intent into filters silently; replies should offer plain-English follow-up options, not raw filter strings. See `docs/open-questions.md` for the full design concern and example.
 
 - Full OAuth 2.1 flow (authorization server, token exchange, refresh tokens) — not needed for pilot; static API
