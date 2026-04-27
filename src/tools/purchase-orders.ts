@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { McClient } from '@/mc-client.js'
-import { odataShape } from '@/shared/odata.js'
+import { odataShape, FETCH_ALL_CAP } from '@/shared/odata.js'
 import { toToolText, toListToolText, toToolError } from '@/shared/response.js'
 import {
   PurchaseOrderSummarySchema,
@@ -30,9 +30,15 @@ export function register(server: McpServer, client: McClient): void {
     },
     async (input) => {
       try {
-        const raw = await client.get('/purchaseorders', { params: input })
+        const { $fetchAll, ...params } = input
+        if ($fetchAll) {
+          const raw = await client.getAllPages('/purchaseorders', { params: { ...params, $top: FETCH_ALL_CAP } })
+          const data = PurchaseOrderListSchema.parse(raw)
+          return toListToolText(data, 0, { fetchedAll: true, cappedAt: FETCH_ALL_CAP })
+        }
+        const raw = await client.get('/purchaseorders', { params })
         const data = PurchaseOrderListSchema.parse(raw)
-        return toListToolText(data, input.$skip ?? 0)
+        return toListToolText(data, params.$skip ?? 0)
       } catch (err) {
         return toToolError(err)
       }
@@ -71,9 +77,15 @@ export function register(server: McpServer, client: McClient): void {
     },
     async (input) => {
       try {
-        const raw = await client.get('/PurchaseOrderLineItems', { params: input })
+        const { $fetchAll, ...params } = input
+        if ($fetchAll) {
+          const raw = await client.getAllPages('/PurchaseOrderLineItems', { params: { ...params, $top: FETCH_ALL_CAP } })
+          const data = PurchaseOrderLineItemListSchema.parse(raw)
+          return toListToolText(data, 0, { fetchedAll: true, cappedAt: FETCH_ALL_CAP })
+        }
+        const raw = await client.get('/PurchaseOrderLineItems', { params })
         const data = PurchaseOrderLineItemListSchema.parse(raw)
-        return toListToolText(data, input.$skip ?? 0)
+        return toListToolText(data, params.$skip ?? 0)
       } catch (err) {
         return toToolError(err)
       }

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
-import { McApiError } from '../src/mc-client.ts'
+import { McApiError, McTimeoutError } from '../src/mc-client.ts'
 import { FakeMcClient } from './helpers/fake-mc-client.ts'
 import { createMcpHarness } from './helpers/mcp-harness.ts'
 
@@ -16,21 +16,43 @@ describe('tool handlers', () => {
     await harness.close()
   })
 
-  test('mc_ping confirms connectivity with a minimal work order query', async () => {
+  test('mc_ping probes all three endpoints and returns ok when all succeed', async () => {
     fakeClient.whenGet('/workorders', { Results: [], Total: 0 })
+    fakeClient.whenGet('/Assets', { Results: [], Total: 0 })
+    fakeClient.whenGet('/Parts', { Results: [], Total: 0 })
 
     const result = await harness.client.callTool({ name: 'mc_ping', arguments: {} })
 
-    expect(result.content[0]).toEqual({
-      type: 'text',
-      text: 'MC API is reachable and credentials are valid.',
-    })
-    expect(fakeClient.getCalls).toEqual([
-      {
-        path: '/workorders',
-        params: { $top: 1 },
-      },
-    ])
+    const parsed = JSON.parse(expectText(result))
+    expect(parsed.status).toBe('ok')
+    expect(Object.keys(parsed.endpoints)).toEqual(['/workorders', '/Assets', '/Parts'])
+    expect(parsed.endpoints['/workorders'].ok).toBe(true)
+    expect(parsed.endpoints['/Assets'].ok).toBe(true)
+    expect(parsed.endpoints['/Parts'].ok).toBe(true)
+  })
+
+  test('mc_ping returns degraded when one endpoint fails', async () => {
+    fakeClient.whenGet('/workorders', { Results: [], Total: 0 })
+    fakeClient.whenGet('/Assets', () => { throw new McTimeoutError('/Assets', 30_000) })
+    fakeClient.whenGet('/Parts', { Results: [], Total: 0 })
+
+    const result = await harness.client.callTool({ name: 'mc_ping', arguments: {} })
+
+    const parsed = JSON.parse(expectText(result))
+    expect(parsed.status).toBe('degraded')
+    expect(parsed.endpoints['/Assets'].ok).toBe(false)
+    expect(parsed.endpoints['/workorders'].ok).toBe(true)
+  })
+
+  test('mc_ping returns an error when all endpoints fail', async () => {
+    fakeClient.whenGet('/workorders', () => { throw new McApiError(503, '/workorders', 'unavailable') })
+    fakeClient.whenGet('/Assets', () => { throw new McApiError(503, '/Assets', 'unavailable') })
+    fakeClient.whenGet('/Parts', () => { throw new McApiError(503, '/Parts', 'unavailable') })
+
+    const result = await harness.client.callTool({ name: 'mc_ping', arguments: {} })
+
+    expect(result.isError).toBe(true)
+    expect(expectText(result)).toContain('all endpoint probes failed')
   })
 
   test('mc_list_work_orders forwards OData params and returns parsed payloads', async () => {
@@ -145,7 +167,7 @@ describe('tool handlers', () => {
     expect(parsed._pagination).toEqual({ total: 1, returned: 1 })
     expect(fakeClient.getCalls.at(-1)).toEqual({
       path: '/Parts',
-      params: { $filter: 'Active eq true' },
+      params: { $filter: 'Active eq true', $top: 200 },
     })
   })
 
@@ -206,6 +228,38 @@ describe('tool handlers', () => {
         params: { $filter: 'PurchaseOrderPK eq 4001' },
       },
     ])
+  })
+
+  test('mc_list_assets calls getAllPages and sets fetchedAll when $fetchAll is true', async () => {
+    fakeClient.whenGetAllPages('/Assets', {
+      Results: [{ PK: 1, ID: 'A-1', Name: 'Pump', IsLocation: false, IsUp: true }],
+      Total: 1,
+    })
+
+    const result = await harness.client.callTool({
+      name: 'mc_list_assets',
+      arguments: { $fetchAll: true },
+    })
+
+    const parsed = JSON.parse(expectText(result))
+    expect(parsed._pagination.fetchedAll).toBe(true)
+    expect(fakeClient.getAllPagesCalls.at(-1)?.path).toBe('/Assets')
+  })
+
+  test('mc_list_assets injects default $top=100 when neither $top nor $fetchAll is provided', async () => {
+    fakeClient.whenGet('/Assets', { Results: [], Total: 33639 })
+
+    await harness.client.callTool({ name: 'mc_list_assets', arguments: {} })
+
+    expect(fakeClient.getCalls.at(-1)?.params?.$top).toBe(100)
+  })
+
+  test('mc_list_work_orders does not inject a default $top', async () => {
+    fakeClient.whenGet('/workorders', { Results: [], Total: 645 })
+
+    await harness.client.callTool({ name: 'mc_list_work_orders', arguments: {} })
+
+    expect(fakeClient.getCalls.at(-1)?.params?.$top).toBeUndefined()
   })
 
   test('tool handlers convert MC API errors into MCP-friendly error results', async () => {

@@ -114,6 +114,29 @@ describe('McClient', () => {
     ])
   })
 
+  test('getAllPages handles an empty collection', async () => {
+    globalThis.fetch = (async () =>
+      new Response(JSON.stringify({ Results: [], Total: 0 }), { status: 200 })) as typeof fetch
+
+    const client = new McClient({ baseUrl: 'https://example.mc.test/v8', basicAuth: 'x' })
+    const result = await client.getAllPages('/Assets')
+    expect(result.Results).toHaveLength(0)
+    expect(result.Total).toBe(0)
+  })
+
+  test('getAllPages stops after a single page when all results fit', async () => {
+    let calls = 0
+    globalThis.fetch = (async () => {
+      calls++
+      return new Response(JSON.stringify({ Results: [{ PK: 1 }, { PK: 2 }], Total: 2 }), { status: 200 })
+    }) as typeof fetch
+
+    const client = new McClient({ baseUrl: 'https://example.mc.test/v8', basicAuth: 'x' })
+    const result = await client.getAllPages<{ PK: number }>('/Parts')
+    expect(result.Results).toHaveLength(2)
+    expect(calls).toBe(1)
+  })
+
   test('reuses cached and in-flight values', async () => {
     const client = new McClient({
       baseUrl: 'https://example.mc.test/v8',
@@ -139,9 +162,83 @@ describe('McClient', () => {
     expect(calls).toBe(1)
   })
 
+  test('concurrent getCached calls share one in-flight request', async () => {
+    let loaderCalls = 0
+    const client = new McClient({ baseUrl: 'https://example.mc.test/v8', basicAuth: 'x' })
+
+    const loader = async () => {
+      loaderCalls++
+      await Bun.sleep(10)
+      return { data: 'loaded' }
+    }
+
+    const [first, second] = await Promise.all([
+      client.getCached('dedup-key', 60_000, loader),
+      client.getCached('dedup-key', 60_000, loader),
+    ])
+
+    expect(first).toEqual({ data: 'loaded' })
+    expect(second).toEqual({ data: 'loaded' })
+    expect(loaderCalls).toBe(1)
+  })
+
   test('surfaces concrete McApiError metadata', () => {
     const error = new McApiError(500, '/Parts', 'broken')
 
     expect(error.message).toContain('MC API error 500 on /Parts')
+  })
+
+  test('retries on 503 and succeeds on the second attempt', async () => {
+    let calls = 0
+    globalThis.fetch = (async () => {
+      calls++
+      if (calls < 2) return new Response('unavailable', { status: 503 })
+      return new Response(JSON.stringify({ Results: [], Total: 0 }), { status: 200 })
+    }) as typeof fetch
+
+    const client = new McClient({
+      baseUrl: 'https://example.mc.test/v8',
+      basicAuth: 'encoded-creds',
+      retryDelayMs: 0,
+    })
+
+    const result = await client.get('/workorders')
+    expect(result).toEqual({ Results: [], Total: 0 })
+    expect(calls).toBe(2)
+  })
+
+  test('does not retry 4xx errors', async () => {
+    let calls = 0
+    globalThis.fetch = (async () => {
+      calls++
+      return new Response('denied', { status: 401 })
+    }) as typeof fetch
+
+    const client = new McClient({
+      baseUrl: 'https://example.mc.test/v8',
+      basicAuth: 'encoded-creds',
+      retryDelayMs: 0,
+    })
+
+    await expect(client.get('/workorders')).rejects.toBeInstanceOf(McApiError)
+    expect(calls).toBe(1)
+  })
+
+  test('exhausts retries and throws the last error', async () => {
+    let calls = 0
+    globalThis.fetch = (async () => {
+      calls++
+      return new Response('boom', { status: 503 })
+    }) as typeof fetch
+
+    const client = new McClient({
+      baseUrl: 'https://example.mc.test/v8',
+      basicAuth: 'encoded-creds',
+      maxRetries: 2,
+      retryDelayMs: 0,
+    })
+
+    await expect(client.get('/workorders')).rejects.toBeInstanceOf(McApiError)
+    expect(calls).toBe(3)
   })
 })

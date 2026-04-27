@@ -1,11 +1,13 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { McClient } from '@/mc-client.js'
-import { odataShape } from '@/shared/odata.js'
+import { odataShape, FETCH_ALL_CAP } from '@/shared/odata.js'
 import { toToolText, toListToolText, toToolError } from '@/shared/response.js'
 import { PartSummarySchema, McApiResponseSchema } from '@/shared/types.js'
 
 const PartListSchema = McApiResponseSchema(PartSummarySchema)
+
+const DEFAULT_TOP = 200
 
 export function register(server: McpServer, client: McClient): void {
   server.registerTool(
@@ -17,14 +19,24 @@ export function register(server: McpServer, client: McClient): void {
         'CostRuleDetails.Value codes: S=Standard Cost, AVG=Average Cost. ' +
         'IssueUnitsDetails.Value: E=Each. ' +
         'IMPORTANT: Quantity-on-hand, on-order, reserved, and reorder fields are NOT on this endpoint — use PartLocations for stock levels. ' +
-        'Key fields: Name, ID, InternalPartNumber, PartDescription, IssueUnitCost, LastOrderUnitPrice, LastOrdered, LastIssued, CategoryRef, ClassificationRef.',
+        'Key fields: Name, ID, InternalPartNumber, PartDescription, IssueUnitCost, LastOrderUnitPrice, LastOrdered, LastIssued, CategoryRef, ClassificationRef. ' +
+        'Default returns up to 200 records — use $filter to narrow or $fetchAll for the full catalog.',
       inputSchema: { ...odataShape },
     },
     async (input) => {
       try {
-        const raw = await client.get('/Parts', { params: input })
+        const { $fetchAll, ...params } = input
+        if ($fetchAll) {
+          const raw = await client.getAllPages('/Parts', { params: { ...params, $top: FETCH_ALL_CAP } })
+          const data = PartListSchema.parse(raw)
+          return toListToolText(data, 0, { fetchedAll: true, cappedAt: FETCH_ALL_CAP })
+        }
+        if (params.$top === undefined) {
+          params.$top = DEFAULT_TOP
+        }
+        const raw = await client.get('/Parts', { params })
         const data = PartListSchema.parse(raw)
-        return toListToolText(data, input.$skip ?? 0)
+        return toListToolText(data, params.$skip ?? 0)
       } catch (err) {
         return toToolError(err)
       }
