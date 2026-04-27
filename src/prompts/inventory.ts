@@ -82,8 +82,7 @@ Summarize:
 Close with a plain-language assessment of whether this asset's reserved-parts situation looks healthy or stalled.`
                   : `A "reserved parts" situation means a work order has parts allocated to it but the work may not yet be complete. I want to audit what is currently reserved.
 
-Step 1: Fetch all open work orders with parts reserved:
-  $filter=IsOpen eq true and IsPartsReserved eq true
+Step 1: Fetch open work orders that have parts reserved.
 
 For each work order, capture: ID, reason/description, type, priority, asset (AssetRef), and date opened.
 
@@ -149,13 +148,13 @@ Summarize:
 Keep the summary concise and specific to the chosen category.`
                   : `Give me a high-level inventory audit of the parts catalog.
 
-Step 1: Fetch a broad sample of parts (use $top=100, no filter) to understand the general shape of the catalog — field population, cost data, category distribution.
+Step 1: Fetch a broad sample of up to 100 parts to understand the general shape of the catalog — field population, cost data, category distribution.
 
-Step 2: Fetch active parts only ($filter=Active eq true) and note the total count from the response envelope.
+Step 2: Fetch active parts only and note the total count from the response envelope.
 
-Step 3: Fetch inactive parts ($filter=Active eq false) and note the count.
+Step 3: Fetch inactive parts only and note the count.
 
-Step 4: Fetch parts available to requesters ($filter=AvailableToRequester eq true) — these are parts end users can request directly.
+Step 4: Fetch parts available to requesters — these are parts end users can request directly.
 
 Summarize:
 - Total parts in the catalog (active + inactive)
@@ -217,15 +216,9 @@ Within that category:
 Close with a plain-language summary of whether this category looks well-managed or overdue for cleanup.`
                   : `I want to find parts that haven't been moving — not issued recently, not ordered recently. These are candidates for reorder policy review or catalog cleanup.
 
-Step 1: Fetch active parts, ordered by LastIssued ascending (oldest first):
-  $filter=Active eq true
-  $orderby=LastIssued asc
-  $top=50
+Step 1: Fetch active parts sorted by LastIssued oldest first (up to 50 records).
 
-Step 2: Fetch active parts ordered by LastOrdered ascending:
-  $filter=Active eq true
-  $orderby=LastOrdered asc
-  $top=50
+Step 2: Fetch active parts sorted by LastOrdered oldest first (up to 50 records).
 
 For parts appearing in both lists (slow on both issuing and ordering), highlight them — these are the strongest candidates for review.
 
@@ -303,5 +296,5 @@ function buildCategoryInstructions(category?: string): string | undefined {
 - Compare category names after trimming whitespace and converting to lowercase.
 - If zero exact matches are found, stop and say the category could not be resolved.
 - If more than one exact match is found, stop and say the category is ambiguous.
-- Once resolved, keep the remainder of the analysis focused on that category and avoid inventing unsupported OData filter paths.`
+- Once resolved, keep the remainder of the analysis focused on that category and avoid inventing unsupported filter fields.`
 }

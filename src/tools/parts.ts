@@ -2,7 +2,7 @@ import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { McClient } from '@/mc-client.js'
 import { odataShape } from '@/shared/odata.js'
-import { toToolText, toToolError } from '@/shared/response.js'
+import { toToolText, toListToolText, toToolError } from '@/shared/response.js'
 import { PartSummarySchema, McApiResponseSchema } from '@/shared/types.js'
 
 const PartListSchema = McApiResponseSchema(PartSummarySchema)
@@ -13,19 +13,18 @@ export function register(server: McpServer, client: McClient): void {
     {
       description:
         'List parts (inventory items) from Maintenance Connection. ' +
-        'Useful boolean filters: Active eq true, DirectIssue eq true, AvailableToRequester eq true. ' +
+        'Filterable boolean fields: Active, DirectIssue, AvailableToRequester. ' +
         'CostRuleDetails.Value codes: S=Standard Cost, AVG=Average Cost. ' +
         'IssueUnitsDetails.Value: E=Each. ' +
         'IMPORTANT: Quantity-on-hand, on-order, reserved, and reorder fields are NOT on this endpoint — use PartLocations for stock levels. ' +
-        'Key fields: Name, ID, InternalPartNumber, PartDescription, IssueUnitCost, LastOrderUnitPrice, LastOrdered, LastIssued, CategoryRef, ClassificationRef. ' +
-        'String filters use double quotes: ID eq "9429994", Name eq "Control Board".',
+        'Key fields: Name, ID, InternalPartNumber, PartDescription, IssueUnitCost, LastOrderUnitPrice, LastOrdered, LastIssued, CategoryRef, ClassificationRef.',
       inputSchema: { ...odataShape },
     },
     async (input) => {
       try {
         const raw = await client.get('/Parts', { params: input })
         const data = PartListSchema.parse(raw)
-        return toToolText(data)
+        return toListToolText(data, input.$skip ?? 0)
       } catch (err) {
         return toToolError(err)
       }

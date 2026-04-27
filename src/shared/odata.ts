@@ -9,9 +9,9 @@ export const odataShape = {
     .string()
     .optional()
     .describe(
-      'OData filter expression. IMPORTANT: string values must use double quotes, not single quotes (MC API requirement). Examples: IsOpen eq true, Type eq "CM", ID eq "1499", TargetDate gt "2024-01-01"',
+      'Filter records by field values. IMPORTANT: string values must use double quotes, not single quotes (MC API requirement). The tool description lists supported filter fields and their valid values.',
     ),
-  $orderby: z.string().optional().describe('OData sort expression. Example: "TargetDate desc" or "ID asc"'),
+  $orderby: z.string().optional().describe('Sort results. Specify a field name followed by asc or desc, for example: TargetDate desc.'),
   $top: z
     .number()
     .int()

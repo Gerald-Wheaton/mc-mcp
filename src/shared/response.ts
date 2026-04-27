@@ -17,6 +17,29 @@ export function toToolText(data: unknown): ToolResult {
   }
 }
 
+export function toListToolText(data: { Results: unknown[]; Total: number }, skip: number): ToolResult {
+  const returned = data.Results.length
+  const nextSkip = skip + returned
+
+  const pagination: { total: number; returned: number; nextSkip?: number } = {
+    total: data.Total,
+    returned,
+  }
+
+  if (nextSkip < data.Total) {
+    pagination.nextSkip = nextSkip
+  }
+
+  return {
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify({ Results: data.Results, Total: data.Total, _pagination: pagination }, null, 2),
+      },
+    ],
+  }
+}
+
 export function toToolError(err: unknown): ToolResult {
   let message: string
   if (err instanceof McTimeoutError) {
