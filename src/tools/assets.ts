@@ -15,7 +15,7 @@ export function register(server: McpServer, client: McClient): void {
     {
       description:
         'List assets (equipment and facilities) from Maintenance Connection. Assets exist in a hierarchy. Filter to equipment only using IsLocation, or filter by hierarchy level using AssetLevel (2 = campus-level nodes). Filterable fields: ID, Name, IsLocation, IsUp, AssetLevel. ' +
-        'Default returns up to 100 records — use $filter to narrow results before fetching more.',
+        'Default returns up to 100 records — narrow results before fetching more.',
       inputSchema: { ...odataShape },
     },
     async (input) => {

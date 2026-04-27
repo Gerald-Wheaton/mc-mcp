@@ -20,7 +20,7 @@ export function register(server: McpServer, client: McClient): void {
         'IssueUnitsDetails.Value: E=Each. ' +
         'IMPORTANT: Quantity-on-hand, on-order, reserved, and reorder fields are NOT on this endpoint — use PartLocations for stock levels. ' +
         'Key fields: Name, ID, InternalPartNumber, PartDescription, IssueUnitCost, LastOrderUnitPrice, LastOrdered, LastIssued, CategoryRef, ClassificationRef. ' +
-        'Default returns up to 200 records — use $filter to narrow or $fetchAll for the full catalog.',
+        'Default returns up to 200 records — add filters to narrow results, or fetch the full catalog.',
       inputSchema: { ...odataShape },
     },
     async (input) => {
