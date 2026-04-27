@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { McClient } from '@/mc-client.js'
-import { odataShape } from '@/shared/odata.js'
+import { odataShape, FETCH_ALL_CAP } from '@/shared/odata.js'
 import { toToolText, toListToolText, toToolError } from '@/shared/response.js'
 import { WorkOrderSummarySchema, McApiResponseSchema } from '@/shared/types.js'
 
@@ -22,9 +22,15 @@ export function register(server: McpServer, client: McClient): void {
     },
     async (input) => {
       try {
-        const raw = await client.get('/workorders', { params: input })
+        const { $fetchAll, ...params } = input
+        if ($fetchAll) {
+          const raw = await client.getAllPages('/workorders', { params: { ...params, $top: FETCH_ALL_CAP } })
+          const data = WorkOrderListSchema.parse(raw)
+          return toListToolText(data, 0, { fetchedAll: true, cappedAt: FETCH_ALL_CAP })
+        }
+        const raw = await client.get('/workorders', { params })
         const data = WorkOrderListSchema.parse(raw)
-        return toListToolText(data, input.$skip ?? 0)
+        return toListToolText(data, params.$skip ?? 0)
       } catch (err) {
         return toToolError(err)
       }

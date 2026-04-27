@@ -20,23 +20,28 @@ interface CacheEntry {
 interface McClientConfig {
   baseUrl: string
   basicAuth: string
-  timeoutMs?: number // default 30000
+  timeoutMs?: number   // default 30000
+  maxRetries?: number  // default 2
+  retryDelayMs?: number // default 300
 }
 
 export class McClient {
   private baseUrl: string
   private basicAuth: string
   private timeoutMs: number
+  private maxRetries: number
+  private retryDelayMs: number
   private cache = new Map<string, CacheEntry>()
 
   constructor(config: McClientConfig) {
     this.baseUrl = config.baseUrl
     this.basicAuth = config.basicAuth
     this.timeoutMs = config.timeoutMs ?? 30_000
+    this.maxRetries = config.maxRetries ?? 2
+    this.retryDelayMs = config.retryDelayMs ?? 300
   }
 
-  async get<T>(path: string, options: McRequestOptions = {}): Promise<T> {
-    const url = this.buildUrl(path, options)
+  private async fetchOnce<T>(url: URL, path: string): Promise<T> {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), this.timeoutMs)
     const start = Date.now()
@@ -63,15 +68,40 @@ export class McClient {
     }
   }
 
+  async get<T>(path: string, options: McRequestOptions = {}): Promise<T> {
+    const url = this.buildUrl(path, options)
+    let lastError: unknown
+
+    for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+      if (attempt > 0) {
+        const delay = this.retryDelayMs * 2 ** (attempt - 1)
+        console.warn(`[mc] GET ${path} → retry ${attempt}/${this.maxRetries} after ${delay}ms`)
+        await new Promise((r) => setTimeout(r, delay))
+      }
+      try {
+        return await this.fetchOnce<T>(url, path)
+      } catch (err) {
+        lastError = err
+        if (err instanceof McTimeoutError) throw err
+        if (err instanceof McApiError && err.status < 500) throw err
+        if (attempt < this.maxRetries) continue
+      }
+    }
+
+    throw lastError
+  }
+
   async getCached<T>(key: string, ttlMs: number, loader: () => Promise<T>): Promise<T> {
     const now = Date.now()
     const entry = this.cache.get(key)
 
     if (entry?.inFlight) {
+      console.log(`[mc] CACHE join ${key}`)
       return entry.inFlight as Promise<T>
     }
 
     if (entry && entry.expiresAt > now) {
+      console.log(`[mc] CACHE hit ${key} (${Math.round((entry.expiresAt - now) / 1000)}s remaining)`)
       return entry.value as T
     }
 
@@ -79,12 +109,14 @@ export class McClient {
       this.cache.delete(key)
     }
 
+    console.log(`[mc] CACHE miss ${key} — fetching`)
     const inFlight = loader()
       .then((value) => {
         this.cache.set(key, {
           value,
           expiresAt: Date.now() + Math.max(0, ttlMs),
         })
+        console.log(`[mc] CACHE stored ${key} (ttl ${Math.round(Math.max(0, ttlMs) / 1000)}s)`)
         return value
       })
       .catch((error) => {

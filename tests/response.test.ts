@@ -26,6 +26,24 @@ describe('toListToolText', () => {
     expect(parsed._pagination.nextSkip).toBeUndefined()
   })
 
+  test('sets fetchedAll and cappedAt when result count equals the cap', () => {
+    const results = Array.from({ length: 2000 }, (_, i) => ({ id: i }))
+    const data = { Results: results, Total: 33639 }
+    const result = toListToolText(data, 0, { fetchedAll: true, cappedAt: 2000 })
+    const parsed = JSON.parse(result.content[0].text)
+    expect(parsed._pagination.fetchedAll).toBe(true)
+    expect(parsed._pagination.cappedAt).toBe(2000)
+    expect(parsed._pagination.nextSkip).toBeUndefined()
+  })
+
+  test('sets fetchedAll without cappedAt when results are below the cap', () => {
+    const data = { Results: [{ id: 1 }], Total: 1 }
+    const result = toListToolText(data, 0, { fetchedAll: true, cappedAt: 2000 })
+    const parsed = JSON.parse(result.content[0].text)
+    expect(parsed._pagination.fetchedAll).toBe(true)
+    expect(parsed._pagination.cappedAt).toBeUndefined()
+  })
+
   test('passes through Results and Total at the top level', () => {
     const data = { Results: [{ id: 1 }], Total: 5 }
     const result = toListToolText(data, 0)

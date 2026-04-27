@@ -82,6 +82,10 @@ MC_LIVE_TESTS=true MC_BASIC_AUTH_ENCODED=... bun run test
 
 These smoke tests are intended as a quick confidence check for real credentials and core endpoints. They are not required for normal local development.
 
+## Deployment
+
+See [`docs/deployment.md`](docs/deployment.md) for the full runbook covering Railway, local dev, credential format, credential rotation, log format, and known limitations.
+
 ## Connecting to Claude Desktop
 
 This server uses **HTTP transport**. Claude Desktop connects via `mcp-remote`, which bridges the local stdio expectation to the remote HTTP endpoint.

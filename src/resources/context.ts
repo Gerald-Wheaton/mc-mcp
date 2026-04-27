@@ -141,6 +141,7 @@ async function readResource(uri: string, loader: () => Promise<unknown>) {
   try {
     return toJsonResource(uri, await loader())
   } catch (err) {
+    console.error(`[resource] ${uri} failed: ${err instanceof Error ? (err.stack ?? err.message) : String(err)}`)
     throw new Error(formatResourceError(err))
   }
 }
