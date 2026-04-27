@@ -1,6 +1,39 @@
 import { describe, expect, test } from 'bun:test'
 import { McApiError, McTimeoutError } from '../src/mc-client.ts'
-import { toToolError } from '../src/shared/response.ts'
+import { toToolError, toListToolText } from '../src/shared/response.ts'
+
+describe('toListToolText', () => {
+  test('includes nextSkip when more pages remain', () => {
+    const data = { Results: [{ id: 1 }, { id: 2 }], Total: 10 }
+    const result = toListToolText(data, 0)
+    const parsed = JSON.parse(result.content[0].text)
+    expect(parsed._pagination).toEqual({ total: 10, returned: 2, nextSkip: 2 })
+  })
+
+  test('omits nextSkip on the last page', () => {
+    const data = { Results: [{ id: 9 }, { id: 10 }], Total: 10 }
+    const result = toListToolText(data, 8)
+    const parsed = JSON.parse(result.content[0].text)
+    expect(parsed._pagination).toEqual({ total: 10, returned: 2 })
+    expect(parsed._pagination.nextSkip).toBeUndefined()
+  })
+
+  test('omits nextSkip when exactly all records fit in one page', () => {
+    const data = { Results: [{ id: 1 }], Total: 1 }
+    const result = toListToolText(data, 0)
+    const parsed = JSON.parse(result.content[0].text)
+    expect(parsed._pagination).toEqual({ total: 1, returned: 1 })
+    expect(parsed._pagination.nextSkip).toBeUndefined()
+  })
+
+  test('passes through Results and Total at the top level', () => {
+    const data = { Results: [{ id: 1 }], Total: 5 }
+    const result = toListToolText(data, 0)
+    const parsed = JSON.parse(result.content[0].text)
+    expect(parsed.Results).toEqual([{ id: 1 }])
+    expect(parsed.Total).toBe(5)
+  })
+})
 
 describe('toToolError', () => {
   test('formats timeout errors with remediation guidance', () => {

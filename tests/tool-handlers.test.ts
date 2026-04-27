@@ -61,10 +61,36 @@ describe('tool handlers', () => {
 
     expect(parsed.Total).toBe(1)
     expect(parsed.Results[0].ID).toBe('WO-1001')
+    expect(parsed._pagination).toEqual({ total: 1, returned: 1 })
+    expect(parsed._pagination.nextSkip).toBeUndefined()
     expect(fakeClient.getCalls.at(-1)).toEqual({
       path: '/workorders',
       params: { $filter: 'IsOpen eq true', $top: 1 },
     })
+  })
+
+  test('mc_list_work_orders includes nextSkip when more pages remain', async () => {
+    fakeClient.whenGet('/workorders', {
+      Results: [
+        {
+          PK: 1001,
+          ID: 'WO-1001',
+          Reason: 'Blower motor',
+          IsOpen: true,
+          TypeDetails: { Value: 'CM', Description: 'Corrective Maintenance' },
+          StatusDetails: { Value: 'ISSUED', Description: 'Issued' },
+        },
+      ],
+      Total: 100,
+    })
+
+    const result = await harness.client.callTool({
+      name: 'mc_list_work_orders',
+      arguments: { $top: 1, $skip: 0 },
+    })
+
+    const parsed = JSON.parse(expectText(result))
+    expect(parsed._pagination).toEqual({ total: 100, returned: 1, nextSkip: 1 })
   })
 
   test('mc_get_asset uses the PK-specific endpoint', async () => {
@@ -114,7 +140,9 @@ describe('tool handlers', () => {
       },
     })
 
-    expect(JSON.parse(expectText(result)).Results[0].Name).toBe('Control Board')
+    const parsed = JSON.parse(expectText(result))
+    expect(parsed.Results[0].Name).toBe('Control Board')
+    expect(parsed._pagination).toEqual({ total: 1, returned: 1 })
     expect(fakeClient.getCalls.at(-1)).toEqual({
       path: '/Parts',
       params: { $filter: 'Active eq true' },
@@ -161,8 +189,13 @@ describe('tool handlers', () => {
       },
     })
 
-    expect(JSON.parse(expectText(poResult)).Results[0].ID).toBe('PO-4001')
-    expect(JSON.parse(expectText(lineItemResult)).Results[0].PurchaseOrderPK).toBe(4001)
+    const parsedPo = JSON.parse(expectText(poResult))
+    expect(parsedPo.Results[0].ID).toBe('PO-4001')
+    expect(parsedPo._pagination).toEqual({ total: 1, returned: 1 })
+
+    const parsedLines = JSON.parse(expectText(lineItemResult))
+    expect(parsedLines.Results[0].PurchaseOrderPK).toBe(4001)
+    expect(parsedLines._pagination).toEqual({ total: 1, returned: 1 })
     expect(fakeClient.getCalls.slice(-2)).toEqual([
       {
         path: '/purchaseorders',

@@ -77,11 +77,11 @@ Summarize:
 Close with a plain-language compliance assessment for this specific asset.`
                   : `Give me a PM compliance review — how well is scheduled preventive maintenance being completed?
 
-Step 1: Fetch all PM-type work orders ($filter=Type eq "PM"), capturing Status and DateOpened for each. Tally by status: ISSUED, CLOSED, REQUESTED, CANCELED.
+Step 1: Fetch all PM-type work orders, capturing Status and DateOpened for each. Tally by status: ISSUED, CLOSED, REQUESTED, CANCELED.
 
-Step 2: Among open PMs (Status eq "ISSUED"), fetch the oldest ones ($orderby=DateOpened asc, $top=10). How long have they been open? Long-open PMs may signal overdue work.
+Step 2: Fetch the 10 oldest open PMs, sorted by date opened. How long have they been open? Long-open PMs may signal overdue work.
 
-Step 3: Among recently closed PMs (Status eq "CLOSED", $orderby=DateOpened desc, $top=20), what assets were maintained?
+Step 3: Fetch the 20 most recently closed PMs. What assets were maintained?
 
 Summarize:
 - Total PM work orders and status breakdown (as percentages)
@@ -122,16 +122,11 @@ Summarize:
                 'Read mc://context/asset-locations before translating asset parent/location references.',
               ]),
               buildRepairCenterInstructions(args),
-              `Give me a summary of inspection work orders (Type eq "IN").
+              `Give me a summary of inspection work orders.
 
-Step 1: Fetch all open inspections:
-  $filter=Type eq "IN" and IsOpen eq true
-  $orderby=Priority asc
+Step 1: Fetch all open inspection work orders, sorted by priority.
 
-Step 2: Fetch recently closed inspections:
-  $filter=Type eq "IN" and Status eq "CLOSED"
-  $orderby=DateOpened desc
-  $top=20
+Step 2: Fetch the 20 most recently closed inspection work orders.
 
 For open inspections, summarize:
 - Total count and priority breakdown

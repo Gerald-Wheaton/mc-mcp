@@ -2,7 +2,7 @@ import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { McClient } from '@/mc-client.js'
 import { odataShape } from '@/shared/odata.js'
-import { toToolText, toToolError } from '@/shared/response.js'
+import { toToolText, toListToolText, toToolError } from '@/shared/response.js'
 import {
   PurchaseOrderSummarySchema,
   PurchaseOrderLineItemSummarySchema,
@@ -19,13 +19,12 @@ export function register(server: McpServer, client: McClient): void {
       description:
         'List purchase orders from Maintenance Connection. ' +
         'Status codes: ISSUED, REQUESTED, CANCELED, CLOSED. ' +
-        'Useful boolean filters: IsOpen eq true, IsPartsOrdered eq true. ' +
+        'Filterable boolean fields: IsOpen, IsPartsOrdered. ' +
         'Key cost fields: Total, Subtotal, FreightCharge, TaxAmount, Discount. ' +
         'Key refs: VendorRef, RequesterRef, BuyerRef, DepartmentRef. ' +
         'ShippingInfo and BillingInfo contain address/freight details (mostly null). ' +
         'SubStatusDetails can carry integration codes (e.g. "UB"=Updated with Banner PO). ' +
-        'String filters use double quotes: Status eq "ISSUED", VendorRef/Name eq "North Point Toyota". ' +
-        'NOTE: Status filter uses "Status" not "StatusDetails/Value" for POs. ' +
+        'NOTE: Filter by status using the Status field (not StatusDetails/Value) — values: ISSUED, REQUESTED, CANCELED, CLOSED. ' +
         'NOTE: Line items are a separate resource — use mc_list_po_line_items to get parts ordered on a PO.',
       inputSchema: { ...odataShape },
     },
@@ -33,7 +32,7 @@ export function register(server: McpServer, client: McClient): void {
       try {
         const raw = await client.get('/purchaseorders', { params: input })
         const data = PurchaseOrderListSchema.parse(raw)
-        return toToolText(data)
+        return toListToolText(data, input.$skip ?? 0)
       } catch (err) {
         return toToolError(err)
       }
@@ -65,17 +64,16 @@ export function register(server: McpServer, client: McClient): void {
       description:
         'List purchase order line items from Maintenance Connection. ' +
         'Each line item is one part/item ordered on a PO, with quantities ordered, received, backordered, and canceled. ' +
-        'Key filter: PurchaseOrderPK eq {pk} — returns all lines for a specific PO. ' +
+        'Filter by PurchaseOrderPK to get all line items for a specific PO. ' +
         'Also filterable by PartRef/PK to find all POs that ordered a specific part. ' +
-        'Key fields: PartRef, OrderUnitQty, OrderUnitQtyReceived, OrderUnitQtyBackOrdered, OrderUnitPrice, LineItemTotal, WorkOrderRef, AssetRef. ' +
-        'String filters use double quotes. Filter on PurchaseOrderPK (integer) does not need quotes: PurchaseOrderPK eq 1000.',
+        'Key fields: PartRef, OrderUnitQty, OrderUnitQtyReceived, OrderUnitQtyBackOrdered, OrderUnitPrice, LineItemTotal, WorkOrderRef, AssetRef.',
       inputSchema: { ...odataShape },
     },
     async (input) => {
       try {
         const raw = await client.get('/PurchaseOrderLineItems', { params: input })
         const data = PurchaseOrderLineItemListSchema.parse(raw)
-        return toToolText(data)
+        return toListToolText(data, input.$skip ?? 0)
       } catch (err) {
         return toToolError(err)
       }

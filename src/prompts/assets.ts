@@ -125,11 +125,11 @@ Close with a plain-language assessment: which assets look like they may need pro
               buildRepairCenterInstructions(args),
               `Help me understand the shape of the asset hierarchy in this system.
 
-Step 1: Fetch assets at the top of the hierarchy (AssetLevel eq 1 and AssetLevel eq 2) — these are the root and campus/site-level nodes. List their names and IDs.
+Step 1: Fetch assets at the top of the hierarchy — root and campus/site-level nodes. List their names and IDs.
 
-Step 2: Fetch a sample of equipment assets (IsLocation eq false, $top=20) to show what the leaf-level records look like — include Name, ID, ClassificationRef, and ParentRef.
+Step 2: Fetch a sample of up to 20 equipment assets (non-location nodes) to show what the leaf-level records look like — include Name, ID, ClassificationRef, and ParentRef.
 
-Step 3: Fetch a count of location-only assets ($filter=IsLocation eq true, use $top=1 and inspect Total in the response) vs equipment assets ($filter=IsLocation eq false).
+Step 3: Get a count of location-only assets and a count of equipment assets (inspect Total in each response).
 
 Summarize:
 - How many total assets are in the system (locations + equipment combined)?

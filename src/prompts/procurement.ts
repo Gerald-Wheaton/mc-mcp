@@ -73,9 +73,7 @@ Summarize:
 Close with a plain-language summary of whether purchasing with this vendor appears healthy or stalled.`
                   : `Give me a summary of all open purchase orders.
 
-Step 1: Fetch all open POs:
-  $filter=IsOpen eq true
-  $orderby=OrderDate asc
+Step 1: Fetch all open POs, sorted by order date (oldest first).
 
 For each PO capture: ID, Description, VendorRef (name), Total, OrderDate, Status, IsPartsOrdered, InvoiceNumber.
 
@@ -83,7 +81,7 @@ Step 2: Summarize:
 - Total number of open POs and combined dollar value (sum of Total)
 - Breakdown by status (ISSUED vs REQUESTED)
 - Which vendors have the most open POs?
-- How many POs have parts already ordered (IsPartsOrdered eq true) vs not yet ordered?
+- How many POs have parts already ordered vs not yet ordered?
 - Oldest open POs by OrderDate — flag any that have been open unusually long
 
 Close with a plain-language summary of the procurement pipeline: is purchasing moving smoothly, or are there stalled orders that need follow-up?`,
@@ -141,9 +139,7 @@ Summarize:
 Close with a plain-language assessment of whether this vendor looks reliable and significant, or whether there are warning signs.`
                   : `I want to understand vendor performance through the lens of purchase order data.
 
-Step 1: Fetch all POs (no status filter, to get the full picture):
-  $top=200
-Capture VendorRef (name and PK), Total, Status, OrderDate, IsPartsOrdered for each.
+Step 1: Fetch a broad sample of up to 200 POs across all statuses. Capture VendorRef (name and PK), Total, Status, OrderDate, IsPartsOrdered for each.
 
 Step 2: Group by vendor. For each vendor calculate:
 - Number of POs (total, open, closed, canceled)
@@ -191,13 +187,11 @@ Close with a plain-language summary: which vendors are the primary suppliers, is
               buildRepairCenterInstructions(args),
               `Show me all purchase orders currently in the approval pipeline — status REQUESTED, meaning they have been created but not yet issued/approved.
 
-Step 1: Fetch all REQUESTED POs:
-  $filter=Status eq "REQUESTED"
-  $orderby=OrderDate asc
+Step 1: Fetch all purchase orders in REQUESTED status, sorted by order date.
 
 For each PO capture: ID, Description, VendorRef (name), Total, OrderDate, and whether parts are already flagged as ordered (IsPartsOrdered).
 
-Step 2: Fetch line items for the top 5 largest REQUESTED POs (by Total) using mc_list_po_line_items with $filter=PurchaseOrderPK eq {pk}. Summarize what is being ordered.
+Step 2: Fetch line items for the top 5 largest REQUESTED POs (by Total) using mc_list_po_line_items filtered to each PO's PK. Summarize what is being ordered.
 
 Summarize:
 - How many POs are awaiting approval and their combined value?

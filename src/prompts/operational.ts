@@ -57,7 +57,7 @@ export function register(server: McpServer): void {
 
 1. **Emergency and high-priority open work orders** — fetch open work orders with priority 0 ("Emergency / Immediate Response"). List each one with its ID, reason/description, asset, and how long it has been open (use DateOpened).
 
-2. **Unassigned open work orders** — fetch open work orders that are not yet assigned (IsAssigned eq false). How many are there? Break them down by type (CM, PM, IN, SR, etc.).
+2. **Unassigned open work orders** — fetch open work orders that are not yet assigned. How many are there? Break them down by type (CM, PM, IN, SR, etc.).
 
 3. **Recently closed work orders** — fetch work orders with Status eq "CLOSED". How many were closed? Any notable patterns (type mix, assets involved)?
 
@@ -104,7 +104,7 @@ Summarize your findings in plain language a maintenance manager would understand
                 scopedType
                   ? `Pull the open ${scopedType} work order backlog and analyze it.
 
-Focus only on work orders of type "${scopedType}" using double-quoted string filters such as Type eq "${scopedType}" together with IsOpen eq true.
+Focus only on open work orders of type "${scopedType}".
 
 Summarize:
 - How many open work orders of this type exist?
@@ -114,7 +114,7 @@ Summarize:
 - Which assets or locations appear most often?
 
 Close with a one-paragraph executive summary about whether this specific backlog looks healthy or needs attention.`
-                  : `Pull the full open work order backlog and analyze it. Walk through each work order type using $filter=IsOpen eq true, fetching each type separately if needed (CM, PM, IN, SR, CAP, ADMN, FO, PC).
+                  : `Pull the full open work order backlog and analyze it. Walk through each work order type by fetching open work orders, by type if needed (CM, PM, IN, SR, CAP, ADMN, FO, PC).
 
 For each type present in the data:
 - How many open work orders exist?
@@ -163,9 +163,7 @@ After the per-type breakdown, give me a one-paragraph executive summary: where i
                 buildRepairCenterInstructions(args),
                 buildTypeInstructions(scopedType),
                 scopedType
-                  ? `Fetch all open, unassigned work orders of type "${scopedType}" using double-quoted string filters such as:
-  $filter=IsOpen eq true and IsAssigned eq false and Type eq "${scopedType}"
-  $orderby=Priority asc
+                  ? `Fetch open, unassigned work orders of type "${scopedType}", sorted by priority (lowest number = highest urgency).
 
 List each work order with:
 - ID and reason/description
@@ -176,9 +174,7 @@ List each work order with:
 Group the results by priority. For any Priority 0 items, call them out explicitly at the top of your response.
 
 Finish with a concise summary of how many unassigned "${scopedType}" work orders exist and whether they appear manageable or risky.`
-                  : `Fetch all open, unassigned work orders using:
-  $filter=IsOpen eq true and IsAssigned eq false
-  $orderby=Priority asc
+                  : `Fetch all open, unassigned work orders, sorted by priority.
 
 List each work order with:
 - ID and reason/description
@@ -224,8 +220,7 @@ Finish with a count summary: how many unassigned WOs by type and priority.`,
                 'Read mc://context/asset-locations when you need to translate asset parent/location references.',
               ]),
               buildRepairCenterInstructions(args),
-              `Fetch all open work orders at Priority 0 (Emergency / Immediate Response) using:
-  $filter=IsOpen eq true and Priority eq 0
+              `Fetch all open work orders at Priority 0 (Emergency / Immediate Response).
 
 For each one, tell me:
 - Work order ID and reason/description
@@ -290,5 +285,5 @@ function buildTypeInstructions(workOrderType?: string): string | undefined {
     return undefined
   }
 
-  return `Focus only on work orders of type "${workOrderType}". Use double-quoted string filters such as Type eq "${workOrderType}", and do not broaden the analysis to other work order types unless you first explain why the scope could not be applied.`
+  return `Focus only on work orders of type "${workOrderType}". Do not broaden the analysis to other work order types unless you first explain why the scope could not be applied.`
 }
