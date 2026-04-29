@@ -101,7 +101,7 @@ This server uses **HTTP transport**. Claude Desktop connects via `mcp-remote`, w
   "command": "npx",
   "args": [
     "mcp-remote",
-    "https://mc-mcp-production-d25a.up.railway.app/mcp",
+    "https://{DOMAIN_STRING}/mcp",
     "--header",
     "X-MC-Basic-Auth: base64(CONNECTION_KEY:API_KEY)"
   ]
@@ -121,13 +121,12 @@ echo -n "YOUR_CONNECTION_KEY:YOUR_API_KEY" | base64
 
 **Suggested first prompts:**
 
-- *"What data is available in Maintenance Connection?"* — calls `mc_list_datasets`
-- *"Show me open work orders"* — calls `mc_list_work_orders` with `IsOpen eq true`
-- *"How many assets does this facility have?"* — calls `mc_list_assets`
-- *"Are there any open purchase orders?"* — calls `mc_list_purchase_orders`
+- _"What data is available in Maintenance Connection?"_ — calls `mc_list_datasets`
+- _"Show me open work orders"_ — calls `mc_list_work_orders` with `IsOpen eq true`
+- _"How many assets does this facility have?"_ — calls `mc_list_assets`
+- _"Are there any open purchase orders?"_ — calls `mc_list_purchase_orders`
 
 ## Available Tools
-
 
 | Tool                      | Description                                                                                                                                          |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -142,7 +141,6 @@ echo -n "YOUR_CONNECTION_KEY:YOUR_API_KEY" | base64
 | `mc_list_purchase_orders` | List purchase orders (74 records)                                                                                                                    |
 | `mc_get_purchase_order`   | Get a single purchase order by PK                                                                                                                    |
 | `mc_list_po_line_items`   | List PO line items — filter by `PurchaseOrderPK eq {pk}` to see what was ordered on a PO, or by `PartRef/PK` to trace procurement history for a part |
-
 
 All list tools support OData pagination: `$top` (max 500), `$skip`, `$orderby`.
 

@@ -3,3 +3,5 @@ dist/
 .env
 .DS_Store
 segment3-plan.md
+node_modules/
+.fallow/
