@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// fallow-ignore-file unused-file
 /**
  * Reads mc://context/lookup-tables from the MC MCP server via stdio.
  * Usage: node read-lookup-tables.mjs [--mc-dir /path/to/fm-360/mc-mcp]

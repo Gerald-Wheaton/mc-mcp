@@ -1,3 +1,4 @@
+// fallow-ignore-file unused-file
 import { describe, expect, test } from 'bun:test'
 import { loadConfig } from '../src/config.ts'
 import { McClient } from '../src/mc-client.ts'

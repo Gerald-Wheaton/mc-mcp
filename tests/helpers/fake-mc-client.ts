@@ -1,3 +1,4 @@
+// fallow-ignore-file unused-file
 type Params = Record<string, unknown> | undefined
 
 interface GetCall {
@@ -12,6 +13,7 @@ interface GetAllPagesCall {
 
 type CachedLoader<T> = () => Promise<T>
 
+// fallow-ignore-next-line unused-export
 export class FakeMcClient {
   readonly getCalls: GetCall[] = []
   readonly getAllPagesCalls: GetAllPagesCall[] = []

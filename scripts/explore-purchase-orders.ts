@@ -1,3 +1,4 @@
+// fallow-ignore-file unused-file
 /**
  * Phase 2.5 exploration script — Purchase Orders
  * Run: bun --env-file=.env run scripts/explore-purchase-orders.ts

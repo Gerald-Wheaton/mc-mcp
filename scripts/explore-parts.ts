@@ -1,3 +1,4 @@
+// fallow-ignore-file unused-file
 /**
  * Phase 2.5 exploration script — Parts
  * Run: bun --env-file=.env run scripts/explore-parts.ts

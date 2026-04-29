@@ -1,3 +1,4 @@
+// fallow-ignore-file unused-file
 /**
  * Verify PartSummarySchema parse() against a live sample
  * Run: bun --env-file=.env run scripts/verify-parts-parse.ts

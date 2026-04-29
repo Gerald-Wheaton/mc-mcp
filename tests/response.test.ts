@@ -1,3 +1,4 @@
+// fallow-ignore-file unused-file
 import { describe, expect, test } from 'bun:test'
 import { McApiError, McTimeoutError } from '../src/mc-client.ts'
 import { toToolError, toListToolText } from '../src/shared/response.ts'
