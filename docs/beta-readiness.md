@@ -19,14 +19,11 @@ All three items implemented on `phase-4-and-auth-cleanup`.
 
 ---
 
-## Segment 2 — Deployment
+## Segment 2 — Deployment ✅
 
-Without a hosted URL there are no external testers.
-
-- [ ] Choose hosting platform (Railway or Fly.io recommended — both support Bun, free tier,
-  HTTPS termination)
-- [ ] Deploy server, set `PORT` env var, confirm `GET /health` returns `ok` publicly
-- [ ] Update README with the real hosted URL and note that HTTPS is handled by the host
+- [x] Choose hosting platform — Railway selected
+- [x] Deploy server — live at `https://mc-mcp-production-d25a.up.railway.app`; `GET /health` returns `ok`
+- [x] README updated with hosted URL; HTTPS handled by Railway
 
 ---
 

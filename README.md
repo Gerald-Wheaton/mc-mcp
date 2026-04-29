@@ -50,6 +50,42 @@ console.log('Connected. Total WOs:', r.Total)
 "
 ```
 
+## Testing
+
+Run the full local test suite with:
+
+```bash
+bun run test
+```
+
+This suite covers:
+
+- `McClient` behavior: success paths, 401s, timeouts, pagination, and caching
+- MCP contract checks: tools, prompts, resources, and request routing
+- Domain tool handlers with fake MC responses
+- Dynamic context resources such as `mc://context/summary`, `mc://context/labors`, `mc://context/asset-locations`, and `mc://context/lookup-tables`
+- Schema fixture parsing for work orders, assets, parts, purchase orders, and PO line items
+
+Type-check the project with:
+
+```bash
+bun run build
+```
+
+### Optional Live Smoke Tests
+
+Live smoke tests are skipped by default. To run them against a real MC tenant:
+
+```bash
+MC_LIVE_TESTS=true MC_BASIC_AUTH_ENCODED=... bun run test
+```
+
+These smoke tests are intended as a quick confidence check for real credentials and core endpoints. They are not required for normal local development.
+
+## Deployment
+
+See [`docs/deployment.md`](docs/deployment.md) for the full runbook covering Railway, local dev, credential format, credential rotation, log format, and known limitations.
+
 ## Connecting to Claude Desktop
 
 This server uses **HTTP transport**. Claude Desktop connects via `mcp-remote`, which bridges the local stdio expectation to the remote HTTP endpoint.
@@ -65,7 +101,7 @@ This server uses **HTTP transport**. Claude Desktop connects via `mcp-remote`, w
   "command": "npx",
   "args": [
     "mcp-remote",
-    "https://mc-mcp.up.railway.app/mcp",
+    "https://{DOMAIN_STRING}/mcp",
     "--header",
     "X-MC-Basic-Auth: base64(CONNECTION_KEY:API_KEY)"
   ]
@@ -85,13 +121,12 @@ echo -n "YOUR_CONNECTION_KEY:YOUR_API_KEY" | base64
 
 **Suggested first prompts:**
 
-- *"What data is available in Maintenance Connection?"* — calls `mc_list_datasets`
-- *"Show me open work orders"* — calls `mc_list_work_orders` with `IsOpen eq true`
-- *"How many assets does this facility have?"* — calls `mc_list_assets`
-- *"Are there any open purchase orders?"* — calls `mc_list_purchase_orders`
+- _"What data is available in Maintenance Connection?"_ — calls `mc_list_datasets`
+- _"Show me open work orders"_ — calls `mc_list_work_orders` with `IsOpen eq true`
+- _"How many assets does this facility have?"_ — calls `mc_list_assets`
+- _"Are there any open purchase orders?"_ — calls `mc_list_purchase_orders`
 
 ## Available Tools
-
 
 | Tool                      | Description                                                                                                                                          |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -106,7 +141,6 @@ echo -n "YOUR_CONNECTION_KEY:YOUR_API_KEY" | base64
 | `mc_list_purchase_orders` | List purchase orders (74 records)                                                                                                                    |
 | `mc_get_purchase_order`   | Get a single purchase order by PK                                                                                                                    |
 | `mc_list_po_line_items`   | List PO line items — filter by `PurchaseOrderPK eq {pk}` to see what was ordered on a PO, or by `PartRef/PK` to trace procurement history for a part |
-
 
 All list tools support OData pagination: `$top` (max 500), `$skip`, `$orderby`.
 
@@ -152,4 +186,3 @@ src/
 5. Run `bun run --bun tsc --noEmit` to type-check
 
 > If using Claude Code, the `add-mc-tool-domain` skill automates this process.
-

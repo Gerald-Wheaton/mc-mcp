@@ -6,6 +6,7 @@
     "start": "bun run src/index.ts",
     "dev": "bun run src/index.ts",
     "build": "bunx tsc",
+    "test": "bun test",
     "format": "prettier --write src/**/*.ts"
   },
   "dependencies": {
@@ -14,6 +15,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.4.0",
+    "fallow": "^2.54.2",
     "prettier": "^3.8.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"

@@ -17,7 +17,50 @@ export function toToolText(data: unknown): ToolResult {
   }
 }
 
+export function toListToolText(
+  data: { Results: unknown[]; Total: number },
+  skip: number,
+  opts?: { fetchedAll?: boolean; cappedAt?: number },
+): ToolResult {
+  const returned = data.Results.length
+  const nextSkip = skip + returned
+
+  const pagination: {
+    total: number
+    returned: number
+    nextSkip?: number
+    fetchedAll?: boolean
+    cappedAt?: number
+  } = {
+    total: data.Total,
+    returned,
+  }
+
+  if (opts?.fetchedAll) {
+    pagination.fetchedAll = true
+    if (opts.cappedAt !== undefined && data.Results.length >= opts.cappedAt) {
+      pagination.cappedAt = opts.cappedAt
+    }
+  } else if (nextSkip < data.Total) {
+    pagination.nextSkip = nextSkip
+  }
+
+  return {
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify({ Results: data.Results, Total: data.Total, _pagination: pagination }, null, 2),
+      },
+    ],
+  }
+}
+
 export function toToolError(err: unknown): ToolResult {
+  if (!(err instanceof McApiError && err.status < 500)) {
+    const detail = err instanceof Error ? (err.stack ?? err.message) : String(err)
+    console.error(`[tool] error: ${detail}`)
+  }
+
   let message: string
   if (err instanceof McTimeoutError) {
     message = `${err.message} — try narrowing your filter or reducing $top`
