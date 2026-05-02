@@ -1,0 +1,4 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicolo-ribaudo/fallow/main/fallow-config.schema.json",
+  "ignorePatterns": ["scripts/**", "tests/**", "build-mc-api-map.ts", "read-lookup-tables.mjs"]
+}
