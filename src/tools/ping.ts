@@ -10,7 +10,7 @@ export function register(server: McpServer, client: McClient): void {
     {
       description:
         'Check connectivity and authentication to the Maintenance Connection API. ' +
-        'Probes /workorders, /Assets, and /Parts in parallel. ' +
+        'Probes three core data endpoints in parallel. ' +
         'Returns status: ok (all healthy), status: degraded (some failed), or an error (all failed).',
     },
     async () => {
@@ -27,14 +27,14 @@ export function register(server: McpServer, client: McClient): void {
       let anyFailed = false
 
       for (let i = 0; i < PROBES.length; i++) {
-        const r = results[i]
-        if (r.status === 'fulfilled') {
-          endpoints[PROBES[i]] = { ok: true, ms: r.value.ms }
+        const result = results[i]
+        if (result.status === 'fulfilled') {
+          endpoints[PROBES[i]] = { ok: true, ms: result.value.ms }
           allFailed = false
         } else {
           endpoints[PROBES[i]] = {
             ok: false,
-            error: r.reason instanceof Error ? r.reason.message : String(r.reason),
+            error: result.reason instanceof Error ? result.reason.message : String(result.reason),
           }
           anyFailed = true
         }

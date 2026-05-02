@@ -35,5 +35,5 @@ export const DATASETS = [
   },
 ] as const
 
-export const DATASETS_TRANSITION_NOTE =
+export const DATASETS_MIGRATION_NOTE =
   'Transitional compatibility note: mc_list_datasets remains supported for now, but MCP clients should prefer the mc://context/datasets resource. Deprecation of the tool will be considered only after the resource path is validated in real client workflows.'

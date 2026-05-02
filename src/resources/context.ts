@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { McApiError, type McClient } from '@/mc-client.js'
-import { DATASETS, DATASETS_TRANSITION_NOTE } from '@/shared/datasets.js'
+import { DATASETS, DATASETS_MIGRATION_NOTE } from '@/shared/datasets.js'
 import { AssetSummarySchema, EntityRefSchema, McApiResponseSchema } from '@/shared/types.js'
 
 const JSON_MIME_TYPE = 'application/json'
@@ -75,7 +75,7 @@ export function register(server: McpServer, client: McClient): void {
       toJsonResource(DATASETS_RESOURCE_URI, {
         preferredInterface: DATASETS_RESOURCE_URI,
         compatibilityTool: 'mc_list_datasets',
-        transitionNote: DATASETS_TRANSITION_NOTE,
+        transitionNote: DATASETS_MIGRATION_NOTE,
         datasets: DATASETS,
       }),
   )
@@ -141,7 +141,7 @@ async function readResource(uri: string, loader: () => Promise<unknown>) {
   try {
     return toJsonResource(uri, await loader())
   } catch (err) {
-    console.error(`[resource] ${uri} failed: ${err instanceof Error ? (err.stack ?? err.message) : String(err)}`)
+    console.error(`[resource] ${uri} failed: ${err instanceof Error ? err.message : String(err)}`)
     throw new Error(formatResourceError(err))
   }
 }
