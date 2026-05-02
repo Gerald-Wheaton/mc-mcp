@@ -1,4 +1,3 @@
-// fallow-ignore-file unused-file
 // build-mc-api-map.ts
 // Usage:
 //   npx tsx build-mc-api-map.ts ./mc-api-swagger.json ./out

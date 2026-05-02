@@ -1,4 +1,3 @@
-// fallow-ignore-file unused-file
 /**
  * Verify WorkOrderSummarySchema parse() against a live sample of all types
  * Run: bun --env-file=.env run scripts/verify-wo-parse.ts

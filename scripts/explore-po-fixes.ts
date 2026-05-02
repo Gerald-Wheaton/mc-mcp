@@ -1,4 +1,3 @@
-// fallow-ignore-file unused-file
 import { loadConfig } from '../src/config.js'
 import { McClient } from '../src/mc-client.js'
 

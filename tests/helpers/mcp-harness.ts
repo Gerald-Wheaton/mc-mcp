@@ -1,10 +1,8 @@
-// fallow-ignore-file unused-file
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js'
 import { McClient } from '../../src/mc-client.ts'
 import { buildMcpServer } from '../../src/server.ts'
 
-// fallow-ignore-next-line unused-export
 export async function createMcpHarness(
   clientImplementation: McClient = new McClient({
     baseUrl: 'https://example.mc.test/v8',

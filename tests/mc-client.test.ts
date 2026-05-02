@@ -1,4 +1,3 @@
-// fallow-ignore-file unused-file
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { McApiError, McClient, McTimeoutError } from '../src/mc-client.ts'
 

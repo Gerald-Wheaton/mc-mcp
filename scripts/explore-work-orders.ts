@@ -1,4 +1,3 @@
-// fallow-ignore-file unused-file
 /**
  * Phase 2.5 exploration script — Work Orders
  * Run: bun --env-file=.env run scripts/explore-work-orders.ts

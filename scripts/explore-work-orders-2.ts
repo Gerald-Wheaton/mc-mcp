@@ -1,4 +1,3 @@
-// fallow-ignore-file unused-file
 /**
  * Phase 2.5 — Work Orders follow-up: find all type codes and complete status codes
  * Run: bun --env-file=.env run scripts/explore-work-orders-2.ts

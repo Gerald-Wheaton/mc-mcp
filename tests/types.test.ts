@@ -1,4 +1,3 @@
-// fallow-ignore-file unused-file
 import { describe, expect, test } from 'bun:test'
 import {
   AssetSummarySchema,
