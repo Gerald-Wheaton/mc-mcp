@@ -14,13 +14,7 @@ export function register(server: McpServer, client: McClient): void {
     'mc_list_parts',
     {
       description:
-        'List parts (inventory items) from Maintenance Connection. ' +
-        'Filterable boolean fields: Active, DirectIssue, AvailableToRequester. ' +
-        'CostRuleDetails.Value codes: S=Standard Cost, AVG=Average Cost. ' +
-        'IssueUnitsDetails.Value: E=Each. ' +
-        'IMPORTANT: Quantity-on-hand, on-order, reserved, and reorder fields are NOT on this endpoint — use PartLocations for stock levels. ' +
-        'Key fields: Name, ID, InternalPartNumber, PartDescription, IssueUnitCost, LastOrderUnitPrice, LastOrdered, LastIssued, CategoryRef, ClassificationRef. ' +
-        'Default returns up to 200 records — add filters to narrow results, or fetch the full catalog.',
+        'List part master records from Maintenance Connection. Best for catalog reviews, requester availability, pricing, category coverage, and slow-moving inventory analysis.',
       inputSchema: { ...odataShape },
     },
     async (input) => {
@@ -46,9 +40,9 @@ export function register(server: McpServer, client: McClient): void {
   server.registerTool(
     'mc_get_part',
     {
-      description: 'Get full details for a single part by its primary key (PK).',
+      description: 'Get full details for one part using its internal Maintenance Connection record number.',
       inputSchema: {
-        pk: z.number().int().positive().describe('The part primary key (PK integer)'),
+        pk: z.number().int().positive().describe('Internal Maintenance Connection record number for the part.'),
       },
     },
     async ({ pk }) => {

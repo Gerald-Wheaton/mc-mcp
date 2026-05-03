@@ -2,6 +2,21 @@ import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { createMcpHarness } from './helpers/mcp-harness.ts'
 import { parseJsonBody, routeHttpRequest } from '../src/server.ts'
 
+const USER_FACING_TECHNICAL_PATTERNS = [
+  /\$filter/i,
+  /\$orderby/i,
+  /\$top\b/i,
+  /\$skip\b/i,
+  /\bOData\b/i,
+  /\beq\b/,
+  /\bPK\b/,
+  /navigation path/i,
+  /unsupported .*filter/i,
+  /RepairCenterRef\//,
+  /PartRef\/PK/i,
+  /StatusDetails\/Value/i,
+] as const
+
 describe('server request routing', () => {
   test('allows the health check without credentials', () => {
     expect(
@@ -126,7 +141,13 @@ describe('MCP integration contract', () => {
     expect(datasetText).toBeTruthy()
     expect(JSON.parse(datasetText ?? '{}')).toEqual(
       expect.objectContaining({
-        preferredInterface: 'mc://context/datasets',
+        overview: expect.any(String),
+        datasets: expect.any(Array),
+      }),
+    )
+    expect(JSON.parse(datasetText ?? '{}')).not.toEqual(
+      expect.objectContaining({
+        preferredInterface: expect.anything(),
       }),
     )
     expect(JSON.parse(timeText ?? '{}')).toEqual(
@@ -138,6 +159,49 @@ describe('MCP integration contract', () => {
     expect(promptText).toContain('Read mc://context/time before querying tools')
     expect(promptText).toContain('Resolve the target asset before the main analysis')
     expect(promptText).toContain('"AHU-12"')
+    for (const pattern of USER_FACING_TECHNICAL_PATTERNS) {
+      expect(datasetText ?? '').not.toMatch(pattern)
+    }
+  })
+
+  test('keeps tool, prompt, and resource descriptions free of raw query syntax', async () => {
+    const tools = await harness.client.listTools()
+    const prompts = await harness.client.listPrompts()
+    const resources = await harness.client.listResources()
+
+    const descriptions = [
+      ...tools.tools.map((tool) => tool.description ?? ''),
+      ...prompts.prompts.map((prompt) => prompt.description ?? ''),
+      ...resources.resources.map((resource) => resource.description ?? ''),
+    ]
+
+    for (const description of descriptions) {
+      for (const pattern of USER_FACING_TECHNICAL_PATTERNS) {
+        expect(description).not.toMatch(pattern)
+      }
+    }
+  })
+
+  test('keeps runtime prompt text free of raw query syntax even when scoped args are used', async () => {
+    const promptCases = [
+      { name: 'mc_daily_maintenance_review', arguments: { repair_center_name: 'Main Campus' } },
+      { name: 'mc_open_work_order_backlog', arguments: { repair_center_id: 'M', type: 'CM' } },
+      { name: 'mc_asset_health_check', arguments: { repair_center_id: 'M', asset_name: 'AHU-12' } },
+      { name: 'mc_reserved_parts_audit', arguments: { repair_center_name: 'Main Campus', asset_name: 'AHU-12' } },
+      { name: 'mc_inventory_audit', arguments: { category: 'Electrical' } },
+      { name: 'mc_pm_compliance_review', arguments: { repair_center_id: 'M', asset_name: 'AHU-12' } },
+      { name: 'mc_open_purchase_orders', arguments: { repair_center_name: 'Main Campus', vendor_name: 'Grainger' } },
+      { name: 'mc_po_approval_pipeline', arguments: { repair_center_id: 'M' } },
+    ] as const
+
+    for (const promptCase of promptCases) {
+      const prompt = await harness.client.getPrompt(promptCase)
+      const text = prompt.messages[0]?.content.type === 'text' ? prompt.messages[0].content.text : ''
+
+      for (const pattern of USER_FACING_TECHNICAL_PATTERNS) {
+        expect(text).not.toMatch(pattern)
+      }
+    }
   })
 
   test('fails fast on invalid prompt argument combinations', async () => {

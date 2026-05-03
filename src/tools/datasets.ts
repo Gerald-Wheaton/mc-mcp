@@ -7,8 +7,7 @@ export function register(server: McpServer): void {
     'mc_list_datasets',
     {
       description:
-        'List all available Maintenance Connection data sets and the tools used to query them. ' +
-        'Prefer the mc://context/datasets resource when the MCP client supports resources.',
+        'List the main Maintenance Connection data groups available through this server and the tools used to explore each one.',
     },
     async () => toToolText(DATASETS),
   )

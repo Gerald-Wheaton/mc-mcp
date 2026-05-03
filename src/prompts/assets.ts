@@ -62,13 +62,13 @@ export function register(server: McpServer): void {
 
 Step 1: Resolve the target asset first. If multiple assets plausibly match, stop and ask the user to clarify which asset they mean.
 
-Step 2: Pull open corrective maintenance work tied to that resolved asset. Use the resolved asset's exact identifiers and do not invent unsupported asset filter paths.
+Step 2: Pull open corrective maintenance work tied to that resolved asset. Keep the scope tightly focused on the resolved asset and do not guess if the results cannot be narrowed reliably.
 
-Step 3: Fetch the full asset record using mc_get_asset to gather context such as IsUp, LastMaintained, AssetLevel, ClassificationRef, and ParentRef.
+Step 3: Fetch the full asset record using mc_get_asset to gather context such as whether it is currently up, when it was last maintained, where it sits in the hierarchy, its classification, and its parent location.
 
 Summarize:
 - Asset name and ID
-- Whether the asset is currently up (IsUp)
+- Whether the asset is currently up
 - Last maintained date
 - Count and age of open corrective work orders for this asset
 - Any warning signs from the asset's open work history or condition
@@ -76,16 +76,16 @@ Summarize:
 Close with a plain-language assessment of whether this specific asset looks healthy, stressed, or in need of follow-up.`
                   : `I want to understand which equipment assets are generating the most maintenance activity right now.
 
-Step 1: Fetch open corrective maintenance work orders (Type eq "CM" and IsOpen eq true). Collect the AssetRef (PK and Name) from each record.
+Step 1: Fetch open corrective maintenance work orders. Collect the linked asset from each record.
 
 Step 2: Tally open CM work orders per asset. Which assets appear most frequently?
 
-Step 3: For the top 5 assets by open CM count, fetch the full asset record using mc_get_asset to get additional context: IsUp (is the asset currently operational?), LastMaintained, AssetLevel, ClassificationRef, and ParentRef (location).
+Step 3: For the top 5 assets by open CM count, fetch the full asset record using mc_get_asset to gather additional context such as whether the asset is currently operational, when it was last maintained, how deep it is in the hierarchy, its classification, and its parent location.
 
 Present a ranked list of the top assets by open CM work order count. For each asset, include:
 - Asset name and ID
 - Number of open CMs
-- Is the asset currently up (IsUp)?
+- Is the asset currently up?
 - Last maintained date
 - Location / parent asset
 
@@ -127,7 +127,7 @@ Close with a plain-language assessment: which assets look like they may need pro
 
 Step 1: Fetch assets at the top of the hierarchy — root and campus/site-level nodes. List their names and IDs.
 
-Step 2: Fetch a sample of up to 20 equipment assets (non-location nodes) to show what the leaf-level records look like — include Name, ID, ClassificationRef, and ParentRef.
+Step 2: Fetch a sample of up to 20 equipment assets (non-location nodes) to show what the leaf-level records look like — include each asset's name, ID, classification, and parent location.
 
 Step 3: Get a count of location-only assets and a count of equipment assets (inspect Total in each response).
 
@@ -169,18 +169,18 @@ function buildRepairCenterInstructions(args: RepairCenterArgs): string | undefin
   }
 
   if (repairCenterId) {
-    return `Scope all relevant asset queries to repair center ID "${repairCenterId}" using the filter RepairCenterID eq "${repairCenterId}". Do not use RepairCenterRef navigation paths in filters.`
+    return `Keep all relevant asset and work-order queries limited to repair center ID "${repairCenterId}". If that scope cannot be applied confidently, stop and explain the limitation instead of guessing.`
   }
 
   if (repairCenterName) {
     return `Resolve the repair center before the main analysis:
-- Fetch a small sample of work orders or assets that include RepairCenterRef values.
-- Build a distinct list of repair centers using each record's RepairCenterRef.ID and RepairCenterRef.Name.
+- Fetch a small sample of work orders or assets that include repair center information.
+- Build a distinct list of repair centers using the IDs and names returned in those records.
 - Compare names after trimming whitespace and converting to lowercase.
 - If zero exact matches are found for "${repairCenterName}", stop and say the repair center name could not be resolved.
 - If more than one exact match is found for "${repairCenterName}", stop and say duplicate repair centers were found and the request is ambiguous.
-- Once exactly one repair center is resolved, use its ID and scope all subsequent asset queries with RepairCenterID eq "{resolvedID}".
-- Do not use RepairCenterRef/PK or RepairCenterRef/ID navigation filters.`
+- Once exactly one repair center is resolved, keep all relevant asset and work-order queries limited to that repair center.
+- Do not guess or broaden the scope if the repair center cannot be pinned down.`
   }
 
   return undefined
@@ -195,5 +195,5 @@ function buildAssetResolutionInstructions(assetName?: string): string | undefine
 - Use mc_list_assets to find candidates whose IDs or names match "${assetName}".
 - Prefer an exact match when one exists.
 - If multiple assets plausibly match, stop and ask the user to clarify which asset they want.
-- Once one asset is resolved, use that asset's exact PK, ID, and Name to keep the rest of the analysis focused on it.`
+- Once one asset is resolved, use that asset's returned identifiers and name to keep the rest of the analysis focused on it.`
 }

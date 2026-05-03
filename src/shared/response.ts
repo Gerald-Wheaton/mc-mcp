@@ -63,9 +63,10 @@ export function toToolError(err: unknown): ToolResult {
 
   let message: string
   if (err instanceof McTimeoutError) {
-    message = `${err.message} — try narrowing your filter or reducing $top`
+    message = `${err.message} — try narrowing the request or asking for fewer records`
   } else if (err instanceof McApiError && err.status === 401) {
-    message = `MC credentials rejected — verify your X-MC-Basic-Auth header is correctly base64-encoded (CONNECTION_KEY:API_KEY)`
+    message =
+      'MC credentials rejected — verify the Maintenance Connection connection key and API key configured for this session'
   } else if (err instanceof McApiError) {
     message = `MC API error ${err.status}: ${err.body || err.message}`
   } else if (err instanceof Error) {

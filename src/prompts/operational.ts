@@ -55,11 +55,11 @@ export function register(server: McpServer): void {
               buildRepairCenterInstructions(args),
               `Give me a daily maintenance review. Cover the following:
 
-1. **Emergency and high-priority open work orders** — fetch open work orders with priority 0 ("Emergency / Immediate Response"). List each one with its ID, reason/description, asset, and how long it has been open (use DateOpened).
+1. **Emergency and high-priority open work orders** — fetch open work orders with priority 0 ("Emergency / Immediate Response"). List each one with its ID, reason/description, asset, and how long it has been open.
 
-2. **Unassigned open work orders** — fetch open work orders that are not yet assigned. How many are there? Break them down by type (CM, PM, IN, SR, etc.).
+2. **Unassigned open work orders** — fetch open work orders that are not yet assigned. How many are there? Break them down by work order type.
 
-3. **Recently closed work orders** — fetch work orders with Status eq "CLOSED". How many were closed? Any notable patterns (type mix, assets involved)?
+3. **Recently closed work orders** — fetch recently closed work orders. How many were closed? Any notable patterns in the mix of work types or assets involved?
 
 4. **Follow-up work orders** — fetch any open work orders of type FO (follow-up). These signal unresolved issues that needed a second pass.
 
@@ -109,18 +109,18 @@ Focus only on open work orders of type "${scopedType}".
 Summarize:
 - How many open work orders of this type exist?
 - What is the priority distribution (0=Emergency, 2=Normal, 3=Low)?
-- How many are unassigned (IsAssigned eq false)?
-- Are any notably old based on DateOpened?
+- How many are unassigned?
+- Are any notably old based on when they were opened?
 - Which assets or locations appear most often?
 
 Close with a one-paragraph executive summary about whether this specific backlog looks healthy or needs attention.`
-                  : `Pull the full open work order backlog and analyze it. Walk through each work order type by fetching open work orders, by type if needed (CM, PM, IN, SR, CAP, ADMN, FO, PC).
+                  : `Pull the full open work order backlog and analyze it. Walk through each work order type by fetching open work and separating it into the types present in the data.
 
 For each type present in the data:
 - How many open work orders exist?
 - What is the priority distribution (0=Emergency, 2=Normal, 3=Low)?
-- How many are unassigned (IsAssigned eq false)?
-- Are any overdue or notably old based on DateOpened?
+- How many are unassigned?
+- Are any overdue or notably old based on when they were opened?
 
 After the per-type breakdown, give me a one-paragraph executive summary: where is the backlog concentrated, and what should the team focus on first?`,
               ]
@@ -183,7 +183,7 @@ List each work order with:
 - Asset name and location (if available)
 - Date opened
 
-Group the results by priority. For any Priority 0 items, call them out explicitly at the top of your response — these require immediate attention.
+Group the results by priority. For any Priority 0 items, call them out explicitly at the top of your response because they need immediate attention.
 
 Finish with a count summary: how many unassigned WOs by type and priority.`,
               ]
@@ -263,18 +263,18 @@ function buildRepairCenterInstructions(args: RepairCenterArgs): string | undefin
   }
 
   if (repairCenterId) {
-    return `Scope all relevant work-order queries to repair center ID "${repairCenterId}" using the filter RepairCenterID eq "${repairCenterId}". Do not use RepairCenterRef navigation paths in filters.`
+    return `Keep all relevant work-order queries limited to repair center ID "${repairCenterId}". If that scope cannot be applied confidently, stop and explain the limitation instead of guessing.`
   }
 
   if (repairCenterName) {
     return `Resolve the repair center before the main analysis:
-- Fetch a small sample of work orders or assets that include RepairCenterRef values.
-- Build a distinct list of repair centers using each record's RepairCenterRef.ID and RepairCenterRef.Name.
+- Fetch a small sample of work orders or assets that include repair center information.
+- Build a distinct list of repair centers using the IDs and names returned in those records.
 - Compare names after trimming whitespace and converting to lowercase.
 - If zero exact matches are found for "${repairCenterName}", stop and say the repair center name could not be resolved.
 - If more than one exact match is found for "${repairCenterName}", stop and say duplicate repair centers were found and the request is ambiguous.
-- Once exactly one repair center is resolved, use its ID and scope all subsequent work-order queries with RepairCenterID eq "{resolvedID}".
-- Do not use RepairCenterRef/PK or RepairCenterRef/ID navigation filters.`
+- Once exactly one repair center is resolved, keep all relevant work-order queries limited to that repair center.
+- Do not guess or broaden the scope if the repair center cannot be pinned down.`
   }
 
   return undefined
