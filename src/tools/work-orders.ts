@@ -12,12 +12,7 @@ export function register(server: McpServer, client: McClient): void {
     'mc_list_work_orders',
     {
       description:
-        'List work orders from Maintenance Connection. ' +
-        'Type codes: CM=Corrective Maintenance, IN=Inspection, PM=Preventive Maintenance, SR=Service Request, CAP=Capital Project, ADMN=Administration, FO=Follow-up, PC=Part Checkout. ' +
-        'Status codes: ISSUED, CLOSED, REQUESTED, CANCELED. ' +
-        'Priority codes: 0=Emergency, 2=Normal, 3=Low. ' +
-        'Filterable boolean fields: IsOpen, IsAssigned, IsPartsReserved, IsFollowupWork. ' +
-        'PM records have PMRef populated; non-PMs have PMRef=null.',
+        'List work orders from Maintenance Connection. Useful for backlog, assignment, priority, status, repair-center, and asset-focused maintenance analysis.',
       inputSchema: { ...odataShape },
     },
     async (input) => {
@@ -40,9 +35,9 @@ export function register(server: McpServer, client: McClient): void {
   server.registerTool(
     'mc_get_work_order',
     {
-      description: 'Get full details for a single work order by its primary key (PK).',
+      description: 'Get full details for one work order using its internal Maintenance Connection record number.',
       inputSchema: {
-        pk: z.number().int().positive().describe('The work order primary key (PK integer)'),
+        pk: z.number().int().positive().describe('Internal Maintenance Connection record number for the work order.'),
       },
     },
     async ({ pk }) => {

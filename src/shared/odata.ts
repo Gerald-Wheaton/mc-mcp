@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 /**
- * Shared OData query parameter shape. Spread into every list tool's input schema:
+ * Shared list-query parameter shape. Spread into every list tool's input schema:
  *   server.tool('mc_list_X', 'desc', { ...odataShape, ...toolSpecificParams }, handler)
  */
 export const odataShape = {
@@ -9,24 +9,30 @@ export const odataShape = {
     .string()
     .optional()
     .describe(
-      'Filter records by field values. IMPORTANT: string values must use double quotes, not single quotes (MC API requirement). The tool description lists supported filter fields and their valid values.',
+      'Optional narrowing for the result set. Use only when earlier context gives you a reliable way to target the right records. IMPORTANT: string values must use double quotes, not single quotes, for example `Status eq "REQUESTED"`.',
     ),
-  $orderby: z.string().optional().describe('Sort results. Specify a field name followed by asc or desc, for example: TargetDate desc.'),
+  $orderby: z
+    .string()
+    .optional()
+    .describe('Optional sort order for the result set.'),
   $top: z
     .number()
     .int()
     .positive()
     .max(500)
     .optional()
-    .describe('Max records to return (1–500). Defaults to server page size.'),
-  $skip: z.number().int().nonnegative().optional().describe('Number of records to skip for pagination. Use with $top.'),
+    .describe('Optional page size from 1 to 500 records.'),
+  $skip: z
+    .number()
+    .int()
+    .nonnegative()
+    .optional()
+    .describe('Optional offset for continuing through a longer result set.'),
   $fetchAll: z
     .boolean()
     .optional()
     .describe(
-      'Fetch all pages automatically, up to 2000 records. ' +
-      'Use on Work Orders (≈645), Parts (≈3305), and POs (≈74). ' +
-      'Do NOT use on Assets (33k+) without a $filter that substantially reduces the set.',
+      'Automatically collect multiple pages when the result set is small enough to do so safely. Avoid this on large asset lists unless the scope is already narrow.',
     ),
 } as const
 

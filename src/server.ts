@@ -126,7 +126,13 @@ export function createHttpServer(config: ServerConfig): Server {
 }
 
 export function buildMcpServer(client: McClient): McpServer {
-  const server = new McpServer({ name: 'mc-mcp', version: '0.1.0' })
+  const server = new McpServer(
+    { name: 'mc-mcp', version: '0.1.0' },
+    {
+      instructions:
+        'This is an MCP server connected to Maintenance Connection, a CMMS — use it to answer questions about assets, work orders, PMs, parts, and purchase orders.',
+    },
+  )
 
   registerContextResources(server, client)
   registerPing(server, client)

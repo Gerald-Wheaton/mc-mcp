@@ -59,7 +59,7 @@ describe('toToolError', () => {
       content: [
         {
           type: 'text',
-          text: 'Error: MC API request timed out after 30000ms on /Assets — try narrowing your filter or reducing $top',
+          text: 'Error: MC API request timed out after 30000ms on /Assets — try narrowing the request or asking for fewer records',
         },
       ],
       isError: true,
@@ -71,7 +71,7 @@ describe('toToolError', () => {
       content: [
         {
           type: 'text',
-          text: 'Error: MC credentials rejected — verify your X-MC-Basic-Auth header is correctly base64-encoded (CONNECTION_KEY:API_KEY)',
+          text: 'Error: MC credentials rejected — verify the Maintenance Connection connection key and API key configured for this session',
         },
       ],
       isError: true,

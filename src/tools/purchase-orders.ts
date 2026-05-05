@@ -17,15 +17,7 @@ export function register(server: McpServer, client: McClient): void {
     'mc_list_purchase_orders',
     {
       description:
-        'List purchase orders from Maintenance Connection. ' +
-        'Status codes: ISSUED, REQUESTED, CANCELED, CLOSED. ' +
-        'Filterable boolean fields: IsOpen, IsPartsOrdered. ' +
-        'Key cost fields: Total, Subtotal, FreightCharge, TaxAmount, Discount. ' +
-        'Key refs: VendorRef, RequesterRef, BuyerRef, DepartmentRef. ' +
-        'ShippingInfo and BillingInfo contain address/freight details (mostly null). ' +
-        'SubStatusDetails can carry integration codes (e.g. "UB"=Updated with Banner PO). ' +
-        'NOTE: Filter by status using the Status field (not StatusDetails/Value) — values: ISSUED, REQUESTED, CANCELED, CLOSED. ' +
-        'NOTE: Line items are a separate resource — use mc_list_po_line_items to get parts ordered on a PO.',
+        'List purchase orders from Maintenance Connection. Useful for open commitments, approval-pipeline reviews, vendor activity, and purchase-order aging analysis.',
       inputSchema: { ...odataShape },
     },
     async (input) => {
@@ -48,9 +40,9 @@ export function register(server: McpServer, client: McClient): void {
   server.registerTool(
     'mc_get_purchase_order',
     {
-      description: 'Get full details for a single purchase order by its primary key (PK).',
+      description: 'Get full details for one purchase order using its internal Maintenance Connection record number.',
       inputSchema: {
-        pk: z.number().int().positive().describe('The purchase order primary key (PK integer)'),
+        pk: z.number().int().positive().describe('Internal Maintenance Connection record number for the purchase order.'),
       },
     },
     async ({ pk }) => {
@@ -68,11 +60,7 @@ export function register(server: McpServer, client: McClient): void {
     'mc_list_po_line_items',
     {
       description:
-        'List purchase order line items from Maintenance Connection. ' +
-        'Each line item is one part/item ordered on a PO, with quantities ordered, received, backordered, and canceled. ' +
-        'Filter by PurchaseOrderPK to get all line items for a specific PO. ' +
-        'Also filterable by PartRef/PK to find all POs that ordered a specific part. ' +
-        'Key fields: PartRef, OrderUnitQty, OrderUnitQtyReceived, OrderUnitQtyBackOrdered, OrderUnitPrice, LineItemTotal, WorkOrderRef, AssetRef.',
+        'List purchase-order line items from Maintenance Connection so you can see what was ordered, how much was ordered, and what has already been received or backordered.',
       inputSchema: { ...odataShape },
     },
     async (input) => {

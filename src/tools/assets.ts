@@ -14,8 +14,7 @@ export function register(server: McpServer, client: McClient): void {
     'mc_list_assets',
     {
       description:
-        'List assets (equipment and facilities) from Maintenance Connection. Assets exist in a hierarchy. Filter to equipment only using IsLocation, or filter by hierarchy level using AssetLevel (2 = campus-level nodes). Filterable fields: ID, Name, IsLocation, IsUp, AssetLevel. ' +
-        'Default returns up to 100 records — narrow results before fetching more.',
+        'List assets from Maintenance Connection, including both equipment and structural location records. Useful for hierarchy, equipment health, and site-orientation analysis.',
       inputSchema: { ...odataShape },
     },
     async (input) => {
@@ -41,9 +40,9 @@ export function register(server: McpServer, client: McClient): void {
   server.registerTool(
     'mc_get_asset',
     {
-      description: 'Get full details for a single asset by its primary key (PK).',
+      description: 'Get full details for one asset using its internal Maintenance Connection record number.',
       inputSchema: {
-        pk: z.number().int().positive().describe('The asset primary key (PK integer)'),
+        pk: z.number().int().positive().describe('Internal Maintenance Connection record number for the asset.'),
       },
     },
     async ({ pk }) => {
