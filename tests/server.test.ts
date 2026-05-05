@@ -17,6 +17,8 @@ const USER_FACING_TECHNICAL_PATTERNS = [
   /StatusDetails\/Value/i,
 ] as const
 
+const DESCRIPTION_ONLY_TECHNICAL_PATTERNS = USER_FACING_TECHNICAL_PATTERNS
+
 describe('server request routing', () => {
   test('allows the health check without credentials', () => {
     expect(
@@ -176,32 +178,47 @@ describe('MCP integration contract', () => {
     ]
 
     for (const description of descriptions) {
-      for (const pattern of USER_FACING_TECHNICAL_PATTERNS) {
+      for (const pattern of DESCRIPTION_ONLY_TECHNICAL_PATTERNS) {
         expect(description).not.toMatch(pattern)
       }
     }
   })
 
-  test('keeps runtime prompt text free of raw query syntax even when scoped args are used', async () => {
-    const promptCases = [
-      { name: 'mc_daily_maintenance_review', arguments: { repair_center_name: 'Main Campus' } },
-      { name: 'mc_open_work_order_backlog', arguments: { repair_center_id: 'M', type: 'CM' } },
-      { name: 'mc_asset_health_check', arguments: { repair_center_id: 'M', asset_name: 'AHU-12' } },
-      { name: 'mc_reserved_parts_audit', arguments: { repair_center_name: 'Main Campus', asset_name: 'AHU-12' } },
-      { name: 'mc_inventory_audit', arguments: { category: 'Electrical' } },
-      { name: 'mc_pm_compliance_review', arguments: { repair_center_id: 'M', asset_name: 'AHU-12' } },
-      { name: 'mc_open_purchase_orders', arguments: { repair_center_name: 'Main Campus', vendor_name: 'Grainger' } },
-      { name: 'mc_po_approval_pipeline', arguments: { repair_center_id: 'M' } },
-    ] as const
+  test('keeps targeted executable query guidance in runtime prompts where needed', async () => {
+    const scopedBacklogPrompt = await harness.client.getPrompt({
+      name: 'mc_open_work_order_backlog',
+      arguments: { repair_center_id: 'M', type: 'CM' },
+    })
+    const scopedBacklogText =
+      scopedBacklogPrompt.messages[0]?.content.type === 'text'
+        ? scopedBacklogPrompt.messages[0].content.text
+        : ''
 
-    for (const promptCase of promptCases) {
-      const prompt = await harness.client.getPrompt(promptCase)
-      const text = prompt.messages[0]?.content.type === 'text' ? prompt.messages[0].content.text : ''
+    expect(scopedBacklogText).toContain('RepairCenterID eq "M"')
 
-      for (const pattern of USER_FACING_TECHNICAL_PATTERNS) {
-        expect(text).not.toMatch(pattern)
-      }
-    }
+    const approvalPipelinePrompt = await harness.client.getPrompt({
+      name: 'mc_po_approval_pipeline',
+      arguments: { repair_center_id: 'M' },
+    })
+    const approvalPipelineText =
+      approvalPipelinePrompt.messages[0]?.content.type === 'text'
+        ? approvalPipelinePrompt.messages[0].content.text
+        : ''
+
+    expect(approvalPipelineText).toContain('RepairCenterID eq "M"')
+    expect(approvalPipelineText).toContain('mc_list_po_line_items')
+    expect(approvalPipelineText).toContain('PurchaseOrderPK eq {poPK}')
+  })
+
+  test('keeps MC-specific filter guidance in tool input schemas', async () => {
+    const tools = await harness.client.listTools()
+    const workOrderTool = tools.tools.find((tool) => tool.name === 'mc_list_work_orders')
+
+    expect(workOrderTool).toBeTruthy()
+    expect(JSON.stringify(workOrderTool?.inputSchema ?? {})).toContain(
+      'IMPORTANT: string values must use double quotes, not single quotes',
+    )
+    expect(JSON.stringify(workOrderTool?.inputSchema ?? {})).toContain('Status eq \\"REQUESTED\\"')
   })
 
   test('fails fast on invalid prompt argument combinations', async () => {

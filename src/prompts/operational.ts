@@ -11,10 +11,7 @@ interface BacklogArgs extends RepairCenterArgs {
 }
 
 const repairCenterArgsSchema = {
-  repair_center_id: z
-    .string()
-    .optional()
-    .describe('Exact repair center ID to scope the analysis to, such as M.'),
+  repair_center_id: z.string().optional().describe('Exact repair center ID to scope the analysis to, such as M.'),
   repair_center_name: z
     .string()
     .optional()
@@ -137,8 +134,7 @@ After the per-type breakdown, give me a one-paragraph executive summary: where i
     'mc_unassigned_work_orders',
     {
       title: 'Unassigned work orders',
-      description:
-        'Show all open work orders that have not been assigned to a technician, sorted by priority.',
+      description: 'Show all open work orders that have not been assigned to a technician, sorted by priority.',
       argsSchema: {
         ...repairCenterArgsSchema,
         ...workOrderTypeArgSchema,
@@ -200,8 +196,7 @@ Finish with a count summary: how many unassigned WOs by type and priority.`,
     'mc_emergency_work_orders',
     {
       title: 'Emergency work orders',
-      description:
-        'Surface all open emergency (Priority 0) work orders that require immediate response.',
+      description: 'Surface all open emergency (Priority 0) work orders that require immediate response.',
       argsSchema: {
         ...repairCenterArgsSchema,
       },
@@ -257,13 +252,11 @@ function buildRepairCenterInstructions(args: RepairCenterArgs): string | undefin
   const repairCenterName = cleanArg(args.repair_center_name)
 
   if (repairCenterId && repairCenterName) {
-    throw new Error(
-      'Provide only one repair center input. Use either repair_center_id or repair_center_name.',
-    )
+    throw new Error('Provide only one repair center input. Use either repair_center_id or repair_center_name.')
   }
 
   if (repairCenterId) {
-    return `Keep all relevant work-order queries limited to repair center ID "${repairCenterId}". If that scope cannot be applied confidently, stop and explain the limitation instead of guessing.`
+    return `Keep all relevant work-order queries limited to repair center ID "${repairCenterId}" using the filter RepairCenterID eq "${repairCenterId}". If that scope cannot be applied confidently, stop and explain the limitation instead of guessing.`
   }
 
   if (repairCenterName) {
@@ -273,7 +266,7 @@ function buildRepairCenterInstructions(args: RepairCenterArgs): string | undefin
 - Compare names after trimming whitespace and converting to lowercase.
 - If zero exact matches are found for "${repairCenterName}", stop and say the repair center name could not be resolved.
 - If more than one exact match is found for "${repairCenterName}", stop and say duplicate repair centers were found and the request is ambiguous.
-- Once exactly one repair center is resolved, keep all relevant work-order queries limited to that repair center.
+- Once exactly one repair center is resolved, keep all relevant work-order queries limited to that repair center using the filter RepairCenterID eq "{resolvedID}".
 - Do not guess or broaden the scope if the repair center cannot be pinned down.`
   }
 

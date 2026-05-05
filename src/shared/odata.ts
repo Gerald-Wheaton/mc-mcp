@@ -9,7 +9,7 @@ export const odataShape = {
     .string()
     .optional()
     .describe(
-      'Optional narrowing for the result set. Use only when earlier context gives you a reliable way to target the right records.',
+      'Optional narrowing for the result set. Use only when earlier context gives you a reliable way to target the right records. IMPORTANT: string values must use double quotes, not single quotes, for example `Status eq "REQUESTED"`.',
     ),
   $orderby: z
     .string()

@@ -191,7 +191,7 @@ Step 1: Fetch all purchase orders in REQUESTED status, sorted by order date.
 
 For each PO capture: ID, description, vendor name, total value, order date, and whether parts are already marked as ordered.
 
-Step 2: Fetch line items for the top 5 largest REQUESTED POs and summarize what is being ordered.
+Step 2: Fetch line items for the top 5 largest REQUESTED POs. Call mc_list_po_line_items separately for each selected PO and scope each call with the filter PurchaseOrderPK eq {poPK}. Summarize what is being ordered for each one.
 
 Summarize:
 - How many POs are awaiting approval and their combined value?
@@ -231,7 +231,7 @@ function buildRepairCenterInstructions(args: RepairCenterArgs): string | undefin
   }
 
   if (repairCenterId) {
-    return `Keep all relevant purchase-order queries limited to repair center ID "${repairCenterId}". If that scope cannot be applied confidently, stop and explain the limitation instead of guessing.`
+    return `Keep all relevant purchase-order queries limited to repair center ID "${repairCenterId}" using the filter RepairCenterID eq "${repairCenterId}". If that scope cannot be applied confidently, stop and explain the limitation instead of guessing.`
   }
 
   if (repairCenterName) {
@@ -241,7 +241,7 @@ function buildRepairCenterInstructions(args: RepairCenterArgs): string | undefin
 - Compare names after trimming whitespace and converting to lowercase.
 - If zero exact matches are found for "${repairCenterName}", stop and say the repair center name could not be resolved.
 - If more than one exact match is found for "${repairCenterName}", stop and say duplicate repair centers were found and the request is ambiguous.
-- Once exactly one repair center is resolved, keep all relevant purchase-order queries limited to that repair center.
+- Once exactly one repair center is resolved, keep all relevant purchase-order queries limited to that repair center using the filter RepairCenterID eq "{resolvedID}".
 - Do not guess or broaden the scope if the repair center cannot be pinned down.`
   }
 
