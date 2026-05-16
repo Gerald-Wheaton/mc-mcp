@@ -1,21 +1,13 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-
-interface RepairCenterArgs {
-  repair_center_id?: string
-  repair_center_name?: string
-}
+import {
+  buildRepairCenterInstructions,
+  repairCenterArgsSchema,
+  type RepairCenterArgs,
+} from './repair-center.js'
 
 interface BacklogArgs extends RepairCenterArgs {
   type?: string
-}
-
-const repairCenterArgsSchema = {
-  repair_center_id: z.string().optional().describe('Exact repair center ID to scope the analysis to, such as M.'),
-  repair_center_name: z
-    .string()
-    .optional()
-    .describe('Exact repair center name to resolve case-insensitively before scoping the analysis.'),
 }
 
 const workOrderTypeArgSchema = {
@@ -49,7 +41,11 @@ export function register(server: McpServer): void {
                 'Read mc://context/labors before summarizing assignees or technician references.',
                 'Read mc://context/asset-locations when you need to translate asset parent/location references.',
               ]),
-              buildRepairCenterInstructions(args),
+              buildRepairCenterInstructions({
+                args,
+                scopeLabel: 'all relevant work-order queries',
+                resolutionSampleLabel: 'work orders or assets',
+              }),
               `Give me a daily maintenance review. Cover the following:
 
 1. **Emergency and high-priority open work orders** — fetch open work orders with priority 0 ("Emergency / Immediate Response"). List each one with its ID, reason/description, asset, and how long it has been open.
@@ -96,7 +92,11 @@ Summarize your findings in plain language a maintenance manager would understand
                   'Read mc://context/time before querying tools so relative dates are anchored correctly.',
                   'Read mc://context/labors before summarizing assignees or technician references.',
                 ]),
-                buildRepairCenterInstructions(args),
+                buildRepairCenterInstructions({
+                  args,
+                  scopeLabel: 'all relevant work-order queries',
+                  resolutionSampleLabel: 'work orders or assets',
+                }),
                 buildTypeInstructions(scopedType),
                 scopedType
                   ? `Pull the open ${scopedType} work order backlog and analyze it.
@@ -156,7 +156,11 @@ After the per-type breakdown, give me a one-paragraph executive summary: where i
                   'Read mc://context/labors before summarizing assignees or technician references.',
                   'Read mc://context/asset-locations when you need to translate asset parent/location references.',
                 ]),
-                buildRepairCenterInstructions(args),
+                buildRepairCenterInstructions({
+                  args,
+                  scopeLabel: 'all relevant work-order queries',
+                  resolutionSampleLabel: 'work orders or assets',
+                }),
                 buildTypeInstructions(scopedType),
                 scopedType
                   ? `Fetch open, unassigned work orders of type "${scopedType}", sorted by priority (lowest number = highest urgency).
@@ -214,7 +218,11 @@ Finish with a count summary: how many unassigned WOs by type and priority.`,
                 'Read mc://context/labors before summarizing assignees or technician references.',
                 'Read mc://context/asset-locations when you need to translate asset parent/location references.',
               ]),
-              buildRepairCenterInstructions(args),
+              buildRepairCenterInstructions({
+                args,
+                scopeLabel: 'all relevant work-order queries',
+                resolutionSampleLabel: 'work orders or assets',
+              }),
               `Fetch all open work orders at Priority 0 (Emergency / Immediate Response).
 
 For each one, tell me:
@@ -245,32 +253,6 @@ function cleanArg(value?: string): string | undefined {
 function buildContextInstructions(lines: string[]): string {
   return `Before querying tools:
 ${lines.map((line) => `- ${line}`).join('\n')}`
-}
-
-function buildRepairCenterInstructions(args: RepairCenterArgs): string | undefined {
-  const repairCenterId = cleanArg(args.repair_center_id)
-  const repairCenterName = cleanArg(args.repair_center_name)
-
-  if (repairCenterId && repairCenterName) {
-    throw new Error('Provide only one repair center input. Use either repair_center_id or repair_center_name.')
-  }
-
-  if (repairCenterId) {
-    return `Keep all relevant work-order queries limited to repair center ID "${repairCenterId}" using the filter RepairCenterID eq "${repairCenterId}". If that scope cannot be applied confidently, stop and explain the limitation instead of guessing.`
-  }
-
-  if (repairCenterName) {
-    return `Resolve the repair center before the main analysis:
-- Fetch a small sample of work orders or assets that include repair center information.
-- Build a distinct list of repair centers using the IDs and names returned in those records.
-- Compare names after trimming whitespace and converting to lowercase.
-- If zero exact matches are found for "${repairCenterName}", stop and say the repair center name could not be resolved.
-- If more than one exact match is found for "${repairCenterName}", stop and say duplicate repair centers were found and the request is ambiguous.
-- Once exactly one repair center is resolved, keep all relevant work-order queries limited to that repair center using the filter RepairCenterID eq "{resolvedID}".
-- Do not guess or broaden the scope if the repair center cannot be pinned down.`
-  }
-
-  return undefined
 }
 
 function buildTypeInstructions(workOrderType?: string): string | undefined {

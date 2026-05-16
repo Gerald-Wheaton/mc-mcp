@@ -1,24 +1,13 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-
-interface RepairCenterArgs {
-  repair_center_id?: string
-  repair_center_name?: string
-}
+import {
+  buildRepairCenterInstructions,
+  repairCenterArgsSchema,
+  type RepairCenterArgs,
+} from './repair-center.js'
 
 interface VendorArgs extends RepairCenterArgs {
   vendor_name?: string
-}
-
-const repairCenterArgsSchema = {
-  repair_center_id: z
-    .string()
-    .optional()
-    .describe('Exact repair center ID to scope the analysis to, such as M.'),
-  repair_center_name: z
-    .string()
-    .optional()
-    .describe('Exact repair center name to resolve case-insensitively before scoping the analysis.'),
 }
 
 const vendorNameArgSchema = {
@@ -55,7 +44,11 @@ export function register(server: McpServer): void {
                   'Read mc://context/time before querying tools so relative dates are anchored correctly.',
                   'Read mc://context/lookup-tables when you need lookup-backed labels or codes during the analysis.',
                 ]),
-                buildRepairCenterInstructions(args),
+                buildRepairCenterInstructions({
+                  args,
+                  scopeLabel: 'all relevant purchase-order queries',
+                  resolutionSampleLabel: 'work orders or assets',
+                }),
                 buildVendorResolutionInstructions(vendorName),
                 vendorName
                   ? `Give me a summary of open purchase orders for the resolved vendor matching "${vendorName}".
@@ -121,7 +114,11 @@ Close with a plain-language summary of the procurement pipeline: is purchasing m
                   'Read mc://context/time before querying tools so relative dates are anchored correctly.',
                   'Read mc://context/lookup-tables when you need lookup-backed labels or codes during the analysis.',
                 ]),
-                buildRepairCenterInstructions(args),
+                buildRepairCenterInstructions({
+                  args,
+                  scopeLabel: 'all relevant purchase-order queries',
+                  resolutionSampleLabel: 'work orders or assets',
+                }),
                 buildVendorResolutionInstructions(vendorName),
                 vendorName
                   ? `I want to understand the performance of the resolved vendor matching "${vendorName}" through the lens of purchase order data.
@@ -184,7 +181,11 @@ Close with a plain-language summary: which vendors are the primary suppliers, is
                 'Read mc://context/time before querying tools so relative dates are anchored correctly.',
                 'Read mc://context/lookup-tables when you need lookup-backed labels or codes during the analysis.',
               ]),
-              buildRepairCenterInstructions(args),
+              buildRepairCenterInstructions({
+                args,
+                scopeLabel: 'all relevant purchase-order queries',
+                resolutionSampleLabel: 'work orders or assets',
+              }),
               `Show me all purchase orders currently in the approval pipeline — status REQUESTED, meaning they have been created but not yet issued/approved.
 
 Step 1: Fetch all purchase orders in REQUESTED status, sorted by order date.
@@ -218,34 +219,6 @@ function cleanArg(value?: string): string | undefined {
 function buildContextInstructions(lines: string[]): string {
   return `Before querying tools:
 ${lines.map((line) => `- ${line}`).join('\n')}`
-}
-
-function buildRepairCenterInstructions(args: RepairCenterArgs): string | undefined {
-  const repairCenterId = cleanArg(args.repair_center_id)
-  const repairCenterName = cleanArg(args.repair_center_name)
-
-  if (repairCenterId && repairCenterName) {
-    throw new Error(
-      'Provide only one repair center input. Use either repair_center_id or repair_center_name.',
-    )
-  }
-
-  if (repairCenterId) {
-    return `Keep all relevant purchase-order queries limited to repair center ID "${repairCenterId}" using the filter RepairCenterID eq "${repairCenterId}". If that scope cannot be applied confidently, stop and explain the limitation instead of guessing.`
-  }
-
-  if (repairCenterName) {
-    return `Resolve the repair center before the main analysis:
-- Fetch a small sample of work orders or assets that include repair center information.
-- Build a distinct list of repair centers using the IDs and names returned in those records.
-- Compare names after trimming whitespace and converting to lowercase.
-- If zero exact matches are found for "${repairCenterName}", stop and say the repair center name could not be resolved.
-- If more than one exact match is found for "${repairCenterName}", stop and say duplicate repair centers were found and the request is ambiguous.
-- Once exactly one repair center is resolved, keep all relevant purchase-order queries limited to that repair center using the filter RepairCenterID eq "{resolvedID}".
-- Do not guess or broaden the scope if the repair center cannot be pinned down.`
-  }
-
-  return undefined
 }
 
 function buildVendorResolutionInstructions(vendorName?: string): string | undefined {

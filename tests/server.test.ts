@@ -196,6 +196,47 @@ describe('MCP integration contract', () => {
 
     expect(scopedBacklogText).toContain('RepairCenterID eq "M"')
 
+    const pmPrompt = await harness.client.getPrompt({
+      name: 'mc_pm_compliance_review',
+      arguments: { repair_center_id: 'M' },
+    })
+    const pmPromptText =
+      pmPrompt.messages[0]?.content.type === 'text' ? pmPrompt.messages[0].content.text : ''
+
+    expect(pmPromptText).toContain('RepairCenterID eq "M"')
+
+    const inspectionPrompt = await harness.client.getPrompt({
+      name: 'mc_inspection_summary',
+      arguments: { repair_center_name: 'Main Campus' },
+    })
+    const inspectionPromptText =
+      inspectionPrompt.messages[0]?.content.type === 'text'
+        ? inspectionPrompt.messages[0].content.text
+        : ''
+
+    expect(inspectionPromptText).toContain('RepairCenterID eq "{resolvedID}"')
+
+    const reservedPartsPrompt = await harness.client.getPrompt({
+      name: 'mc_reserved_parts_audit',
+      arguments: { repair_center_id: 'M' },
+    })
+    const reservedPartsPromptText =
+      reservedPartsPrompt.messages[0]?.content.type === 'text'
+        ? reservedPartsPrompt.messages[0].content.text
+        : ''
+
+    expect(reservedPartsPromptText).toContain('RepairCenterID eq "M"')
+    expect(reservedPartsPromptText).toContain('Do not apply that repair-center scope to the part lookups.')
+
+    const assetPrompt = await harness.client.getPrompt({
+      name: 'mc_asset_health_check',
+      arguments: { repair_center_id: 'M' },
+    })
+    const assetPromptText =
+      assetPrompt.messages[0]?.content.type === 'text' ? assetPrompt.messages[0].content.text : ''
+
+    expect(assetPromptText).toContain('RepairCenterID eq "M"')
+
     const approvalPipelinePrompt = await harness.client.getPrompt({
       name: 'mc_po_approval_pipeline',
       arguments: { repair_center_id: 'M' },
