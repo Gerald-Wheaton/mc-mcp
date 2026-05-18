@@ -1,9 +1,12 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import {
+  buildRepairCenterInstructions,
+  repairCenterArgsSchema,
+  type RepairCenterArgs,
+} from './repair-center.js'
 
-interface ReservedPartsArgs {
-  repair_center_id?: string
-  repair_center_name?: string
+interface ReservedPartsArgs extends RepairCenterArgs {
   asset_name?: string
 }
 
@@ -12,16 +15,7 @@ interface CategoryArgs {
 }
 
 const reservedPartsArgsSchema = {
-  repair_center_id: z
-    .string()
-    .optional()
-    .describe('Exact repair center ID to scope the work-order side of the audit to, such as M.'),
-  repair_center_name: z
-    .string()
-    .optional()
-    .describe(
-      'Exact repair center name to resolve case-insensitively before scoping the work-order side of the audit.',
-    ),
+  ...repairCenterArgsSchema,
   asset_name: z
     .string()
     .optional()
@@ -62,7 +56,14 @@ export function register(server: McpServer): void {
                   'Read mc://context/labors before summarizing assignees or technician references on work orders.',
                   'Read mc://context/lookup-tables when you need lookup-backed labels or codes during the audit.',
                 ]),
-                buildRepairCenterInstructions(args),
+                buildRepairCenterInstructions({
+                  args,
+                  scopeLabel: 'the work-order side of this audit',
+                  resolutionSampleLabel: 'work orders or assets',
+                  excludeFollowupLookups: true,
+                  postResolveInstruction:
+                    'Once exactly one repair center is resolved, keep subsequent work-order queries limited to that repair center using the filter RepairCenterID eq "{resolvedID}".',
+                }),
                 buildAssetResolutionInstructions(assetName),
                 assetName
                   ? `A "reserved parts" situation means a work order has parts allocated to it but the work may not yet be complete. I want to audit reserved parts only for the resolved asset matching "${assetName}".
@@ -244,34 +245,6 @@ function cleanArg(value?: string): string | undefined {
 function buildContextInstructions(lines: string[]): string {
   return `Before querying tools:
 ${lines.map((line) => `- ${line}`).join('\n')}`
-}
-
-function buildRepairCenterInstructions(args: ReservedPartsArgs): string | undefined {
-  const repairCenterId = cleanArg(args.repair_center_id)
-  const repairCenterName = cleanArg(args.repair_center_name)
-
-  if (repairCenterId && repairCenterName) {
-    throw new Error(
-      'Provide only one repair center input. Use either repair_center_id or repair_center_name.',
-    )
-  }
-
-  if (repairCenterId) {
-    return `Keep the work-order side of this audit limited to repair center ID "${repairCenterId}". Do not apply that repair-center scope to the part lookups. If the scope cannot be applied confidently, stop and explain the limitation instead of guessing.`
-  }
-
-  if (repairCenterName) {
-    return `Resolve the repair center before the main analysis:
-- Fetch a small sample of work orders or assets that include repair center information.
-- Build a distinct list of repair centers using the IDs and names returned in those records.
-- Compare names after trimming whitespace and converting to lowercase.
-- If zero exact matches are found for "${repairCenterName}", stop and say the repair center name could not be resolved.
-- If more than one exact match is found for "${repairCenterName}", stop and say duplicate repair centers were found and the request is ambiguous.
-- Once exactly one repair center is resolved, keep subsequent work-order queries limited to that repair center.
-- Do not apply the repair-center scope to the part lookups, and do not broaden the request if the repair center cannot be pinned down.`
-  }
-
-  return undefined
 }
 
 function buildAssetResolutionInstructions(assetName?: string): string | undefined {

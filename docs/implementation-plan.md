@@ -109,6 +109,7 @@ Must be completed for each entity before Phase 3. Follow this checklist for ever
 - [x] **Logging and error handling** — structured log prefixes throughout: `[mc]` for API calls, cache events, retries, and timeouts; `[tool]` for non-4xx tool errors (with stack traces); `[resource]` for context resource failures. Log format documented in `docs/deployment.md`.
 - [x] **Deployment docs** — `docs/deployment.md` added: env vars, Railway config, local dev, credential format, credential rotation, log format table, known limitations. README updated with pointer.
 - [ ] **End-user UX audit** — review all prompt templates and tool descriptions to ensure the LLM never surfaces OData syntax or other developer-facing details to end users. The LLM should translate user intent into filters silently; replies should offer plain-English follow-up options, not raw filter strings. See `docs/open-questions.md` for the full design concern and example.
+- [ ] **Prompt redundancy review** — audit all prompt templates for shared boilerplate (repeated behavioral rules, resource-fetch sequences, output formatting instructions, scope-narrowing patterns) and extract into reusable helper prompts, following the model of the repair-center scope helper. Goal: reduce drift and make cross-cutting policy changes a single-file edit.
 
 - Full OAuth 2.1 flow (authorization server, token exchange, refresh tokens) — not needed for pilot; static API
   keys are sufficient

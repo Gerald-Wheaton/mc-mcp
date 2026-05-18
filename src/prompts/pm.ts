@@ -1,24 +1,13 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-
-interface RepairCenterArgs {
-  repair_center_id?: string
-  repair_center_name?: string
-}
+import {
+  buildRepairCenterInstructions,
+  repairCenterArgsSchema,
+  type RepairCenterArgs,
+} from './repair-center.js'
 
 interface PmArgs extends RepairCenterArgs {
   asset_name?: string
-}
-
-const repairCenterArgsSchema = {
-  repair_center_id: z
-    .string()
-    .optional()
-    .describe('Exact repair center ID to scope the analysis to, such as M.'),
-  repair_center_name: z
-    .string()
-    .optional()
-    .describe('Exact repair center name to resolve case-insensitively before scoping the analysis.'),
 }
 
 const assetNameArgSchema = {
@@ -56,7 +45,11 @@ export function register(server: McpServer): void {
                   'Read mc://context/labors before summarizing assignees or technician references.',
                   'Read mc://context/asset-locations before translating asset parent/location references.',
                 ]),
-                buildRepairCenterInstructions(args),
+                buildRepairCenterInstructions({
+                  args,
+                  scopeLabel: 'all relevant work-order queries',
+                  resolutionSampleLabel: 'work orders or assets',
+                }),
                 buildAssetResolutionInstructions(assetName),
                 assetName
                   ? `Give me a PM compliance review focused only on the resolved asset matching "${assetName}".
@@ -121,7 +114,11 @@ Summarize:
                 'Read mc://context/labors before summarizing assignees or technician references.',
                 'Read mc://context/asset-locations before translating asset parent/location references.',
               ]),
-              buildRepairCenterInstructions(args),
+              buildRepairCenterInstructions({
+                args,
+                scopeLabel: 'all relevant work-order queries',
+                resolutionSampleLabel: 'work orders or assets',
+              }),
               `Give me a summary of inspection work orders.
 
 Step 1: Fetch all open inspection work orders, sorted by priority.
@@ -156,34 +153,6 @@ function cleanArg(value?: string): string | undefined {
 function buildContextInstructions(lines: string[]): string {
   return `Before querying tools:
 ${lines.map((line) => `- ${line}`).join('\n')}`
-}
-
-function buildRepairCenterInstructions(args: RepairCenterArgs): string | undefined {
-  const repairCenterId = cleanArg(args.repair_center_id)
-  const repairCenterName = cleanArg(args.repair_center_name)
-
-  if (repairCenterId && repairCenterName) {
-    throw new Error(
-      'Provide only one repair center input. Use either repair_center_id or repair_center_name.',
-    )
-  }
-
-  if (repairCenterId) {
-    return `Keep all relevant work-order queries limited to repair center ID "${repairCenterId}". If that scope cannot be applied confidently, stop and explain the limitation instead of guessing.`
-  }
-
-  if (repairCenterName) {
-    return `Resolve the repair center before the main analysis:
-- Fetch a small sample of work orders or assets that include repair center information.
-- Build a distinct list of repair centers using the IDs and names returned in those records.
-- Compare names after trimming whitespace and converting to lowercase.
-- If zero exact matches are found for "${repairCenterName}", stop and say the repair center name could not be resolved.
-- If more than one exact match is found for "${repairCenterName}", stop and say duplicate repair centers were found and the request is ambiguous.
-- Once exactly one repair center is resolved, keep all relevant work-order queries limited to that repair center.
-- Do not guess or broaden the scope if the repair center cannot be pinned down.`
-  }
-
-  return undefined
 }
 
 function buildAssetResolutionInstructions(assetName?: string): string | undefined {
