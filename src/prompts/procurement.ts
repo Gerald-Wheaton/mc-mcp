@@ -18,16 +18,12 @@ const vendorNameArgSchema = {
 }
 
 export function register(server: McpServer): void {
-  server.registerPrompt(
+  server.prompt(
     'mc_open_purchase_orders',
+    'Review all open purchase orders — what is outstanding, who are the vendors, and what is the total spend committed.',
     {
-      title: 'Open purchase orders',
-      description:
-        'Review all open purchase orders — what is outstanding, who are the vendors, and what is the total spend committed.',
-      argsSchema: {
-        ...repairCenterArgsSchema,
-        ...vendorNameArgSchema,
-      },
+      ...repairCenterArgsSchema,
+      ...vendorNameArgSchema,
     },
     (args: VendorArgs) => {
       const vendorName = cleanArg(args.vendor_name)
@@ -88,16 +84,12 @@ Close with a plain-language summary of the procurement pipeline: is purchasing m
     },
   )
 
-  server.registerPrompt(
+  server.prompt(
     'mc_vendor_performance',
+    'Analyze purchase orders by vendor to understand spend distribution, order frequency, and order status across suppliers.',
     {
-      title: 'Vendor performance',
-      description:
-        'Analyze purchase orders by vendor to understand spend distribution, order frequency, and order status across suppliers.',
-      argsSchema: {
-        ...repairCenterArgsSchema,
-        ...vendorNameArgSchema,
-      },
+      ...repairCenterArgsSchema,
+      ...vendorNameArgSchema,
     },
     (args: VendorArgs) => {
       const vendorName = cleanArg(args.vendor_name)
@@ -159,15 +151,11 @@ Close with a plain-language summary: which vendors are the primary suppliers, is
     },
   )
 
-  server.registerPrompt(
+  server.prompt(
     'mc_po_approval_pipeline',
+    'Show purchase orders in REQUESTED status that are awaiting approval or action before becoming active orders.',
     {
-      title: 'PO approval pipeline',
-      description:
-        'Show purchase orders in REQUESTED status that are awaiting approval or action before becoming active orders.',
-      argsSchema: {
-        ...repairCenterArgsSchema,
-      },
+      ...repairCenterArgsSchema,
     },
     (args: RepairCenterArgs) => ({
       messages: [

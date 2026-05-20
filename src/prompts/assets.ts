@@ -18,16 +18,12 @@ const assetNameArgSchema = {
 }
 
 export function register(server: McpServer): void {
-  server.registerPrompt(
+  server.prompt(
     'mc_asset_health_check',
+    'Identify which equipment assets have the most active open work orders — a proxy for assets under stress or nearing failure.',
     {
-      title: 'Asset health check',
-      description:
-        'Identify which equipment assets have the most active open work orders — a proxy for assets under stress or nearing failure.',
-      argsSchema: {
-        ...repairCenterArgsSchema,
-        ...assetNameArgSchema,
-      },
+      ...repairCenterArgsSchema,
+      ...assetNameArgSchema,
     },
     (args: AssetHealthArgs) => {
       const assetName = cleanArg(args.asset_name)
@@ -93,15 +89,11 @@ Close with a plain-language assessment: which assets look like they may need pro
     },
   )
 
-  server.registerPrompt(
+  server.prompt(
     'mc_location_equipment_breakdown',
+    'Summarize the asset hierarchy — how many location nodes vs equipment records exist, and what does the top of the tree look like.',
     {
-      title: 'Location & equipment breakdown',
-      description:
-        'Summarize the asset hierarchy — how many location nodes vs equipment records exist, and what does the top of the tree look like.',
-      argsSchema: {
-        ...repairCenterArgsSchema,
-      },
+      ...repairCenterArgsSchema,
     },
     (args: RepairCenterArgs) => ({
       messages: [

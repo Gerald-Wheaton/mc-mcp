@@ -51,7 +51,7 @@ const LookupTableListSchema = McApiResponseSchema(LookupTableContextSchema)
 const LookupTableValueListSchema = McApiResponseSchema(LookupTableValueContextSchema)
 
 export function register(server: McpServer, client: McClient): void {
-  server.registerResource(
+  server.resource(
     'mc-context-time',
     TIME_RESOURCE_URI,
     {
@@ -62,7 +62,7 @@ export function register(server: McpServer, client: McClient): void {
     async () => toJsonResource(TIME_RESOURCE_URI, buildTimeContext()),
   )
 
-  server.registerResource(
+  server.resource(
     'mc-context-datasets',
     DATASETS_RESOURCE_URI,
     {
@@ -78,7 +78,7 @@ export function register(server: McpServer, client: McClient): void {
       }),
   )
 
-  server.registerResource(
+  server.resource(
     'mc-context-summary',
     SUMMARY_RESOURCE_URI,
     {
@@ -89,7 +89,7 @@ export function register(server: McpServer, client: McClient): void {
     async () => readResource(SUMMARY_RESOURCE_URI, () => readSummaryContext(client)),
   )
 
-  server.registerResource(
+  server.resource(
     'mc-context-labors',
     LABORS_RESOURCE_URI,
     {
@@ -100,7 +100,7 @@ export function register(server: McpServer, client: McClient): void {
     async () => readResource(LABORS_RESOURCE_URI, () => readLaborContext(client)),
   )
 
-  server.registerResource(
+  server.resource(
     'mc-context-asset-locations',
     ASSET_LOCATIONS_RESOURCE_URI,
     {
@@ -111,7 +111,7 @@ export function register(server: McpServer, client: McClient): void {
     async () => readResource(ASSET_LOCATIONS_RESOURCE_URI, () => readAssetLocationContext(client)),
   )
 
-  server.registerResource(
+  server.resource(
     'mc-context-lookup-tables',
     LOOKUP_TABLES_RESOURCE_URI,
     {

@@ -48,10 +48,10 @@ export function createHttpServer(config: ServerConfig): Server {
       onsessioninitialized: (id) => {
         sessions.set(id, { server, transport })
       },
-      onsessionclosed: (id) => {
-        sessions.delete(id)
-      },
     })
+    transport.onclose = () => {
+      if (transport.sessionId) sessions.delete(transport.sessionId)
+    }
 
     server.connect(transport)
     return transport

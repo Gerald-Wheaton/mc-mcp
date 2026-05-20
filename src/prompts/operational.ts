@@ -18,15 +18,11 @@ const workOrderTypeArgSchema = {
 }
 
 export function register(server: McpServer): void {
-  server.registerPrompt(
+  server.prompt(
     'mc_daily_maintenance_review',
+    "Get a summary of today's maintenance activity — open high-priority work orders, recently completed work, and anything that needs immediate attention.",
     {
-      title: 'Daily maintenance review',
-      description:
-        "Get a summary of today's maintenance activity — open high-priority work orders, recently completed work, and anything that needs immediate attention.",
-      argsSchema: {
-        ...repairCenterArgsSchema,
-      },
+      ...repairCenterArgsSchema,
     },
     (args: RepairCenterArgs) => ({
       messages: [
@@ -66,16 +62,12 @@ Summarize your findings in plain language a maintenance manager would understand
     }),
   )
 
-  server.registerPrompt(
+  server.prompt(
     'mc_open_work_order_backlog',
+    'Analyze the full backlog of open work orders by type and priority to understand where effort is concentrated.',
     {
-      title: 'Open work order backlog',
-      description:
-        'Analyze the full backlog of open work orders by type and priority to understand where effort is concentrated.',
-      argsSchema: {
-        ...repairCenterArgsSchema,
-        ...workOrderTypeArgSchema,
-      },
+      ...repairCenterArgsSchema,
+      ...workOrderTypeArgSchema,
     },
     (args: BacklogArgs) => {
       const scopedType = cleanArg(args.type)
@@ -130,15 +122,12 @@ After the per-type breakdown, give me a one-paragraph executive summary: where i
     },
   )
 
-  server.registerPrompt(
+  server.prompt(
     'mc_unassigned_work_orders',
+    'Show all open work orders that have not been assigned to a technician, sorted by priority.',
     {
-      title: 'Unassigned work orders',
-      description: 'Show all open work orders that have not been assigned to a technician, sorted by priority.',
-      argsSchema: {
-        ...repairCenterArgsSchema,
-        ...workOrderTypeArgSchema,
-      },
+      ...repairCenterArgsSchema,
+      ...workOrderTypeArgSchema,
     },
     (args: BacklogArgs) => {
       const scopedType = cleanArg(args.type)
@@ -196,14 +185,11 @@ Finish with a count summary: how many unassigned WOs by type and priority.`,
     },
   )
 
-  server.registerPrompt(
+  server.prompt(
     'mc_emergency_work_orders',
+    'Surface all open emergency (Priority 0) work orders that require immediate response.',
     {
-      title: 'Emergency work orders',
-      description: 'Surface all open emergency (Priority 0) work orders that require immediate response.',
-      argsSchema: {
-        ...repairCenterArgsSchema,
-      },
+      ...repairCenterArgsSchema,
     },
     (args: RepairCenterArgs) => ({
       messages: [

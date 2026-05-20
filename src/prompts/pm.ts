@@ -18,16 +18,12 @@ const assetNameArgSchema = {
 }
 
 export function register(server: McpServer): void {
-  server.registerPrompt(
+  server.prompt(
     'mc_pm_compliance_review',
+    'Review PM work order status to understand whether scheduled preventive maintenance is being completed on time or falling behind.',
     {
-      title: 'PM compliance review',
-      description:
-        'Review PM work order status to understand whether scheduled preventive maintenance is being completed on time or falling behind.',
-      argsSchema: {
-        ...repairCenterArgsSchema,
-        ...assetNameArgSchema,
-      },
+      ...repairCenterArgsSchema,
+      ...assetNameArgSchema,
     },
     (args: PmArgs) => {
       const assetName = cleanArg(args.asset_name)
@@ -91,15 +87,11 @@ Summarize:
     },
   )
 
-  server.registerPrompt(
+  server.prompt(
     'mc_inspection_summary',
+    'Summarize open and recent inspection work orders to understand the state of scheduled inspections.',
     {
-      title: 'Inspection summary',
-      description:
-        'Summarize open and recent inspection work orders to understand the state of scheduled inspections.',
-      argsSchema: {
-        ...repairCenterArgsSchema,
-      },
+      ...repairCenterArgsSchema,
     },
     (args: RepairCenterArgs) => ({
       messages: [

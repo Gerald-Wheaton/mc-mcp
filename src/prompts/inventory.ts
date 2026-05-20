@@ -30,15 +30,11 @@ const categoryArgSchema = {
 }
 
 export function register(server: McpServer): void {
-  server.registerPrompt(
+  server.prompt(
     'mc_reserved_parts_audit',
+    'Show all open work orders with parts reserved and surface which parts are tied up, to help identify inventory bottlenecks.',
     {
-      title: 'Reserved parts audit',
-      description:
-        'Show all open work orders with parts reserved and surface which parts are tied up, to help identify inventory bottlenecks.',
-      argsSchema: {
-        ...reservedPartsArgsSchema,
-      },
+      ...reservedPartsArgsSchema,
     },
     (args: ReservedPartsArgs) => {
       const assetName = cleanArg(args.asset_name)
@@ -106,15 +102,11 @@ Close with a plain-language assessment of whether the reserved parts situation l
     },
   )
 
-  server.registerPrompt(
+  server.prompt(
     'mc_inventory_audit',
+    'Get a high-level overview of the parts catalog — active vs inactive parts, cost rule distribution, and general inventory health.',
     {
-      title: 'Inventory audit',
-      description:
-        'Get a high-level overview of the parts catalog — active vs inactive parts, cost rule distribution, and general inventory health.',
-      argsSchema: {
-        ...categoryArgSchema,
-      },
+      ...categoryArgSchema,
     },
     (args: CategoryArgs) => {
       const category = cleanArg(args.category)
@@ -175,15 +167,11 @@ Keep the summary concise — this is an orientation, not an exhaustive ledger.`,
     },
   )
 
-  server.registerPrompt(
+  server.prompt(
     'mc_slow_moving_parts',
+    'Identify parts that have not been issued or ordered recently — candidates for reorder review or catalog cleanup.',
     {
-      title: 'Slow-moving parts',
-      description:
-        'Identify parts that have not been issued or ordered recently — candidates for reorder review or catalog cleanup.',
-      argsSchema: {
-        ...categoryArgSchema,
-      },
+      ...categoryArgSchema,
     },
     (args: CategoryArgs) => {
       const category = cleanArg(args.category)
