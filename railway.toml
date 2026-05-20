@@ -1,6 +1,3 @@
-[build]
-buildCommand = "bun install"
-
 [deploy]
 startCommand = "bun run src/index.ts"
 healthcheckPath = "/health"
