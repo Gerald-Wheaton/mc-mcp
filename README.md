@@ -90,31 +90,59 @@ See [`docs/deployment.md`](docs/deployment.md) for the full runbook covering Rai
 
 This server uses **HTTP transport**. Claude Desktop connects via `mcp-remote`, which bridges the local stdio expectation to the remote HTTP endpoint.
 
-**Steps:**
+> **The only local dependency is Node.js/npm** (for `npx mcp-remote`) — you do not need to install Bun or clone this repo.
+
+> **HTTPS is handled by Railway** — the server speaks plain HTTP internally; clients always connect over `https://`.
+
+### Step 1 — Generate your credentials
+
+Encode your connection key and API key as a single Base64 string. The connection key identifies the tenant (username); the API key authenticates the caller (password). Order matters — connection key must come first.
+
+**Mac / Linux (Terminal):**
+```bash
+echo -n "YOUR_CONNECTION_KEY:YOUR_API_KEY" | base64
+```
+
+**Windows (PowerShell):**
+```powershell
+[Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("YOUR_CONNECTION_KEY:YOUR_API_KEY"))
+```
+
+Copy the output — you'll paste it as `YOUR_BASE64_CREDENTIALS` below.
+
+### Step 2 — Add the MCP server config
 
 1. Open Claude Desktop
 2. Go to **Settings → Developer → Edit Config**
-3. Add the following entry inside thelist `"mcpServers"` object in `claude_desktop_config.json`:
+3. Add the appropriate entry inside the `"mcpServers"` object in `claude_desktop_config.json`:
 
+**Mac / Linux:**
 ```json
 "mc-mcp": {
   "command": "npx",
   "args": [
     "mcp-remote",
-    "https://{DOMAIN_STRING}/mcp",
+    "https://YOUR-RAILWAY-DOMAIN.up.railway.app/mcp",
     "--header",
-    "X-MC-Basic-Auth: base64(CONNECTION_KEY:API_KEY)"
+    "X-MC-Basic-Auth: YOUR_BASE64_CREDENTIALS"
   ]
 }
 ```
 
-> **HTTPS is handled by Railway** — the server speaks plain HTTP internally; clients always connect over `https://`.
-
-Replace the header value with your encoded MC credentials:
-
-```bash
-echo -n "YOUR_CONNECTION_KEY:YOUR_API_KEY" | base64
+**Windows:**
+```json
+"mc-mcp": {
+  "command": "cmd",
+  "args": [
+    "/c", "npx", "mcp-remote",
+    "https://YOUR-RAILWAY-DOMAIN.up.railway.app/mcp",
+    "--header",
+    "X-MC-Basic-Auth: YOUR_BASE64_CREDENTIALS"
+  ]
+}
 ```
+
+> Windows requires routing through `cmd /c` because Claude Desktop cannot resolve the bare `npx` command on Windows — `npx.cmd` is the actual executable.
 
 4. Save and **restart Claude Desktop**
 5. Verify the server appears under the MCP tools icon (hammer icon) in the chat interface
