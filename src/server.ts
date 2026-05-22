@@ -39,8 +39,8 @@ export interface HttpRequestRoute {
 export function createHttpServer(config: ServerConfig): Server {
   const sessions = new Map<string, Session>()
 
-  function createSession(mcBasicAuth: string): StreamableHTTPServerTransport {
-    const client = new McClient({ baseUrl: config.mcBaseUrl, basicAuth: mcBasicAuth })
+  function createSession(mcBasicAuth: string, mcBaseUrl: string): StreamableHTTPServerTransport {
+    const client = new McClient({ baseUrl: mcBaseUrl, basicAuth: mcBasicAuth })
     const server = buildMcpServer(client)
 
     const transport = new StreamableHTTPServerTransport({
@@ -109,11 +109,12 @@ export function createHttpServer(config: ServerConfig): Server {
     }
 
     const mcBasicAuth = req.headers['x-mc-basic-auth'] as string
+    const mcBaseUrl = (req.headers['x-mc-base-url'] as string | undefined) ?? config.mcBaseUrl
     const sessionId = req.headers['mcp-session-id'] as string | undefined
     const transport =
       route.action === 'reuse-session'
         ? sessions.get(sessionId as string)?.transport
-        : createSession(mcBasicAuth)
+        : createSession(mcBasicAuth, mcBaseUrl)
 
     if (!transport) {
       res.writeHead(404, { 'Content-Type': 'application/json' })

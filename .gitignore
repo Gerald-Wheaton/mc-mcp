@@ -5,3 +5,4 @@ dist/
 segment3-plan.md
 node_modules/
 .fallow/
+.mcp.json
