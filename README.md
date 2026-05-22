@@ -90,9 +90,25 @@ See [`docs/deployment.md`](docs/deployment.md) for the full runbook covering Rai
 
 This server uses **HTTP transport**. Claude Desktop connects via `mcp-remote`, which bridges the local stdio expectation to the remote HTTP endpoint.
 
-> **The only local dependency is Node.js/npm** (for `npx mcp-remote`) — you do not need to install Bun or clone this repo.
-
 > **HTTPS is handled by Railway** — the server speaks plain HTTP internally; clients always connect over `https://`.
+
+### Step 0 — Install Node.js (if you don't have it)
+
+`mcp-remote` requires Node.js. If you're not sure whether you have it, open a terminal and run `node --version`. If you get a version number back, skip this step.
+
+**Mac:**
+Download and run the installer from [nodejs.org](https://nodejs.org) (choose the LTS version), or if you use Homebrew:
+```bash
+brew install node
+```
+
+**Windows:**
+Download and run the installer from [nodejs.org](https://nodejs.org) (choose the LTS version), or via winget:
+```powershell
+winget install OpenJS.NodeJS
+```
+
+Once installed, close and reopen your terminal, then confirm with `node --version`.
 
 ### Step 1 — Generate your credentials
 
@@ -124,7 +140,9 @@ Copy the output — you'll paste it as `YOUR_BASE64_CREDENTIALS` below.
     "mcp-remote",
     "https://YOUR-RAILWAY-DOMAIN.up.railway.app/mcp",
     "--header",
-    "X-MC-Basic-Auth: YOUR_BASE64_CREDENTIALS"
+    "X-MC-Basic-Auth: YOUR_BASE64_CREDENTIALS",
+    "--header",
+    "X-MC-Base-URL: https://api.maintenanceconnection.com/v8"
   ]
 }
 ```
@@ -137,10 +155,14 @@ Copy the output — you'll paste it as `YOUR_BASE64_CREDENTIALS` below.
     "/c", "npx", "mcp-remote",
     "https://YOUR-RAILWAY-DOMAIN.up.railway.app/mcp",
     "--header",
-    "X-MC-Basic-Auth: YOUR_BASE64_CREDENTIALS"
+    "X-MC-Basic-Auth: YOUR_BASE64_CREDENTIALS",
+    "--header",
+    "X-MC-Base-URL: https://api.maintenanceconnection.com/v8"
   ]
 }
 ```
+
+> **Staging vs. production:** Replace the `X-MC-Base-URL` value with `https://api-stage.maintenanceconnection.com/v8` if your credentials are for the MC staging environment.
 
 > Windows requires routing through `cmd /c` because Claude Desktop cannot resolve the bare `npx` command on Windows — `npx.cmd` is the actual executable.
 
@@ -162,11 +184,11 @@ Copy the output — you'll paste it as `YOUR_BASE64_CREDENTIALS` below.
 | `mc_list_datasets`        | List all available resource families and their tools — call this first to orient                                                                     |
 | `mc_list_work_orders`     | List work orders (types: CM=Corrective, PM=Preventive, SR=Service Request)                                                                           |
 | `mc_get_work_order`       | Get a single work order by PK                                                                                                                        |
-| `mc_list_assets`          | List assets and locations (33,639 records, hierarchical)                                                                                             |
+| `mc_list_assets`          | List assets and locations (hierarchical)                                                                                                             |
 | `mc_get_asset`            | Get a single asset by PK                                                                                                                             |
-| `mc_list_parts`           | List inventory parts (3,305 records)                                                                                                                 |
+| `mc_list_parts`           | List inventory parts                                                                                                                                 |
 | `mc_get_part`             | Get a single part by PK                                                                                                                              |
-| `mc_list_purchase_orders` | List purchase orders (74 records)                                                                                                                    |
+| `mc_list_purchase_orders` | List purchase orders                                                                                                                                 |
 | `mc_get_purchase_order`   | Get a single purchase order by PK                                                                                                                    |
 | `mc_list_po_line_items`   | List PO line items — filter by `PurchaseOrderPK eq {pk}` to see what was ordered on a PO, or by `PartRef/PK` to trace procurement history for a part |
 
