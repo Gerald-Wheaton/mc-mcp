@@ -126,3 +126,5 @@ Use the **`add-mc-tool-domain` skill** — it covers API lookup, file creation, 
 | `docs/open-questions.md`                   | Outstanding questions before next phase can proceed                                     |
 | `docs/live-context-resources.md`           | Architectural ideation: MCP Resources as context layer (staleness tiers, resource URIs) |
 | `docs/phase3-prompts-and-repair-center.md` | Repair center recon and Phase 3 prompt template plan                                    |
+| `docs/user-feedback.md`                    | Feedback log from early testers — bugs, friction points, feature requests               |
+| `docs/codebase-evaluation.md`              | Point-in-time review (2026-06-14): architecture summary + ranked shortcomings           |
