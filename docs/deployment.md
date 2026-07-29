@@ -26,13 +26,16 @@ curl http://localhost:3000/health
 
 ## Railway deployment
 
-The server auto-deploys on push to the main branch via Railway.
+> **Status:** the original deployment ran on Gerald's personal Railway account and is no longer active. There is currently no live instance; deploy a fresh one before connecting clients.
 
-- **Live URL:** `https://mc-mcp-production-d25a.up.railway.app`
-- **Health check path:** `/health` (configured in `railway.toml`)
-- **HTTPS:** handled by Railway's proxy — the server speaks plain HTTP internally
+To stand up a new instance, create a Railway project from this repo (`railway.toml` is already present) with:
+
+- **Health check path:** `/health`
+- **HTTPS:** handled by Railway's proxy; the server speaks plain HTTP internally
 - **Build command:** `bun install`
 - **Start command:** `bun run src/index.ts`
+
+Railway auto-deploys on push to whichever branch the linked project tracks (`main` by convention).
 
 To check deployment status or view logs, use the Railway dashboard or CLI:
 
@@ -49,9 +52,11 @@ Add the following entry to `claude_desktop_config.json` under `"mcpServers"`:
   "command": "npx",
   "args": [
     "mcp-remote",
-    "https://mc-mcp-production-d25a.up.railway.app/mcp",
+    "https://YOUR-DEPLOYED-DOMAIN/mcp",
     "--header",
-    "X-MC-Basic-Auth: <base64(CONNECTION_KEY:API_KEY)>"
+    "X-MC-Basic-Auth: <base64(CONNECTION_KEY:API_KEY)>",
+    "--header",
+    "X-MC-Base-URL: https://api.maintenanceconnection.com/v8"
   ]
 }
 ```
