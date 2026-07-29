@@ -2,6 +2,8 @@
 
 > Inspired by analysis of the Limble MCP server's context resource pattern (2026-03-30).
 > This doc captures architectural thinking for MC-MCP Phase 3+ work.
+> The source snapshots (formerly `LIMBLE-SYSTEM-PROMPTS/`) were removed 2026-07-29; they held
+> account data from the separate Limble build, and the lessons are captured here.
 
 ## The Core Idea
 
