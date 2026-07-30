@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { createMcpHarness } from './helpers/mcp-harness.ts'
 import { parseJsonBody, routeHttpRequest } from '../src/server.ts'
+import { MC_ASSISTANT_INSTRUCTIONS } from '../src/server-instructions.ts'
 
 const USER_FACING_TECHNICAL_PATTERNS = [
   /\$filter/i,
@@ -114,6 +115,7 @@ describe('MCP integration contract', () => {
       'mc_list_po_line_items',
     ])
     expect(prompts.prompts).toHaveLength(14)
+    expect(harness.client.getInstructions()).toBe(MC_ASSISTANT_INSTRUCTIONS)
     expect(resources.resources.map((resource) => resource.uri)).toEqual([
       'mc://context/time',
       'mc://context/datasets',

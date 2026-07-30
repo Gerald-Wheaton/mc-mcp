@@ -33,7 +33,15 @@ Follow the [README](../README.md) for setup, credential encoding, local runs, te
 
 ## API scope
 
-The v8 spec (per `api-docs/mc-normalized-api-map.json`) contains 38 resource families and 251 operations: 122 GET, 61 POST, 68 PUT, and zero DELETE. This server wraps the read side of the five families above plus the reference families used by context resources (labors, lookup tables, classifications). Everything else (documents, images, meter history, specifications, invoices, receipts, cost actuals and estimates, companies) is unexposed but follows the same pattern; the `add-mc-tool-domain` skill in `.claude/skills/` walks through adding a family.
+The v8 spec (per `api-docs/mc-normalized-api-map.json`) contains 38 resource families and 251 operations: 122 GET, 61 POST, 68 PUT, and zero DELETE. This server wraps the read side of the five families above plus the reference families used by context resources (labors, lookup tables, classifications). Everything else (documents, images, meter history, specifications, invoices, receipts, cost actuals and estimates, companies) is unexposed but follows the same pattern — see "Expanding the toolset" below.
+
+## Expanding the toolset
+
+Adding tools for an unexposed resource family (PartLocations, Companies, Invoices, ...) is a paved path, driven with Claude Code from the repo root:
+
+- Ask in plain language ("add tools for Invoices") — Claude picks up the **`add-mc-tool-domain` skill** (`.claude/skills/add-mc-tool-domain/`) automatically — or invoke it yourself by typing `/add-mc-tool-domain`.
+- The skill walks the full checklist: endpoint lookup in the `api-docs/` artifacts, schema and tool file creation, registration, the dataset catalog entry, test updates, verification, and docs updates. `src/tools/purchase-orders.ts` is the reference implementation.
+- Candidate families worth building next, with the demand signal behind each, are ranked in [`future-work.md`](future-work.md) item 10.
 
 ## Known limitations today
 

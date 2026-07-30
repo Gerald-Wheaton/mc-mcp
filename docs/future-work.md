@@ -43,7 +43,7 @@ The resource uses the server's timezone (UTC on Railway), so relative dates ("to
 
 ## 7. Token cost audit
 
-Moved from `docs/open-questions.md` (2026-07-29). The server offloads query planning to the model (endpoint choice, OData construction, raw-response interpretation), which is flexible but token-expensive per turn. Candidates: pre-built query tools that encode common complete queries ("open CMs this week by site"); trimming fields the model never uses; more cached context resources; and fewer, narrower tools where use cases are predictable. Shipped mitigation: the redundant per-prompt system string ("You are a maintenance operations assistant...") was removed from the 14 prompt bodies in `src/prompts/`; the same identity now lives once in the `McpServer` instructions.
+Moved from `docs/open-questions.md` (2026-07-29). The server offloads query planning to the model (endpoint choice, OData construction, raw-response interpretation), which is flexible but token-expensive per turn. Candidates: pre-built query tools that encode common complete queries ("open CMs this week by site"); trimming fields the model never uses; more cached context resources; and fewer, narrower tools where use cases are predictable. Shipped mitigation: the redundant per-prompt system string ("You are a maintenance operations assistant...") was removed from the 14 prompt bodies in `src/prompts/`; the same identity now lives once in the `McpServer` instructions (`src/server-instructions.ts`). Accepted limitation: initialize-time instructions are the only delivery path for identity/orientation, and some MCP clients do not surface them — per-prompt identity was deliberately not restored to keep the token savings.
 
 ## 8. Split the "no internal syntax" rule by context
 

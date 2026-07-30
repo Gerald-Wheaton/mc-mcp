@@ -37,7 +37,7 @@ Use the **`maintenance-connection-api-rag` skill** (`.claude/skills/SKILL.md`) w
 1. Search `mc-llm-api-chunks.json` for semantic/fuzzy discovery
 2. Verify exact details in `mc-normalized-api-map.json`
 
-Never answer API questions from the raw swagger file (`mc-api-swagger.json`) — use the pre-built artifacts under `api-docs/`.
+Never answer API questions from the raw swagger file (`api-docs/mc-api-swagger.json`) — use the pre-built map artifacts (`mc-normalized-api-map.json`, `mc-llm-api-chunks.json`) instead.
 
 ### Key API resource families (tags)
 
@@ -77,9 +77,9 @@ mc-mcp/
 ├── package.json               # Deps: @modelcontextprotocol/sdk, zod, typescript
 ├── api-docs/
 │   ├── mc-normalized-api-map.json   # Structured endpoint/schema reference (source of truth)
-│   └── mc-llm-api-chunks.json       # Semantic retrieval chunks for fuzzy discovery
-├── build-mc-api-map.ts        # Script that built api-docs/ from mc-api-swagger.json
-├── mc-api-swagger.json        # Raw Swagger 2.0 source (do not query directly)
+│   ├── mc-llm-api-chunks.json       # Semantic retrieval chunks for fuzzy discovery
+│   └── mc-api-swagger.json          # Raw Swagger 2.0 source (do not query directly)
+├── build-mc-api-map.ts        # Script that built the map artifacts from api-docs/mc-api-swagger.json
 ├── docs/                      # Reference docs (see Docs Index below)
 ├── tests/                     # bun test suite: client, routing, MCP contract, handlers, fixtures
 └── src/
@@ -106,7 +106,7 @@ mc-mcp/
 
 ### Adding a new tool domain
 
-Use the **`add-mc-tool-domain` skill** — it covers API lookup, file creation, registration, type-checking, and README update.
+Use the **`add-mc-tool-domain` skill** — it covers API lookup, schema/tool file creation, registration, the dataset catalog entry, test updates, verification, and docs updates. `src/tools/purchase-orders.ts` is the reference implementation.
 
 ## Working Principles & Key Conventions
 

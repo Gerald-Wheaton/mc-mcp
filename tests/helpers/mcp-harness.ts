@@ -10,7 +10,9 @@ export async function createMcpHarness(
   }),
 ) {
   const [clientSide, serverSide] = InMemoryTransport.createLinkedPair()
-  clientSide.sessionId = 'test-session'
+  // Do not pre-set clientSide.sessionId: the SDK client treats a transport with a
+  // sessionId as a reconnect and skips the initialize handshake, which would leave
+  // server-delivered instructions and capabilities unpopulated in these tests.
   serverSide.sessionId = 'test-session'
 
   const server = buildMcpServer(clientImplementation)

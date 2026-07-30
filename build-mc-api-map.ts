@@ -1,6 +1,6 @@
 // build-mc-api-map.ts
 // Usage:
-//   bun run build-mc-api-map.ts ./mc-api-swagger.json ./out
+//   bun run build-mc-api-map.ts ./api-docs/mc-api-swagger.json ./out
 //
 // Outputs:
 //   ./out/mc-normalized-api-map.json
@@ -196,7 +196,7 @@ function main() {
   if (!inputPath) {
     console.error("Missing input file path.");
     console.error(
-      "Usage: bun run build-mc-api-map.ts ./mc-api-swagger.json ./out",
+      "Usage: bun run build-mc-api-map.ts ./api-docs/mc-api-swagger.json ./out",
     );
     process.exit(1);
   }
