@@ -17,6 +17,19 @@ Use this skill when the user asks to:
 - Expose a new entity to MCP clients
 - Implement list/get tools for an endpoint not yet in the server
 
+## The authoritative pattern
+
+**`src/tools/purchase-orders.ts` is the reference implementation.** Read it before writing any code and mirror it exactly — registration call shape, import style, `$fetchAll` handling, Zod parsing, error handling. If anything in this skill disagrees with that file, the file wins.
+
+What the reference demonstrates and every new domain must reproduce:
+
+- `server.registerTool(name, { description, inputSchema }, handler)` — the object-config SDK API
+- Imports via the `@/` path alias, never relative `../` paths
+- List handlers spread `...odataShape`, split off `$fetchAll`, and branch: `client.getAllPages(path, { params: { ...params, $top: FETCH_ALL_CAP } })` when set, plain `client.get(path, { params })` otherwise
+- Every raw response is validated with a Zod schema (`.parse(raw)`) before returning
+- List results return via `toListToolText(data, params.$skip ?? 0)` — with `{ fetchedAll: true, cappedAt: FETCH_ALL_CAP }` on the fetch-all branch; single records return via `toToolText`
+- All handlers wrap in try/catch and return `toToolError(err)` on failure
+
 ## Prerequisites
 
 Before writing any code, use the `maintenance-connection-api-rag` skill to look up the target resource:
@@ -38,107 +51,58 @@ Use the RAG skill to find:
 - Any required query params beyond standard OData
 - The response schema name (usually `ApiResponse` for lists)
 
-### Step 2 — Add minimal types to `src/shared/types.ts`
+### Step 2 — Add a Zod summary schema to `src/shared/types.ts`
 
-Add a `<Entity>Summary` interface with only fields that are confirmed in the normalized map:
-
-```typescript
-export interface InvoiceSummary {
-  PK: number;
-  ID: string;
-  // add fields only as confirmed against real API responses
-}
-```
-
-Do not copy the full Swagger schema as TypeScript — add fields incrementally as they are verified.
+Add `<Entity>SummarySchema`, mirroring `PurchaseOrderSummarySchema`: include only fields confirmed against the normalized map (or better, a real API response), never the full Swagger schema. Add fields incrementally as they are verified, and keep unverified-but-likely fields `.nullable().optional()`.
 
 ### Step 3 — Create `src/tools/<domain>.ts`
 
-Follow this exact pattern:
+Copy `src/tools/purchase-orders.ts` and adapt. Two gotchas the reference file demonstrates but that are easy to miss:
 
-```typescript
-import { z } from 'zod'
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { McClient } from '../mc-client.js'
-import { odataShape } from '../shared/odata.js'
-import { toToolText, toToolError } from '../shared/response.js'
-import type { McApiResponse, <Entity>Summary } from '../shared/types.js'
+- Single-record GET endpoints return the same `ApiResponse` envelope as list endpoints — parse the get response with the **list** schema (`McApiResponseSchema(<Entity>SummarySchema)`), not a bare entity schema.
+- Do not drop the `$fetchAll` branch from list handlers; without it the new tool silently lacks the paging behavior every sibling tool has.
 
-export function register(server: McpServer, client: McClient): void {
-  server.tool(
-    'mc_list_<domain>',
-    '<Description for LLM — what entity, what filters are useful, what questions it answers>',
-    { ...odataShape },
-    async (input) => {
-      try {
-        const data = await client.get<McApiResponse<<Entity>Summary>>('/<exact-path>', {
-          params: input,
-        })
-        return toToolText(data)
-      } catch (err) {
-        return toToolError(err)
-      }
-    },
-  )
+### Step 4 — Register in `src/server.ts`
 
-  server.tool(
-    'mc_get_<domain_singular>',
-    'Get full details for a single <entity> by its primary key (PK).',
-    {
-      pk: z.number().int().positive().describe('The <entity> primary key (PK integer)'),
-    },
-    async ({ pk }) => {
-      try {
-        const data = await client.get<<Entity>Summary>(`/<exact-path>/${pk}`)
-        return toToolText(data)
-      } catch (err) {
-        return toToolError(err)
-      }
-    },
-  )
-}
-```
+Registration happens inside `buildMcpServer()` in `src/server.ts` (not `src/index.ts`, which is only the HTTP bootstrap). Add one import alongside the other tool imports and one `register<Domain>(server, client)` call alongside the existing register calls.
 
-### Step 4 — Register in `src/index.ts`
+### Step 5 — Add the dataset catalog entry
 
-Add two lines — one import and one register call:
+Add an entry to `DATASETS` in `src/shared/datasets.ts` (name, description, tools, bestFor, notes), matching the existing entries' plain, analyst-facing language. This single entry feeds both the `mc_list_datasets` tool and the `mc://context/datasets` resource — skipping it leaves the new domain invisible to orientation queries.
 
-```typescript
-// Add import with other tool imports
-import { register as register<Domain> } from './tools/<domain>.js'
+### Step 6 — Update the tests
 
-// Add call before server.connect()
-register<Domain>(server, client)
-```
+- `tests/server.test.ts` asserts the **exact** tool-name array in the `exposes tools, prompts, and resources over MCP initialize` test — add the new tool names in registration order or the suite fails.
+- Add handler tests to `tests/tool-handlers.test.ts` mirroring an existing list/get pair: `FakeMcClient.whenGet(...)` fixtures, a happy-path list test (params forwarded, payload parsed), a get test, and an error-surfacing test.
 
-### Step 5 — Type-check
+### Step 7 — Verify
 
 ```bash
 bunx tsc --noEmit
+bun run test
 ```
 
-Fix any errors before testing. Common issues:
+Fix errors before shipping. Common issues:
 
-- Path param name wrong (check the normalized map — it may be `assetPK` not `pk`)
-- Response type mismatch (some endpoints return a single object, not `McApiResponse<T>`)
+- Path param name wrong (check the normalized map — it may be `assetPK`, not `pk`)
+- Path casing wrong (the API mixes `/Assets` and `/workorders` styles)
+- Zod schema too strict for real payloads (loosen fields to `.nullable().optional()`)
 
 ## Tool description guidelines
 
-The description field is read by the LLM to decide when to call the tool. Write it for an analyst, not a developer:
+The description field is read by the LLM to decide when to call the tool. Write it for an analyst, not a developer — say what the entity is and what questions the tool answers.
 
-- **Good:** "List invoices from Maintenance Connection. Use $filter to narrow by status, vendor, or date range. Useful for AP reconciliation and spend analysis."
-- **Bad:** "GET /Invoices endpoint wrapper"
+**Hard rule, test-enforced:** descriptions must not contain raw query syntax. The `keeps tool, prompt, and resource descriptions free of raw query syntax` test in `tests/server.test.ts` fails the suite if any tool, prompt, or resource description matches the `USER_FACING_TECHNICAL_PATTERNS` list: `$filter`, `$orderby`, `$top`, `$skip`, `OData`, `eq`, `PK`, or field-path syntax like `StatusDetails/Value`.
 
-Include what the entity _is_, what filters are _typically useful_, and what _questions_ the tool helps answer.
+- **Good:** "List purchase orders from Maintenance Connection. Useful for open commitments, approval-pipeline reviews, vendor activity, and purchase-order aging analysis."
+- **Bad:** "GET /Invoices endpoint wrapper" (developer-speak), or "Use $filter to narrow by status" (fails the description lint)
 
-Also add `.describe()` to any tool-specific params beyond OData — include examples.
+Instead of "PK", say "internal Maintenance Connection record number" — see the live get-tool descriptions. Query-syntax guidance belongs in the shared `odataShape` param descriptions, which already carry it.
+
+Also add `.describe()` to any tool-specific params beyond OData, in the same plain language.
 
 ## After adding the domain
 
-1. Update the `## Available Tools` table in `README.md` — add a row for each new tool following the existing format:
-   ```
-   | `mc_list_<domain>` | <one-line description of what it lists and key filter use cases> |
-   | `mc_get_<domain_singular>` | Get a single <entity> by PK |
-   ```
-
+1. Update the `## Available Tools` table in `README.md` — one row per new tool, following the existing format.
 2. Update `docs/implementation-plan.md` Phase 2 checklist to mark the new entity as done.
+3. If the API lookup surfaced quirks (odd casing, undocumented params, envelope surprises), record them in `docs/notable-findings.md` under a per-entity heading.
