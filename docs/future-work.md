@@ -40,3 +40,11 @@ Older docs called the tool transitional in favor of `mc://context/datasets`, whi
 ## 6. `mc://context/time` timezone
 
 The resource uses the server's timezone (UTC on Railway), so relative dates ("today", "yesterday") are off by one for US users in the evening, and the prompt templates explicitly tell the model to trust this resource. Derive the zone from the client or accept it as a parameter.
+
+## 7. Token cost audit
+
+Moved from `docs/open-questions.md` (2026-07-29). The server offloads query planning to the model (endpoint choice, OData construction, raw-response interpretation), which is flexible but token-expensive per turn. Candidates: pre-built query tools that encode common complete queries ("open CMs this week by site"); trimming fields the model never uses; more cached context resources; fewer, narrower tools where use cases are predictable; and removing the redundant per-prompt system string ("You are a maintenance operations assistant...") repeated 14 times across the five files in `src/prompts/`, since the same identity is already set at the `McpServer` level.
+
+## 8. Split the "no internal syntax" rule by context
+
+Moved from `docs/open-questions.md` (2026-07-29). Keep the strict ban on OData and internal API syntax in tool descriptions, resource descriptions, and static copy, since those leak into user-facing responses verbatim. But allow targeted executable guidance (filter construction, tool-call sequences, internal field references) inside prompt message bodies, which are instructions to the model rather than text it echoes back. While splitting the rule, audit prompt bodies for gratuitous user-facing filter examples and check whether any tool or resource description ended up over-restricted by the blanket rule.
