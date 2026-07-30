@@ -1,24 +1,13 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-
-interface RepairCenterArgs {
-  repair_center_id?: string
-  repair_center_name?: string
-}
+import {
+  buildRepairCenterInstructions,
+  repairCenterArgsSchema,
+  type RepairCenterArgs,
+} from './repair-center.js'
 
 interface PmArgs extends RepairCenterArgs {
   asset_name?: string
-}
-
-const repairCenterArgsSchema = {
-  repair_center_id: z
-    .string()
-    .optional()
-    .describe('Exact repair center ID to scope the analysis to, such as M.'),
-  repair_center_name: z
-    .string()
-    .optional()
-    .describe('Exact repair center name to resolve case-insensitively before scoping the analysis.'),
 }
 
 const assetNameArgSchema = {
@@ -29,16 +18,12 @@ const assetNameArgSchema = {
 }
 
 export function register(server: McpServer): void {
-  server.registerPrompt(
+  server.prompt(
     'mc_pm_compliance_review',
+    'Review PM work order status to understand whether scheduled preventive maintenance is being completed on time or falling behind.',
     {
-      title: 'PM compliance review',
-      description:
-        'Review PM work order status to understand whether scheduled preventive maintenance is being completed on time or falling behind.',
-      argsSchema: {
-        ...repairCenterArgsSchema,
-        ...assetNameArgSchema,
-      },
+      ...repairCenterArgsSchema,
+      ...assetNameArgSchema,
     },
     (args: PmArgs) => {
       const assetName = cleanArg(args.asset_name)
@@ -56,14 +41,18 @@ export function register(server: McpServer): void {
                   'Read mc://context/labors before summarizing assignees or technician references.',
                   'Read mc://context/asset-locations before translating asset parent/location references.',
                 ]),
-                buildRepairCenterInstructions(args),
+                buildRepairCenterInstructions({
+                  args,
+                  scopeLabel: 'all relevant work-order queries',
+                  resolutionSampleLabel: 'work orders or assets',
+                }),
                 buildAssetResolutionInstructions(assetName),
                 assetName
                   ? `Give me a PM compliance review focused only on the resolved asset matching "${assetName}".
 
 Step 1: Resolve the target asset first. If multiple assets plausibly match, stop and ask the user to clarify which asset they mean.
 
-Step 2: Fetch PM-type work orders associated with that asset. Use the resolved asset's exact identifiers and do not invent unsupported asset filter paths.
+Step 2: Fetch PM-type work orders associated with that asset. Keep the scope tightly focused on the resolved asset and do not guess if the results cannot be narrowed reliably.
 
 Step 3: Tally those PM work orders by status: ISSUED, CLOSED, REQUESTED, CANCELED.
 
@@ -77,9 +66,9 @@ Summarize:
 Close with a plain-language compliance assessment for this specific asset.`
                   : `Give me a PM compliance review — how well is scheduled preventive maintenance being completed?
 
-Step 1: Fetch all PM-type work orders, capturing Status and DateOpened for each. Tally by status: ISSUED, CLOSED, REQUESTED, CANCELED.
+Step 1: Fetch all PM-type work orders, capturing status and opened date for each. Tally them by status.
 
-Step 2: Fetch the 10 oldest open PMs, sorted by date opened. How long have they been open? Long-open PMs may signal overdue work.
+Step 2: Fetch the 10 oldest open PMs, sorted by opened date. How long have they been open? Long-open PMs may signal overdue work.
 
 Step 3: Fetch the 20 most recently closed PMs. What assets were maintained?
 
@@ -98,15 +87,11 @@ Summarize:
     },
   )
 
-  server.registerPrompt(
+  server.prompt(
     'mc_inspection_summary',
+    'Summarize open and recent inspection work orders to understand the state of scheduled inspections.',
     {
-      title: 'Inspection summary',
-      description:
-        'Summarize open and recent inspection work orders to understand the state of scheduled inspections.',
-      argsSchema: {
-        ...repairCenterArgsSchema,
-      },
+      ...repairCenterArgsSchema,
     },
     (args: RepairCenterArgs) => ({
       messages: [
@@ -121,7 +106,11 @@ Summarize:
                 'Read mc://context/labors before summarizing assignees or technician references.',
                 'Read mc://context/asset-locations before translating asset parent/location references.',
               ]),
-              buildRepairCenterInstructions(args),
+              buildRepairCenterInstructions({
+                args,
+                scopeLabel: 'all relevant work-order queries',
+                resolutionSampleLabel: 'work orders or assets',
+              }),
               `Give me a summary of inspection work orders.
 
 Step 1: Fetch all open inspection work orders, sorted by priority.
@@ -130,9 +119,9 @@ Step 2: Fetch the 20 most recently closed inspection work orders.
 
 For open inspections, summarize:
 - Total count and priority breakdown
-- How many are unassigned (IsAssigned eq false)?
+- How many are unassigned?
 - Which assets appear most frequently?
-- Oldest open inspections (by DateOpened) — flag anything open more than 30 days
+- Oldest open inspections by opened date — flag anything open more than 30 days
 
 For recently closed, summarize:
 - Count closed recently and which assets were inspected
@@ -158,34 +147,6 @@ function buildContextInstructions(lines: string[]): string {
 ${lines.map((line) => `- ${line}`).join('\n')}`
 }
 
-function buildRepairCenterInstructions(args: RepairCenterArgs): string | undefined {
-  const repairCenterId = cleanArg(args.repair_center_id)
-  const repairCenterName = cleanArg(args.repair_center_name)
-
-  if (repairCenterId && repairCenterName) {
-    throw new Error(
-      'Provide only one repair center input. Use either repair_center_id or repair_center_name.',
-    )
-  }
-
-  if (repairCenterId) {
-    return `Scope all relevant work-order queries to repair center ID "${repairCenterId}" using the filter RepairCenterID eq "${repairCenterId}". Do not use RepairCenterRef navigation paths in filters.`
-  }
-
-  if (repairCenterName) {
-    return `Resolve the repair center before the main analysis:
-- Fetch a small sample of work orders or assets that include RepairCenterRef values.
-- Build a distinct list of repair centers using each record's RepairCenterRef.ID and RepairCenterRef.Name.
-- Compare names after trimming whitespace and converting to lowercase.
-- If zero exact matches are found for "${repairCenterName}", stop and say the repair center name could not be resolved.
-- If more than one exact match is found for "${repairCenterName}", stop and say duplicate repair centers were found and the request is ambiguous.
-- Once exactly one repair center is resolved, use its ID and scope all subsequent work-order queries with RepairCenterID eq "{resolvedID}".
-- Do not use RepairCenterRef/PK or RepairCenterRef/ID navigation filters.`
-  }
-
-  return undefined
-}
-
 function buildAssetResolutionInstructions(assetName?: string): string | undefined {
   if (!assetName) {
     return undefined
@@ -195,5 +156,5 @@ function buildAssetResolutionInstructions(assetName?: string): string | undefine
 - Use mc_list_assets to find candidates whose IDs or names match "${assetName}".
 - Prefer an exact match when one exists.
 - If multiple assets plausibly match, stop and ask the user to clarify which asset they want.
-- Once one asset is resolved, use that asset's exact PK, ID, and Name to keep the rest of the analysis focused on it.`
+- Once one asset is resolved, use that asset's returned identifiers and name to keep the rest of the analysis focused on it.`
 }

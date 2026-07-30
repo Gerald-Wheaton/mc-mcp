@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { McApiError, type McClient } from '@/mc-client.js'
-import { DATASETS, DATASETS_TRANSITION_NOTE } from '@/shared/datasets.js'
+import { DATASETS } from '@/shared/datasets.js'
 import { AssetSummarySchema, EntityRefSchema, McApiResponseSchema } from '@/shared/types.js'
 
 const JSON_MIME_TYPE = 'application/json'
@@ -51,7 +51,7 @@ const LookupTableListSchema = McApiResponseSchema(LookupTableContextSchema)
 const LookupTableValueListSchema = McApiResponseSchema(LookupTableValueContextSchema)
 
 export function register(server: McpServer, client: McClient): void {
-  server.registerResource(
+  server.resource(
     'mc-context-time',
     TIME_RESOURCE_URI,
     {
@@ -62,63 +62,61 @@ export function register(server: McpServer, client: McClient): void {
     async () => toJsonResource(TIME_RESOURCE_URI, buildTimeContext()),
   )
 
-  server.registerResource(
+  server.resource(
     'mc-context-datasets',
     DATASETS_RESOURCE_URI,
     {
       title: 'MC Context: Datasets',
-      description:
-        'Static dataset orientation resource. Prefer this resource over mc_list_datasets when the MCP client supports resources.',
+      description: 'Guide to the main data groups available through this server and the kinds of questions each one can answer.',
       mimeType: JSON_MIME_TYPE,
     },
     async () =>
       toJsonResource(DATASETS_RESOURCE_URI, {
-        preferredInterface: DATASETS_RESOURCE_URI,
-        compatibilityTool: 'mc_list_datasets',
-        transitionNote: DATASETS_TRANSITION_NOTE,
+        overview:
+          'Use this guide to choose the right Maintenance Connection dataset before pulling live records.',
         datasets: DATASETS,
       }),
   )
 
-  server.registerResource(
+  server.resource(
     'mc-context-summary',
     SUMMARY_RESOURCE_URI,
     {
       title: 'MC Context: Summary',
-      description: 'Session-tier summary counts for the major MC entities exposed by this server.',
+      description: 'Cached high-level counts for the main Maintenance Connection record groups exposed by this server.',
       mimeType: JSON_MIME_TYPE,
     },
     async () => readResource(SUMMARY_RESOURCE_URI, () => readSummaryContext(client)),
   )
 
-  server.registerResource(
+  server.resource(
     'mc-context-labors',
     LABORS_RESOURCE_URI,
     {
       title: 'MC Context: Labors',
-      description: 'Cached labor roster for resolving assignee and technician references.',
+      description: 'Cached technician and labor roster for understanding assignees and named personnel in work results.',
       mimeType: JSON_MIME_TYPE,
     },
     async () => readResource(LABORS_RESOURCE_URI, () => readLaborContext(client)),
   )
 
-  server.registerResource(
+  server.resource(
     'mc-context-asset-locations',
     ASSET_LOCATIONS_RESOURCE_URI,
     {
       title: 'MC Context: Asset Locations',
-      description: 'Cached location-only asset hierarchy context for translating parent/location references.',
+      description: 'Cached location hierarchy to help translate parent sites, buildings, floors, and other structural asset nodes.',
       mimeType: JSON_MIME_TYPE,
     },
     async () => readResource(ASSET_LOCATIONS_RESOURCE_URI, () => readAssetLocationContext(client)),
   )
 
-  server.registerResource(
+  server.resource(
     'mc-context-lookup-tables',
     LOOKUP_TABLES_RESOURCE_URI,
     {
       title: 'MC Context: Lookup Tables',
-      description: 'Cached lookup table metadata and values for customer-configured dropdowns and codes.',
+      description: 'Cached customer-defined labels, dropdown values, and other lookup-driven business terms.',
       mimeType: JSON_MIME_TYPE,
     },
     async () => readResource(LOOKUP_TABLES_RESOURCE_URI, () => readLookupTablesContext(client)),
@@ -141,7 +139,7 @@ async function readResource(uri: string, loader: () => Promise<unknown>) {
   try {
     return toJsonResource(uri, await loader())
   } catch (err) {
-    console.error(`[resource] ${uri} failed: ${err instanceof Error ? (err.stack ?? err.message) : String(err)}`)
+    console.error(`[resource] ${uri} failed: ${err instanceof Error ? err.message : String(err)}`)
     throw new Error(formatResourceError(err))
   }
 }

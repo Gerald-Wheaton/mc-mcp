@@ -1,5 +1,5 @@
 [build]
-buildCommand = "bun install"
+buildCommand = "echo 'no build step'"
 
 [deploy]
 startCommand = "bun run src/index.ts"

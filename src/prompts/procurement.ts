@@ -1,24 +1,13 @@
 import { z } from 'zod'
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-
-interface RepairCenterArgs {
-  repair_center_id?: string
-  repair_center_name?: string
-}
+import {
+  buildRepairCenterInstructions,
+  repairCenterArgsSchema,
+  type RepairCenterArgs,
+} from './repair-center.js'
 
 interface VendorArgs extends RepairCenterArgs {
   vendor_name?: string
-}
-
-const repairCenterArgsSchema = {
-  repair_center_id: z
-    .string()
-    .optional()
-    .describe('Exact repair center ID to scope the analysis to, such as M.'),
-  repair_center_name: z
-    .string()
-    .optional()
-    .describe('Exact repair center name to resolve case-insensitively before scoping the analysis.'),
 }
 
 const vendorNameArgSchema = {
@@ -29,16 +18,12 @@ const vendorNameArgSchema = {
 }
 
 export function register(server: McpServer): void {
-  server.registerPrompt(
+  server.prompt(
     'mc_open_purchase_orders',
+    'Review all open purchase orders — what is outstanding, who are the vendors, and what is the total spend committed.',
     {
-      title: 'Open purchase orders',
-      description:
-        'Review all open purchase orders — what is outstanding, who are the vendors, and what is the total spend committed.',
-      argsSchema: {
-        ...repairCenterArgsSchema,
-        ...vendorNameArgSchema,
-      },
+      ...repairCenterArgsSchema,
+      ...vendorNameArgSchema,
     },
     (args: VendorArgs) => {
       const vendorName = cleanArg(args.vendor_name)
@@ -55,14 +40,18 @@ export function register(server: McpServer): void {
                   'Read mc://context/time before querying tools so relative dates are anchored correctly.',
                   'Read mc://context/lookup-tables when you need lookup-backed labels or codes during the analysis.',
                 ]),
-                buildRepairCenterInstructions(args),
+                buildRepairCenterInstructions({
+                  args,
+                  scopeLabel: 'all relevant purchase-order queries',
+                  resolutionSampleLabel: 'work orders or assets',
+                }),
                 buildVendorResolutionInstructions(vendorName),
                 vendorName
                   ? `Give me a summary of open purchase orders for the resolved vendor matching "${vendorName}".
 
 Step 1: Resolve the vendor first from live purchase-order data. If multiple vendors plausibly match, stop and ask the user to clarify which vendor they mean.
 
-Step 2: Fetch open purchase orders for that resolved vendor. Use the vendor information available in returned data and do not invent unsupported vendor filter paths.
+Step 2: Fetch open purchase orders for that resolved vendor. Keep the scope tightly focused on the resolved vendor and do not guess if the results cannot be narrowed reliably.
 
 Summarize:
 - Total number of open POs and combined dollar value for this vendor
@@ -75,7 +64,7 @@ Close with a plain-language summary of whether purchasing with this vendor appea
 
 Step 1: Fetch all open POs, sorted by order date (oldest first).
 
-For each PO capture: ID, Description, VendorRef (name), Total, OrderDate, Status, IsPartsOrdered, InvoiceNumber.
+For each PO capture: ID, description, vendor name, total value, order date, status, whether parts are already marked as ordered, and any invoice number present.
 
 Step 2: Summarize:
 - Total number of open POs and combined dollar value (sum of Total)
@@ -95,16 +84,12 @@ Close with a plain-language summary of the procurement pipeline: is purchasing m
     },
   )
 
-  server.registerPrompt(
+  server.prompt(
     'mc_vendor_performance',
+    'Analyze purchase orders by vendor to understand spend distribution, order frequency, and order status across suppliers.',
     {
-      title: 'Vendor performance',
-      description:
-        'Analyze purchase orders by vendor to understand spend distribution, order frequency, and order status across suppliers.',
-      argsSchema: {
-        ...repairCenterArgsSchema,
-        ...vendorNameArgSchema,
-      },
+      ...repairCenterArgsSchema,
+      ...vendorNameArgSchema,
     },
     (args: VendorArgs) => {
       const vendorName = cleanArg(args.vendor_name)
@@ -121,14 +106,18 @@ Close with a plain-language summary of the procurement pipeline: is purchasing m
                   'Read mc://context/time before querying tools so relative dates are anchored correctly.',
                   'Read mc://context/lookup-tables when you need lookup-backed labels or codes during the analysis.',
                 ]),
-                buildRepairCenterInstructions(args),
+                buildRepairCenterInstructions({
+                  args,
+                  scopeLabel: 'all relevant purchase-order queries',
+                  resolutionSampleLabel: 'work orders or assets',
+                }),
                 buildVendorResolutionInstructions(vendorName),
                 vendorName
                   ? `I want to understand the performance of the resolved vendor matching "${vendorName}" through the lens of purchase order data.
 
 Step 1: Resolve the vendor first from live purchase-order data. If multiple vendors plausibly match, stop and ask the user to clarify which vendor they mean.
 
-Step 2: Fetch purchase orders for that vendor across statuses. Use the vendor information available in returned data and do not invent unsupported vendor filter paths.
+Step 2: Fetch purchase orders for that vendor across statuses. Keep the scope tightly focused on the resolved vendor and do not guess if the results cannot be narrowed reliably.
 
 Summarize:
 - Number of POs (total, open, closed, canceled)
@@ -139,7 +128,7 @@ Summarize:
 Close with a plain-language assessment of whether this vendor looks reliable and significant, or whether there are warning signs.`
                   : `I want to understand vendor performance through the lens of purchase order data.
 
-Step 1: Fetch a broad sample of up to 200 POs across all statuses. Capture VendorRef (name and PK), Total, Status, OrderDate, IsPartsOrdered for each.
+Step 1: Fetch a broad sample of up to 200 POs across all statuses. Capture vendor name, total value, status, order date, and whether parts are already marked as ordered for each one.
 
 Step 2: Group by vendor. For each vendor calculate:
 - Number of POs (total, open, closed, canceled)
@@ -162,15 +151,11 @@ Close with a plain-language summary: which vendors are the primary suppliers, is
     },
   )
 
-  server.registerPrompt(
+  server.prompt(
     'mc_po_approval_pipeline',
+    'Show purchase orders in REQUESTED status that are awaiting approval or action before becoming active orders.',
     {
-      title: 'PO approval pipeline',
-      description:
-        'Show purchase orders in REQUESTED status that are awaiting approval or action before becoming active orders.',
-      argsSchema: {
-        ...repairCenterArgsSchema,
-      },
+      ...repairCenterArgsSchema,
     },
     (args: RepairCenterArgs) => ({
       messages: [
@@ -184,14 +169,18 @@ Close with a plain-language summary: which vendors are the primary suppliers, is
                 'Read mc://context/time before querying tools so relative dates are anchored correctly.',
                 'Read mc://context/lookup-tables when you need lookup-backed labels or codes during the analysis.',
               ]),
-              buildRepairCenterInstructions(args),
+              buildRepairCenterInstructions({
+                args,
+                scopeLabel: 'all relevant purchase-order queries',
+                resolutionSampleLabel: 'work orders or assets',
+              }),
               `Show me all purchase orders currently in the approval pipeline — status REQUESTED, meaning they have been created but not yet issued/approved.
 
 Step 1: Fetch all purchase orders in REQUESTED status, sorted by order date.
 
-For each PO capture: ID, Description, VendorRef (name), Total, OrderDate, and whether parts are already flagged as ordered (IsPartsOrdered).
+For each PO capture: ID, description, vendor name, total value, order date, and whether parts are already marked as ordered.
 
-Step 2: Fetch line items for the top 5 largest REQUESTED POs (by Total) using mc_list_po_line_items filtered to each PO's PK. Summarize what is being ordered.
+Step 2: Fetch line items for the top 5 largest REQUESTED POs. Call mc_list_po_line_items separately for each selected PO and scope each call with the filter PurchaseOrderPK eq {poPK}. Summarize what is being ordered for each one.
 
 Summarize:
 - How many POs are awaiting approval and their combined value?
@@ -218,34 +207,6 @@ function cleanArg(value?: string): string | undefined {
 function buildContextInstructions(lines: string[]): string {
   return `Before querying tools:
 ${lines.map((line) => `- ${line}`).join('\n')}`
-}
-
-function buildRepairCenterInstructions(args: RepairCenterArgs): string | undefined {
-  const repairCenterId = cleanArg(args.repair_center_id)
-  const repairCenterName = cleanArg(args.repair_center_name)
-
-  if (repairCenterId && repairCenterName) {
-    throw new Error(
-      'Provide only one repair center input. Use either repair_center_id or repair_center_name.',
-    )
-  }
-
-  if (repairCenterId) {
-    return `Scope all relevant purchase-order queries to repair center ID "${repairCenterId}" using the filter RepairCenterID eq "${repairCenterId}". Do not use RepairCenterRef navigation paths in filters.`
-  }
-
-  if (repairCenterName) {
-    return `Resolve the repair center before the main analysis:
-- Fetch a small sample of work orders or assets that include RepairCenterRef values.
-- Build a distinct list of repair centers using each record's RepairCenterRef.ID and RepairCenterRef.Name.
-- Compare names after trimming whitespace and converting to lowercase.
-- If zero exact matches are found for "${repairCenterName}", stop and say the repair center name could not be resolved.
-- If more than one exact match is found for "${repairCenterName}", stop and say duplicate repair centers were found and the request is ambiguous.
-- Once exactly one repair center is resolved, use its ID and scope all subsequent purchase-order queries with RepairCenterID eq "{resolvedID}".
-- Do not use RepairCenterRef/PK or RepairCenterRef/ID navigation filters.`
-  }
-
-  return undefined
 }
 
 function buildVendorResolutionInstructions(vendorName?: string): string | undefined {

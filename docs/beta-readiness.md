@@ -34,7 +34,7 @@ Not beta-blocking but critical before a real customer demo.
 - [ ] **Pagination metadata** — Append `{ total, returned, nextSkip }` to all list tool
   responses so the LLM knows when more data exists and can offer "show more" rather than
   silently stopping at 500 records. Assets (33,639) and Parts (3,305) are the primary concern.
-- [ ] **End-user UX audit** — Sweep all tool descriptions (`src/tools/*.ts`), prompt templates
+- [x] **End-user UX audit** — Sweep all tool descriptions (`src/tools/*.ts`), prompt templates
   (`src/prompts/*.ts`), and context resource descriptions (`src/resources/context.ts`) to
   ensure OData syntax and developer-facing terms never surface in user-facing replies. The LLM
   should silently translate intent to filters; users should see plain English.

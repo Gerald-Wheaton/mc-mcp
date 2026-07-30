@@ -2,38 +2,48 @@ export const DATASETS = [
   {
     name: 'Work Orders',
     description:
-      'Maintenance tasks of all types. Each record includes TypeDetails.Value to distinguish types: CM (Corrective Maintenance), PM (Preventive Maintenance), SR (Service Request / Work Request), PC (Part Checkout).',
+      'Reactive, preventive, inspection, follow-up, and other maintenance tasks tracked in the system.',
     tools: ['mc_list_work_orders', 'mc_get_work_order'],
-    usableFilters: [
-      'IsOpen eq true',
-      'IsAssigned eq false',
-      'IsApproved eq true',
-      'Type eq "CM"',
-      'Type eq "PM"',
-      'Type eq "SR"',
+    bestFor: [
+      'Open backlog and daily operations reviews',
+      'Unassigned or emergency work',
+      'Corrective vs preventive workload comparisons',
+      'Work tied to a specific asset or repair center',
     ],
-    note: 'String filters require double quotes: Type eq "CM", not single quotes.',
+    notes: ['PM-linked work orders usually carry a preventive-maintenance reference back to the source plan.'],
   },
   {
     name: 'Assets',
     description:
-      'Equipment, facilities, and locations in a hierarchical tree. AssetLevel indicates depth (1=root, 2=campus, deeper=buildings/equipment). IsLocation=true means a location node, not physical equipment. TypeDetails.Value="L" means Location.',
+      'Equipment, facilities, and location nodes arranged in a hierarchy.',
     tools: ['mc_list_assets', 'mc_get_asset'],
-    usableFilters: ['IsLocation eq false', 'IsUp eq true'],
+    bestFor: [
+      'Equipment health and repeat-maintenance analysis',
+      'Facility hierarchy orientation',
+      'Separating physical equipment from structural location records',
+    ],
+    notes: ['The asset list mixes real equipment with location nodes such as campuses, buildings, and floors.'],
   },
   {
     name: 'Parts',
-    description: 'Inventory items and parts catalog.',
+    description: 'Part master records and catalog details for inventory items.',
     tools: ['mc_list_parts', 'mc_get_part'],
-    usableFilters: ['Active eq true', 'Hazardous eq true', 'DirectIssue eq true', 'ID eq "12528812"'],
+    bestFor: [
+      'Catalog cleanup and requester-availability reviews',
+      'Slow-moving parts analysis',
+      'Reserved-parts audits after work orders identify which parts are tied up',
+    ],
+    notes: ['This dataset is best for catalog data, not by-location stock balances or on-hand quantities.'],
   },
   {
     name: 'Purchase Orders',
-    description: 'Procurement records with line items, receipts, and invoice status.',
+    description: 'Procurement records covering open commitments, vendor activity, and approval flow.',
     tools: ['mc_list_purchase_orders', 'mc_get_purchase_order'],
-    usableFilters: ['IsOpen eq true', 'IsApproved eq true', 'Status eq "ISSUED"'],
+    bestFor: [
+      'Open purchasing pipeline reviews',
+      'Vendor performance summaries',
+      'Approval-queue and ordered-vs-pending analysis',
+    ],
+    notes: ['Use the PO line-items tool when you need to see what was ordered on a specific purchase order.'],
   },
 ] as const
-
-export const DATASETS_TRANSITION_NOTE =
-  'Transitional compatibility note: mc_list_datasets remains supported for now, but MCP clients should prefer the mc://context/datasets resource. Deprecation of the tool will be considered only after the resource path is validated in real client workflows.'
