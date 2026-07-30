@@ -16,6 +16,7 @@ import { register as registerAssetPrompts } from '@/prompts/assets.js'
 import { register as registerInventoryPrompts } from '@/prompts/inventory.js'
 import { register as registerPmPrompts } from '@/prompts/pm.js'
 import { register as registerProcurementPrompts } from '@/prompts/procurement.js'
+import { MC_ASSISTANT_INSTRUCTIONS } from '@/server-instructions.js'
 
 interface Session {
   server: McpServer
@@ -130,8 +131,7 @@ export function buildMcpServer(client: McClient): McpServer {
   const server = new McpServer(
     { name: 'mc-mcp', version: '0.1.0' },
     {
-      instructions:
-        'This is an MCP server connected to Maintenance Connection, a CMMS — use it to answer questions about assets, work orders, PMs, parts, and purchase orders.',
+      instructions: MC_ASSISTANT_INSTRUCTIONS,
     },
   )
 

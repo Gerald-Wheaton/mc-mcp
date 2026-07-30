@@ -5,6 +5,13 @@ import {
   repairCenterArgsSchema,
   type RepairCenterArgs,
 } from './repair-center.js'
+import {
+  buildContextInstructions,
+  buildPromptText,
+  buildVendorResolutionInstructions,
+  cleanArg,
+  CONTEXT_INSTRUCTIONS,
+} from './shared.js'
 
 interface VendorArgs extends RepairCenterArgs {
   vendor_name?: string
@@ -34,11 +41,10 @@ export function register(server: McpServer): void {
             role: 'user',
             content: {
               type: 'text',
-              text: [
-                'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+              text: buildPromptText([
                 buildContextInstructions([
-                  'Read mc://context/time before querying tools so relative dates are anchored correctly.',
-                  'Read mc://context/lookup-tables when you need lookup-backed labels or codes during the analysis.',
+                  CONTEXT_INSTRUCTIONS.time,
+                  CONTEXT_INSTRUCTIONS.lookupTables,
                 ]),
                 buildRepairCenterInstructions({
                   args,
@@ -74,9 +80,7 @@ Step 2: Summarize:
 - Oldest open POs by OrderDate — flag any that have been open unusually long
 
 Close with a plain-language summary of the procurement pipeline: is purchasing moving smoothly, or are there stalled orders that need follow-up?`,
-              ]
-                .filter(Boolean)
-                .join('\n\n'),
+              ]),
             },
           },
         ],
@@ -100,11 +104,10 @@ Close with a plain-language summary of the procurement pipeline: is purchasing m
             role: 'user',
             content: {
               type: 'text',
-              text: [
-                'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+              text: buildPromptText([
                 buildContextInstructions([
-                  'Read mc://context/time before querying tools so relative dates are anchored correctly.',
-                  'Read mc://context/lookup-tables when you need lookup-backed labels or codes during the analysis.',
+                  CONTEXT_INSTRUCTIONS.time,
+                  CONTEXT_INSTRUCTIONS.lookupTables,
                 ]),
                 buildRepairCenterInstructions({
                   args,
@@ -141,9 +144,7 @@ Step 3: Rank vendors by total spend (highest first). Present the top 10 vendors 
 Step 4: Flag any vendors with canceled POs — these may signal fulfillment issues.
 
 Close with a plain-language summary: which vendors are the primary suppliers, is spend concentrated or distributed, and are there any vendors with concerning patterns?`,
-              ]
-                .filter(Boolean)
-                .join('\n\n'),
+              ]),
             },
           },
         ],
@@ -163,11 +164,10 @@ Close with a plain-language summary: which vendors are the primary suppliers, is
           role: 'user',
           content: {
             type: 'text',
-            text: [
-              'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+            text: buildPromptText([
               buildContextInstructions([
-                'Read mc://context/time before querying tools so relative dates are anchored correctly.',
-                'Read mc://context/lookup-tables when you need lookup-backed labels or codes during the analysis.',
+                CONTEXT_INSTRUCTIONS.time,
+                CONTEXT_INSTRUCTIONS.lookupTables,
               ]),
               buildRepairCenterInstructions({
                 args,
@@ -189,34 +189,10 @@ Summarize:
 - What are the biggest pending orders about (from line item detail)?
 
 Close with a plain-language assessment: is the approval queue healthy or are there orders stalled and waiting?`,
-            ]
-              .filter(Boolean)
-              .join('\n\n'),
+            ]),
           },
         },
       ],
     }),
   )
-}
-
-function cleanArg(value?: string): string | undefined {
-  const trimmed = value?.trim()
-  return trimmed ? trimmed : undefined
-}
-
-function buildContextInstructions(lines: string[]): string {
-  return `Before querying tools:
-${lines.map((line) => `- ${line}`).join('\n')}`
-}
-
-function buildVendorResolutionInstructions(vendorName?: string): string | undefined {
-  if (!vendorName) {
-    return undefined
-  }
-
-  return `Resolve the target vendor before the main analysis:
-- Use live purchase-order data to find vendors whose names match "${vendorName}".
-- Prefer an exact match when one exists.
-- If multiple vendors plausibly match, stop and ask the user to clarify which vendor they want.
-- Once one vendor is resolved, use that vendor's exact name and identifiers from returned data to keep the rest of the analysis focused on it.`
 }

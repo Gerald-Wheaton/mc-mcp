@@ -5,6 +5,13 @@ import {
   repairCenterArgsSchema,
   type RepairCenterArgs,
 } from './repair-center.js'
+import {
+  buildAssetResolutionInstructions,
+  buildContextInstructions,
+  buildPromptText,
+  cleanArg,
+  CONTEXT_INSTRUCTIONS,
+} from './shared.js'
 
 interface AssetHealthArgs extends RepairCenterArgs {
   asset_name?: string
@@ -34,11 +41,10 @@ export function register(server: McpServer): void {
             role: 'user',
             content: {
               type: 'text',
-              text: [
-                'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+              text: buildPromptText([
                 buildContextInstructions([
-                  'Read mc://context/time before querying tools so relative dates are anchored correctly.',
-                  'Read mc://context/asset-locations before translating asset parent/location references.',
+                  CONTEXT_INSTRUCTIONS.time,
+                  CONTEXT_INSTRUCTIONS.assetLocationsBefore,
                 ]),
                 buildRepairCenterInstructions({
                   args,
@@ -79,9 +85,7 @@ Present a ranked list of the top assets by open CM work order count. For each as
 - Location / parent asset
 
 Close with a plain-language assessment: which assets look like they may need proactive attention or investigation?`,
-              ]
-                .filter(Boolean)
-                .join('\n\n'),
+              ]),
             },
           },
         ],
@@ -101,11 +105,10 @@ Close with a plain-language assessment: which assets look like they may need pro
           role: 'user',
           content: {
             type: 'text',
-            text: [
-              'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+            text: buildPromptText([
               buildContextInstructions([
-                'Read mc://context/time before querying tools so relative dates are anchored correctly.',
-                'Read mc://context/asset-locations before translating asset parent/location references.',
+                CONTEXT_INSTRUCTIONS.time,
+                CONTEXT_INSTRUCTIONS.assetLocationsBefore,
               ]),
               buildRepairCenterInstructions({
                 args,
@@ -127,34 +130,10 @@ Summarize:
 - What types of equipment are represented in the sample?
 
 This gives a quick orientation to the facility structure for someone new to this account.`,
-            ]
-              .filter(Boolean)
-              .join('\n\n'),
+            ]),
           },
         },
       ],
     }),
   )
-}
-
-function cleanArg(value?: string): string | undefined {
-  const trimmed = value?.trim()
-  return trimmed ? trimmed : undefined
-}
-
-function buildContextInstructions(lines: string[]): string {
-  return `Before querying tools:
-${lines.map((line) => `- ${line}`).join('\n')}`
-}
-
-function buildAssetResolutionInstructions(assetName?: string): string | undefined {
-  if (!assetName) {
-    return undefined
-  }
-
-  return `Resolve the target asset before the main analysis:
-- Use mc_list_assets to find candidates whose IDs or names match "${assetName}".
-- Prefer an exact match when one exists.
-- If multiple assets plausibly match, stop and ask the user to clarify which asset they want.
-- Once one asset is resolved, use that asset's returned identifiers and name to keep the rest of the analysis focused on it.`
 }

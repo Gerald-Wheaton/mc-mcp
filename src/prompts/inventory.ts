@@ -5,6 +5,14 @@ import {
   repairCenterArgsSchema,
   type RepairCenterArgs,
 } from './repair-center.js'
+import {
+  buildAssetResolutionInstructions,
+  buildCategoryInstructions,
+  buildContextInstructions,
+  buildPromptText,
+  cleanArg,
+  CONTEXT_INSTRUCTIONS,
+} from './shared.js'
 
 interface ReservedPartsArgs extends RepairCenterArgs {
   asset_name?: string
@@ -45,12 +53,11 @@ export function register(server: McpServer): void {
             role: 'user',
             content: {
               type: 'text',
-              text: [
-                'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+              text: buildPromptText([
                 buildContextInstructions([
-                  'Read mc://context/time before querying tools so relative dates are anchored correctly.',
-                  'Read mc://context/labors before summarizing assignees or technician references on work orders.',
-                  'Read mc://context/lookup-tables when you need lookup-backed labels or codes during the audit.',
+                  CONTEXT_INSTRUCTIONS.time,
+                  CONTEXT_INSTRUCTIONS.laborsOnWorkOrders,
+                  CONTEXT_INSTRUCTIONS.lookupTablesDuringAudit,
                 ]),
                 buildRepairCenterInstructions({
                   args,
@@ -92,9 +99,7 @@ Step 3: Summarize:
 - Which work orders have been open the longest with parts still reserved — these may represent stalled work?
 
 Close with a plain-language assessment of whether the reserved parts situation looks healthy or whether action is needed.`,
-              ]
-                .filter(Boolean)
-                .join('\n\n'),
+              ]),
             },
           },
         ],
@@ -117,11 +122,10 @@ Close with a plain-language assessment of whether the reserved parts situation l
             role: 'user',
             content: {
               type: 'text',
-              text: [
-                'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+              text: buildPromptText([
                 buildContextInstructions([
-                  'Read mc://context/time before querying tools so relative dates are anchored correctly.',
-                  'Read mc://context/lookup-tables before resolving any category or other lookup-backed value.',
+                  CONTEXT_INSTRUCTIONS.time,
+                  CONTEXT_INSTRUCTIONS.lookupTablesBeforeCategory,
                 ]),
                 buildCategoryInstructions(category),
                 category
@@ -157,9 +161,7 @@ Summarize:
 - Any data quality flags — parts with no description, no category, or zero cost?
 
 Keep the summary concise — this is an orientation, not an exhaustive ledger.`,
-              ]
-                .filter(Boolean)
-                .join('\n\n'),
+              ]),
             },
           },
         ],
@@ -182,11 +184,10 @@ Keep the summary concise — this is an orientation, not an exhaustive ledger.`,
             role: 'user',
             content: {
               type: 'text',
-              text: [
-                'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+              text: buildPromptText([
                 buildContextInstructions([
-                  'Read mc://context/time before querying tools so relative dates are anchored correctly.',
-                  'Read mc://context/lookup-tables before resolving any category or other lookup-backed value.',
+                  CONTEXT_INSTRUCTIONS.time,
+                  CONTEXT_INSTRUCTIONS.lookupTablesBeforeCategory,
                 ]),
                 buildCategoryInstructions(category),
                 category
@@ -214,48 +215,11 @@ For parts appearing in both lists (slow on both issuing and ordering), highlight
 For each highlighted part include its name, ID, internal part number, last-issued date, last-ordered date, and unit cost.
 
 Close with a plain-language summary: how many parts appear genuinely slow-moving, and does the catalog seem well-maintained or overdue for a cleanup pass?`,
-              ]
-                .filter(Boolean)
-                .join('\n\n'),
+              ]),
             },
           },
         ],
       }
     },
   )
-}
-
-function cleanArg(value?: string): string | undefined {
-  const trimmed = value?.trim()
-  return trimmed ? trimmed : undefined
-}
-
-function buildContextInstructions(lines: string[]): string {
-  return `Before querying tools:
-${lines.map((line) => `- ${line}`).join('\n')}`
-}
-
-function buildAssetResolutionInstructions(assetName?: string): string | undefined {
-  if (!assetName) {
-    return undefined
-  }
-
-  return `Resolve the target asset before the main analysis:
-- Use mc_list_assets to find candidates whose IDs or names match "${assetName}".
-- Prefer an exact match when one exists.
-- If multiple assets plausibly match, stop and ask the user to clarify which asset they want.
-- Once one asset is resolved, use that asset's returned identifiers and name to keep the rest of the analysis focused on it.`
-}
-
-function buildCategoryInstructions(category?: string): string | undefined {
-  if (!category) {
-    return undefined
-  }
-
-  return `Resolve the category before the main analysis:
-- Use mc://context/lookup-tables and observed category values in live part data to find the exact category that matches "${category}".
-- Compare category names after trimming whitespace and converting to lowercase.
-- If zero exact matches are found, stop and say the category could not be resolved.
-- If more than one exact match is found, stop and say the category is ambiguous.
-- Once resolved, keep the remainder of the analysis focused on that category. If the results cannot be narrowed reliably, say so briefly and keep the scope in your reasoning instead of guessing.`
 }

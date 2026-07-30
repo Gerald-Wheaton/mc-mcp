@@ -5,6 +5,13 @@ import {
   repairCenterArgsSchema,
   type RepairCenterArgs,
 } from './repair-center.js'
+import {
+  buildAssetResolutionInstructions,
+  buildContextInstructions,
+  buildPromptText,
+  cleanArg,
+  CONTEXT_INSTRUCTIONS,
+} from './shared.js'
 
 interface PmArgs extends RepairCenterArgs {
   asset_name?: string
@@ -34,12 +41,11 @@ export function register(server: McpServer): void {
             role: 'user',
             content: {
               type: 'text',
-              text: [
-                'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+              text: buildPromptText([
                 buildContextInstructions([
-                  'Read mc://context/time before querying tools so relative dates are anchored correctly.',
-                  'Read mc://context/labors before summarizing assignees or technician references.',
-                  'Read mc://context/asset-locations before translating asset parent/location references.',
+                  CONTEXT_INSTRUCTIONS.time,
+                  CONTEXT_INSTRUCTIONS.labors,
+                  CONTEXT_INSTRUCTIONS.assetLocationsBefore,
                 ]),
                 buildRepairCenterInstructions({
                   args,
@@ -77,9 +83,7 @@ Summarize:
 - How many PMs are currently open, and how old is the oldest?
 - Any patterns in which assets generate the most PMs?
 - Plain-language compliance assessment: is PM work staying current or building up a backlog?`,
-              ]
-                .filter(Boolean)
-                .join('\n\n'),
+              ]),
             },
           },
         ],
@@ -99,12 +103,11 @@ Summarize:
           role: 'user',
           content: {
             type: 'text',
-            text: [
-              'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+            text: buildPromptText([
               buildContextInstructions([
-                'Read mc://context/time before querying tools so relative dates are anchored correctly.',
-                'Read mc://context/labors before summarizing assignees or technician references.',
-                'Read mc://context/asset-locations before translating asset parent/location references.',
+                CONTEXT_INSTRUCTIONS.time,
+                CONTEXT_INSTRUCTIONS.labors,
+                CONTEXT_INSTRUCTIONS.assetLocationsBefore,
               ]),
               buildRepairCenterInstructions({
                 args,
@@ -127,34 +130,10 @@ For recently closed, summarize:
 - Count closed recently and which assets were inspected
 
 Close with a plain-language assessment: are inspections being kept current, or is there a backlog building?`,
-            ]
-              .filter(Boolean)
-              .join('\n\n'),
+            ]),
           },
         },
       ],
     }),
   )
-}
-
-function cleanArg(value?: string): string | undefined {
-  const trimmed = value?.trim()
-  return trimmed ? trimmed : undefined
-}
-
-function buildContextInstructions(lines: string[]): string {
-  return `Before querying tools:
-${lines.map((line) => `- ${line}`).join('\n')}`
-}
-
-function buildAssetResolutionInstructions(assetName?: string): string | undefined {
-  if (!assetName) {
-    return undefined
-  }
-
-  return `Resolve the target asset before the main analysis:
-- Use mc_list_assets to find candidates whose IDs or names match "${assetName}".
-- Prefer an exact match when one exists.
-- If multiple assets plausibly match, stop and ask the user to clarify which asset they want.
-- Once one asset is resolved, use that asset's returned identifiers and name to keep the rest of the analysis focused on it.`
 }

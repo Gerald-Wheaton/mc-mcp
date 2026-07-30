@@ -5,6 +5,12 @@ import {
   repairCenterArgsSchema,
   type RepairCenterArgs,
 } from './repair-center.js'
+import {
+  buildContextInstructions,
+  buildPromptText,
+  cleanArg,
+  CONTEXT_INSTRUCTIONS,
+} from './shared.js'
 
 interface BacklogArgs extends RepairCenterArgs {
   type?: string
@@ -30,12 +36,11 @@ export function register(server: McpServer): void {
           role: 'user',
           content: {
             type: 'text',
-            text: [
-              'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+            text: buildPromptText([
               buildContextInstructions([
-                'Read mc://context/time before querying tools so relative dates are anchored correctly.',
-                'Read mc://context/labors before summarizing assignees or technician references.',
-                'Read mc://context/asset-locations when you need to translate asset parent/location references.',
+                CONTEXT_INSTRUCTIONS.time,
+                CONTEXT_INSTRUCTIONS.labors,
+                CONTEXT_INSTRUCTIONS.assetLocations,
               ]),
               buildRepairCenterInstructions({
                 args,
@@ -53,9 +58,7 @@ export function register(server: McpServer): void {
 4. **Follow-up work orders** — fetch any open work orders of type FO (follow-up). These signal unresolved issues that needed a second pass.
 
 Summarize your findings in plain language a maintenance manager would understand. Flag anything that looks urgent or out of the ordinary.`,
-            ]
-              .filter(Boolean)
-              .join('\n\n'),
+            ]),
           },
         },
       ],
@@ -78,11 +81,10 @@ Summarize your findings in plain language a maintenance manager would understand
             role: 'user',
             content: {
               type: 'text',
-              text: [
-                'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+              text: buildPromptText([
                 buildContextInstructions([
-                  'Read mc://context/time before querying tools so relative dates are anchored correctly.',
-                  'Read mc://context/labors before summarizing assignees or technician references.',
+                  CONTEXT_INSTRUCTIONS.time,
+                  CONTEXT_INSTRUCTIONS.labors,
                 ]),
                 buildRepairCenterInstructions({
                   args,
@@ -112,9 +114,7 @@ For each type present in the data:
 - Are any overdue or notably old based on when they were opened?
 
 After the per-type breakdown, give me a one-paragraph executive summary: where is the backlog concentrated, and what should the team focus on first?`,
-              ]
-                .filter(Boolean)
-                .join('\n\n'),
+              ]),
             },
           },
         ],
@@ -138,12 +138,11 @@ After the per-type breakdown, give me a one-paragraph executive summary: where i
             role: 'user',
             content: {
               type: 'text',
-              text: [
-                'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+              text: buildPromptText([
                 buildContextInstructions([
-                  'Read mc://context/time before querying tools so relative dates are anchored correctly.',
-                  'Read mc://context/labors before summarizing assignees or technician references.',
-                  'Read mc://context/asset-locations when you need to translate asset parent/location references.',
+                  CONTEXT_INSTRUCTIONS.time,
+                  CONTEXT_INSTRUCTIONS.labors,
+                  CONTEXT_INSTRUCTIONS.assetLocations,
                 ]),
                 buildRepairCenterInstructions({
                   args,
@@ -175,9 +174,7 @@ List each work order with:
 Group the results by priority. For any Priority 0 items, call them out explicitly at the top of your response because they need immediate attention.
 
 Finish with a count summary: how many unassigned WOs by type and priority.`,
-              ]
-                .filter(Boolean)
-                .join('\n\n'),
+              ]),
             },
           },
         ],
@@ -197,12 +194,11 @@ Finish with a count summary: how many unassigned WOs by type and priority.`,
           role: 'user',
           content: {
             type: 'text',
-            text: [
-              'You are a maintenance operations assistant with access to live Maintenance Connection data.',
+            text: buildPromptText([
               buildContextInstructions([
-                'Read mc://context/time before querying tools so relative dates are anchored correctly.',
-                'Read mc://context/labors before summarizing assignees or technician references.',
-                'Read mc://context/asset-locations when you need to translate asset parent/location references.',
+                CONTEXT_INSTRUCTIONS.time,
+                CONTEXT_INSTRUCTIONS.labors,
+                CONTEXT_INSTRUCTIONS.assetLocations,
               ]),
               buildRepairCenterInstructions({
                 args,
@@ -221,24 +217,12 @@ For each one, tell me:
 If there are no open emergency work orders, say so clearly — that is a good sign worth noting.
 
 Close with a plain-language assessment: is the emergency situation under control, or are there items that have been sitting open too long?`,
-            ]
-              .filter(Boolean)
-              .join('\n\n'),
+            ]),
           },
         },
       ],
     }),
   )
-}
-
-function cleanArg(value?: string): string | undefined {
-  const trimmed = value?.trim()
-  return trimmed ? trimmed : undefined
-}
-
-function buildContextInstructions(lines: string[]): string {
-  return `Before querying tools:
-${lines.map((line) => `- ${line}`).join('\n')}`
 }
 
 function buildTypeInstructions(workOrderType?: string): string | undefined {
