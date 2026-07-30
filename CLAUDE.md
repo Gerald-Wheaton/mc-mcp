@@ -117,7 +117,7 @@ Use the **`add-mc-tool-domain` skill** — it covers API lookup, file creation, 
 - **OData string filters require double quotes** — `Type eq "CM"` works; `Type eq 'CM'` fails. See `docs/notable-findings.md`.
 - **Do not invent undocumented parameters** — verify everything against `mc-normalized-api-map.json`.
 - **API errors** should surface as tool errors with the HTTP status and message.
-- **Document decisions** in `docs/interview-log.md` when material decisions are made.
+- **Document decisions** in the relevant doc under `docs/` (e.g. resolve items in `docs/open-questions.md`) when material decisions are made.
 - **Testing entry point:** `bun dev`, then `curl localhost:3000/health`; for end-to-end auth call `mc_ping` from an MCP client. Full suite: `bun run test`.
 
 ## Docs Index
