@@ -44,7 +44,7 @@ export function register(server: McpServer): void {
               text: buildPromptText([
                 buildContextInstructions([
                   CONTEXT_INSTRUCTIONS.time,
-                  CONTEXT_INSTRUCTIONS.assetLocationsBefore,
+                  CONTEXT_INSTRUCTIONS.assetLocations,
                 ]),
                 buildRepairCenterInstructions({
                   args,
@@ -108,7 +108,7 @@ Close with a plain-language assessment: which assets look like they may need pro
             text: buildPromptText([
               buildContextInstructions([
                 CONTEXT_INSTRUCTIONS.time,
-                CONTEXT_INSTRUCTIONS.assetLocationsBefore,
+                CONTEXT_INSTRUCTIONS.assetLocations,
               ]),
               buildRepairCenterInstructions({
                 args,

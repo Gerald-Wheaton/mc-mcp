@@ -56,8 +56,8 @@ export function register(server: McpServer): void {
               text: buildPromptText([
                 buildContextInstructions([
                   CONTEXT_INSTRUCTIONS.time,
-                  CONTEXT_INSTRUCTIONS.laborsOnWorkOrders,
-                  CONTEXT_INSTRUCTIONS.lookupTablesDuringAudit,
+                  CONTEXT_INSTRUCTIONS.labors,
+                  CONTEXT_INSTRUCTIONS.lookupTables,
                 ]),
                 buildRepairCenterInstructions({
                   args,
@@ -125,7 +125,7 @@ Close with a plain-language assessment of whether the reserved parts situation l
               text: buildPromptText([
                 buildContextInstructions([
                   CONTEXT_INSTRUCTIONS.time,
-                  CONTEXT_INSTRUCTIONS.lookupTablesBeforeCategory,
+                  CONTEXT_INSTRUCTIONS.lookupTables,
                 ]),
                 buildCategoryInstructions(category),
                 category
@@ -187,7 +187,7 @@ Keep the summary concise — this is an orientation, not an exhaustive ledger.`,
               text: buildPromptText([
                 buildContextInstructions([
                   CONTEXT_INSTRUCTIONS.time,
-                  CONTEXT_INSTRUCTIONS.lookupTablesBeforeCategory,
+                  CONTEXT_INSTRUCTIONS.lookupTables,
                 ]),
                 buildCategoryInstructions(category),
                 category

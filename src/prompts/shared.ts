@@ -1,18 +1,10 @@
 export const CONTEXT_INSTRUCTIONS = {
   time: 'Read mc://context/time before querying tools so relative dates are anchored correctly.',
   labors: 'Read mc://context/labors before summarizing assignees or technician references.',
-  laborsOnWorkOrders:
-    'Read mc://context/labors before summarizing assignees or technician references on work orders.',
   assetLocations:
     'Read mc://context/asset-locations when you need to translate asset parent/location references.',
-  assetLocationsBefore:
-    'Read mc://context/asset-locations before translating asset parent/location references.',
   lookupTables:
-    'Read mc://context/lookup-tables when you need lookup-backed labels or codes during the analysis.',
-  lookupTablesDuringAudit:
-    'Read mc://context/lookup-tables when you need lookup-backed labels or codes during the audit.',
-  lookupTablesBeforeCategory:
-    'Read mc://context/lookup-tables before resolving any category or other lookup-backed value.',
+    'Read mc://context/lookup-tables when you need lookup-backed labels or codes.',
 } as const
 
 export function cleanArg(value?: string): string | undefined {

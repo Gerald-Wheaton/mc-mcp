@@ -45,7 +45,7 @@ export function register(server: McpServer): void {
                 buildContextInstructions([
                   CONTEXT_INSTRUCTIONS.time,
                   CONTEXT_INSTRUCTIONS.labors,
-                  CONTEXT_INSTRUCTIONS.assetLocationsBefore,
+                  CONTEXT_INSTRUCTIONS.assetLocations,
                 ]),
                 buildRepairCenterInstructions({
                   args,
@@ -107,7 +107,7 @@ Summarize:
               buildContextInstructions([
                 CONTEXT_INSTRUCTIONS.time,
                 CONTEXT_INSTRUCTIONS.labors,
-                CONTEXT_INSTRUCTIONS.assetLocationsBefore,
+                CONTEXT_INSTRUCTIONS.assetLocations,
               ]),
               buildRepairCenterInstructions({
                 args,
