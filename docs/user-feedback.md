@@ -44,6 +44,10 @@ The MCP client config template (`.mcp.template.json`) invokes `npx` directly. Wi
 **Suggested resolution:**
 Add a Windows variant to the template (or a comment pointing to it) that routes through `cmd /c npx`, mirroring the Windows config already documented in the README's "Connecting to Claude Desktop" section.
 
+---
+
+## FB-004 — Read access to PMs, Procedures, and custom reporting
+
 **Date:** 2026-06-02
 **Tester:** — (colleague, relayed)
 **Type:** Feature Request
@@ -67,7 +71,7 @@ The PM and Procedure portion reinforces [FB-003](#fb-003). The new piece is **cu
 **Date:** 2026-05-22
 **Tester:** —
 **Type:** Feature Request
-**Status:** Open
+**Status:** Won't Fix (no API surface)
 
 **Description:**
 PMs (Preventive Maintenance schedules) and their associated Procedures (task lists / steps attached to PMs) are not currently exposed as tool-callable endpoints. Testers need to be able to query PM records and the procedure steps tied to them.

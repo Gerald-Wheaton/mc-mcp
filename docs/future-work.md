@@ -1,6 +1,6 @@
 # Future Work
 
-Improvement queue identified during the 2026-07-29 handoff pass. Ranked detail behind most items lives in [`codebase-evaluation.md`](codebase-evaluation.md). None of these block local use; items 1 and 2 should be treated as blocking before putting the server in front of a real customer tenant of unknown size.
+Improvement queue identified during the 2026-07-29 handoff pass. Ranked detail behind most items lives in [`codebase-evaluation.md`](codebase-evaluation.md). Items 9–11 and the amendments to items 2 and 3 were added from the 2026-07-29 full-surface tooling review ([`tooling-review-2026-07-29.md`](tooling-review-2026-07-29.md)). None of these block local use; items 1 and 2 should be treated as blocking before putting the server in front of a real customer tenant of unknown size.
 
 ## 1. Large responses vs the consuming agent's context window
 
@@ -23,11 +23,11 @@ Candidate fixes, cheapest first:
 
 ## 2. Endpoint hardening
 
-Allowlist `X-MC-Base-URL` to the two known MC hosts (today any URL is honored, an SSRF vector on a public endpoint). Bind sessions to a hash of the creating credentials (today any holder of a session ID can reuse it). Add idle session expiry (today the session map only shrinks on transport close, a slow memory leak). Add rate limiting.
+Allowlist `X-MC-Base-URL` to the two known MC hosts (today any URL is honored, an SSRF vector on a public endpoint). Bind sessions to a hash of the creating credentials (today any holder of a session ID can reuse it). Add idle session expiry (today the session map only shrinks on transport close, a slow memory leak). Add rate limiting on our endpoint. Separately, MC-side rate limits are undocumented and recorded nowhere — state what is known (even if that is "unknown; no 429 observed") in `docs/notable-findings.md` as part of this work, per the design heuristics.
 
 ## 3. `mc_get_*` detail honesty
 
-Get tools parse with the same summary schemas as list tools, and Zod strips unknown fields, so "full details" is not full. Either use `.passthrough()` on the get-by-PK path or change the tool descriptions to match reality.
+Get tools parse with the same summary schemas as list tools, and Zod strips unknown fields, so "full details" is not full. Measured against the swagger ViewModels (2026-07-29): `mc_get_asset` returns roughly 19 of 150 fields, work orders about 55 of 91, parts about 35 of 65, POs about 40 of 66. Either use `.passthrough()` on the get-by-PK path or change the tool descriptions to match reality.
 
 ## 4. Error UX and annotations
 
@@ -48,3 +48,37 @@ Moved from `docs/open-questions.md` (2026-07-29). The server offloads query plan
 ## 8. Split the "no internal syntax" rule by context
 
 Moved from `docs/open-questions.md` (2026-07-29). Keep the strict ban on OData and internal API syntax in tool descriptions, resource descriptions, and static copy, since those leak into user-facing responses verbatim. But allow targeted executable guidance (filter construction, tool-call sequences, internal field references) inside prompt message bodies, which are instructions to the model rather than text it echoes back. While splitting the rule, audit prompt bodies for gratuitous user-facing filter examples and check whether any tool or resource description ended up over-restricted by the blanket rule.
+
+## 9. `$fetchAll` correctness
+
+From the 2026-07-29 tooling review; do this in the same pass as item 1 — it is the same code.
+
+- **Short-page break can silently under-fetch.** `McClient.getAllPages` treats a page shorter than the requested size as end-of-data (`src/mc-client.ts:167`). Pages are requested at 500; if MC ever clamps page size below the requested value (never live-probed), `$fetchAll` returns one page while reporting `fetchedAll: true` with `returned` far below `total`. Fix: stop only on an empty page, `skip >= Total`, or the requested top being reached. Add a regression test that simulates a clamping server.
+- **Caller's `$top` is discarded.** All four list tools pass `{ ...params, $top: FETCH_ALL_CAP }` in the `$fetchAll` branch, so "fetch all but stop at 600" is impossible. Honor `min(caller $top, FETCH_ALL_CAP)`.
+
+## 10. Tool coverage and the missing deferred-tools record
+
+From the 2026-07-29 tooling review. The API map holds 122 GET operations across 38 resource families; the server exposes 5 families as tools plus 3 via context resources, and nothing records why the rest are out. Two parts:
+
+**New domains** (use the `add-mc-tool-domain` skill), highest value first, each with a live demand signal:
+
+| Family | Signal |
+| --- | --- |
+| PartLocations | On-hand/reorder quantities live only here — "are we out of X" is unanswerable today, and the datasets catalog admits it |
+| WorkOrderAssignments | `mc_emergency_work_orders` asks "assigned and to whom", but `WorkOrderViewModel` only carries `IsAssigned`; assignee identity is `LaborRef` on assignments. Until built, soften that prompt line |
+| WorkOrderTasks | Named in the FB-003/FB-004 resolutions as the nearest procedure substitute — never built |
+| WorkOrder/PurchaseOrder StatusUpdates | Status-change history for "why is this stuck" aging analysis |
+| WO Labor/Part/Misc cost actuals + estimates | Cost "why" questions — core to the project goal |
+| Companies | Vendor prompts currently resolve vendors by sampling POs |
+
+**Deferred-tools record:** the mcp-tool-designer heuristics require every excluded GET endpoint to be listed with a stated reason. Write that record (a table in this doc or a dedicated doc) so scope decisions stop being re-litigated from scratch.
+
+## 11. Schema-discovery tool and surfacing filter knowledge
+
+From the 2026-07-29 tooling review. `$filter` evaluates server-side against the full record, so the model can already filter on fields the trimmed summaries never show it — it just has no way to learn those fields exist. And two live-probed quirks sit only in `notable-findings.md` where no client model can see them: PO status filtering is `Status eq "ISSUED"` (`StatusDetails/Value eq ...` returns 400), and repair-center scoping uses the flat `RepairCenterID` / `RepairCenterPK` fields, not `RepairCenterRef/...` paths.
+
+Candidates:
+
+- Expose `GET /Schema/{model}` as an `mc_describe_entity_fields` tool so the model can discover filterable fields per entity (cheap, read-only, self-describing).
+- Move the known filter quirks into the tool descriptions where models will hit them — coordinate with the item 8 rule split.
+- Enrich the API map: add a `resourceFamily → ViewModel` mapping (every operation's `responseSchemaRefs` is the generic `ApiResponse`, so the operation→ViewModel link is currently a naming convention), and consider carrying the OData quirks in `usageNotes`.

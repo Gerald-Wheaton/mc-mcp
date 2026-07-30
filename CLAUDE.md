@@ -132,6 +132,7 @@ Use the **`add-mc-tool-domain` skill** — it covers API lookup, file creation, 
 | `docs/phase3-prompts-and-repair-center.md` | Repair center recon and Phase 3 prompt template plan                                    |
 | `docs/user-feedback.md`                    | Feedback log from early testers — bugs, friction points, feature requests               |
 | `docs/codebase-evaluation.md`              | Point-in-time review (2026-06-14): architecture summary + ranked shortcomings           |
+| `docs/tooling-review-2026-07-29.md`        | Point-in-time full-surface tooling review (2026-07-29): design vs API reality, coverage gaps, net-new findings |
 | `docs/future-work.md`                      | Queued improvements, led by the large-response/context-window problem                   |
 | `docs/deployment.md`                       | Runbook: env vars, Railway setup, credential format and rotation, log format, limits    |
 | `docs/testing-strategy.md`                 | What the test suite protects and why: protocol wiring, contract, handlers               |
