@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "mc-mcp-RAILWAY": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://mc-mcp-main-staging.up.railway.app/mcp",
+        "--header",
+        "X-MC-Basic-Auth: REDACTED",
+        "--header",
+        "X-MC-Base-URL: https://api-stage.maintenanceconnection.com/v8"
+      ]
+    },
+    "mc-mcp-LOCAL": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "http://localhost:3000/mcp",
+        "--header",
+        "X-MC-Basic-Auth: REDACTED",
+        "--header",
+        "X-MC-Base-URL: https://api-stage.maintenanceconnection.com/v8"
+      ]
+    }
+  }
+}
