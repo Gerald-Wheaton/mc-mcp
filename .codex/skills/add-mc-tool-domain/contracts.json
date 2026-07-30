@@ -1,0 +1,43 @@
+{
+  "referenceImplementation": "src/tools/purchase-orders.ts",
+  "prerequisites": [
+    "run_maintenance-connection-api-rag_skill_before_writing_code",
+    "verify_exact_path_casing_in_normalized_map",
+    "confirm_path_param_names_in_normalized_map",
+    "read_reference_implementation_before_writing_code"
+  ],
+  "filesToCreate": [
+    "src/tools/<domain>.ts"
+  ],
+  "filesToModify": [
+    "src/shared/types.ts",
+    "src/server.ts",
+    "src/shared/datasets.ts",
+    "tests/server.test.ts",
+    "tests/tool-handlers.test.ts",
+    "README.md",
+    "docs/implementation-plan.md"
+  ],
+  "requiredImports": [
+    "odataShape and FETCH_ALL_CAP from @/shared/odata.js",
+    "toToolText, toListToolText, toToolError from @/shared/response.js",
+    "McApiResponseSchema and <Entity>SummarySchema from @/shared/types.js"
+  ],
+  "verification": [
+    "bunx tsc --noEmit",
+    "bun run test"
+  ],
+  "conventions": [
+    "tool names: mc_list_<domain> and mc_get_<domain_singular>",
+    "register via server.registerTool(name, { description, inputSchema }, handler) inside buildMcpServer() in src/server.ts",
+    "all list tools spread ...odataShape and implement the $fetchAll branch via client.getAllPages + FETCH_ALL_CAP",
+    "list handlers return toListToolText(data, $skip ?? 0); get handlers return toToolText",
+    "every handler parses the raw response with a Zod schema before returning",
+    "single-record GET endpoints return the same ApiResponse envelope as lists — parse with the list schema",
+    "entity summary schemas: only confirmed fields, never the full swagger schema",
+    "all handlers use try/catch and return toToolError on failure",
+    "imports use the @/ path alias, never relative paths",
+    "tool descriptions: plain analyst language; no $filter/$orderby/$top/$skip/OData/eq/PK — enforced by tests/server.test.ts",
+    "every new domain gets a DATASETS entry in src/shared/datasets.ts"
+  ]
+}
